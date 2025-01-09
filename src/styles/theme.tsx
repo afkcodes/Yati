@@ -1,0 +1,52 @@
+import {
+  borderRadius,
+  borderWidths,
+  colors,
+  opacity,
+  spacing,
+  typography,
+} from './tokens';
+
+export const themes = {
+  dark: {
+    background: {
+      primary: colors.neutral.dark[800],
+      secondary: colors.neutral.dark[600],
+      tertiary: colors.neutral.dark[500],
+      accent: colors.brand.primary[500],
+      transparent: 'transparent',
+    },
+    text: {
+      primary: colors.text.dark.primary,
+      secondary: colors.text.dark.gray[500],
+      tertiary: colors.text.dark.gray[700],
+      accent: colors.brand.primary[500],
+    },
+    opacity: opacity,
+    spacing: spacing,
+    borderWidths: borderWidths,
+    borderRadius: borderRadius,
+    typography: typography,
+  },
+
+  light: {
+    background: {
+      primary: colors.neutral.light[50],
+      secondary: colors.neutral.light[400],
+      tertiary: colors.neutral.light[800],
+      transparent: 'transparent',
+      accent: colors.brand.primary[500],
+    },
+    text: {
+      primary: colors.text.light.primary,
+      secondary: colors.text.light.gray[600],
+      tertiary: colors.text.light.gray[500],
+      accent: colors.brand.primary[500],
+    },
+    opacity: opacity,
+    spacing: spacing,
+    borderWidths: borderWidths,
+    borderRadius: borderRadius,
+    typography: typography,
+  },
+};

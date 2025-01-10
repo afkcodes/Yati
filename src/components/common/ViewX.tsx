@@ -6,6 +6,8 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
+import {useTheme} from '~hooks/ThemeContext';
+import {themes} from '~styles/theme';
 
 interface ViewXProps extends ViewStyle {
   children?: React.ReactNode;
@@ -13,6 +15,7 @@ interface ViewXProps extends ViewStyle {
   onLayout?: (event: LayoutChangeEvent) => void;
   testID?: string;
   accessibilityLabel?: string;
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'accent' | 'transparent';
 }
 
 const ViewX: React.FC<ViewXProps> = ({
@@ -21,17 +24,21 @@ const ViewX: React.FC<ViewXProps> = ({
   onLayout,
   testID,
   accessibilityLabel,
+  variant = 'primary',
   ...rest
 }) => {
   const styleProps = JSON.stringify(rest);
+  const {theme} = useTheme();
+  const bgColor = themes[theme].background[variant];
 
   const styles = useMemo(() => {
     return StyleSheet.create({
       container: {
         ...JSON.parse(styleProps),
+        backgroundColor: bgColor,
       },
     });
-  }, [styleProps]);
+  }, [styleProps, bgColor]);
 
   return (
     <View

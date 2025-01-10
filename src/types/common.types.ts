@@ -1,4 +1,7 @@
+import type {typography} from '~styles/tokens';
+
 export type Theme = 'dark' | 'light';
+export type FontWeight = keyof typeof typography.fontFamily;
 
 export type Size =
   | '3xs'

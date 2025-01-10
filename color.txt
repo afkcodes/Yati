@@ -110,4 +110,64 @@ This palette uses vibrant oceanic tones to evoke a sense of calm and clarity, wi
 
 ---
 
-These palettes are vibrant, modern, and soothing, ensuring your app is both visually appealing and functional. Let me know if you'd like further refinements or additional palettes!
+{
+  "colors": [
+    {"name": "Soft Lavender", "hex": "#C3B1E1"},
+    {"name": "Pale Mint Green", "hex": "#B2F2BB"},
+    {"name": "Dusty Rose", "hex": "#D4A6A6"},
+    {"name": "Light Sky Blue", "hex": "#A2DDF0"},
+    {"name": "Warm Beige", "hex": "#F5E1DA"},
+    {"name": "Muted Peach", "hex": "#FFCBA4"},
+    {"name": "Pale Yellow", "hex": "#FFF9C4"},
+    {"name": "Soft Sage Green", "hex": "#C8E6C9"},
+    {"name": "Light Gray-Blue", "hex": "#CFD8DC"},
+    {"name": "Pastel Coral", "hex": "#FFCCBC"},
+    {"name": "Muted Lilac", "hex": "#D1C4E9"},
+    {"name": "Pale Aqua", "hex": "#B2EBF2"},
+    {"name": "Warm Taupe", "hex": "#BCAAA4"},
+    {"name": "Soft Buttercream", "hex": "#FFF8E1"},
+    {"name": "Dusty Teal", "hex": "#80CBC4"},
+    {"name": "Blush Pink", "hex": "#F8BBD0"},
+    {"name": "Pale Olive Green", "hex": "#DCE775"},
+    {"name": "Soft Periwinkle", "hex": "#B3E5FC"},
+    {"name": "Muted Mustard", "hex": "#FFD54F"},
+    {"name": "Light Coral Pink", "hex": "#FFAB91"},
+    {"name": "Dusty Mauve", "hex": "#CE93D8"},
+    {"name": "Pale Seafoam Green", "hex": "#A5D6A7"},
+    {"name": "Soft Apricot", "hex": "#FFCC80"},
+    {"name": "Muted Sky Blue", "hex": "#81D4FA"},
+    {"name": "Light Clay", "hex": "#EF9A9A"}
+  ]
+}
+
+Here’s a list of 25 soothing, distinct colors suitable for a habit tracker app. These shades are designed to promote calmness and focus, creating an appealing UI experience:
+
+1. **Soft Lavender** - #E6E6FA  
+2. **Powder Blue** - #B0E0E6  
+3. **Mint Green** - #98FF98  
+4. **Light Coral** - #F08080  
+5. **Peach Puff** - #FFDAB9  
+6. **Sky Blue** - #87CEEB  
+7. **Pale Turquoise** - #AFEEEE  
+8. **Honeydew** - #F0FFF0  
+9. **Misty Rose** - #FFE4E1  
+10. **Lemon Chiffon** - #FFFACD  
+11. **Periwinkle** - #CCCCFF  
+12. **Seafoam Green** - #93E9BE  
+13. **Blush Pink** - #F4C2C2  
+14. **Champagne** - #FAD6A5  
+15. **Light Khaki** - #F0E68C  
+16. **Celeste (Sky Blue)** - #B2FFFF  
+17. **Tea Green** - #D0F0C0  
+18. **Baby Blue** - #89CFF0  
+19. **Pale Peach** - #FFDAB9  
+20. **Ivory White** - #FFFFF0  
+21. **Lilac Mist** - #C8A2C8  
+22. **Sand Dollar** - #EED5B7  
+23. **Aquamarine** - #7FFFD4  
+24. **Alice Blue** - #F0F8FF  
+25. **Muted Sage** - #B2BEB5  
+
+### Suggestions:
+- Group colors into themes for better aesthetics (e.g., greens for productivity, blues for calmness, pastels for relaxation). 
+- Use these colors as accents or backgrounds, ensuring readability when combined with text or icons.

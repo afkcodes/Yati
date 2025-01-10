@@ -1,5 +1,6 @@
-import React, {createContext, useCallback, useContext, useState} from 'react';
-import {Theme} from '~types/common.types';
+import type React from 'react';
+import {createContext, useCallback, useContext, useState} from 'react';
+import type {Theme} from '~types/common.types';
 
 interface ThemeContextType {
   theme: Theme;

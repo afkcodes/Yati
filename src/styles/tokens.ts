@@ -1,5 +1,5 @@
-import {Alignment} from '~types/common.types';
-import {
+import type {Alignment} from '~types/common.types';
+import type {
   BorderRadius,
   BorderWidths,
   IconSizes,
@@ -10,16 +10,16 @@ import {font, ms, vs} from '~utils/screenUtil';
 
 const brand = {
   primary: {
-    50: '#FFF0F2', // Soft stage light
-    100: '#FFE2E7', // Gentle spotlight
-    200: '#FFCCD5', // Soft curtain light
-    300: '#FF8FA3', // Drama accent
-    400: '#F0566F', // Emotional accent
-    500: '#D91838', // Stage crimson (Main brand color)
-    600: '#BC1431', // Theater curtain red
-    700: '#9F0F29', // Deep dramatic red
-    800: '#820B22', // Shadow red
-    900: '#65081A', // Dark theater red
+    '50': '#FFF0F2', // Soft stage light
+    '100': '#FFE2E7', // Gentle spotlight
+    '200': '#FFCCD5', // Soft curtain light
+    '300': '#FF8FA3', // Drama accent
+    '400': '#E84A6A', // Emotional accent
+    '500': '#C8234A', // New primary crimson
+    '600': '#A81D3D', // Theater curtain red
+    '700': '#8A1731', // Deep dramatic red
+    '800': '#6C1226', // Shadow red
+    '900': '#4E0C1B', // Dark theater red
   },
 };
 

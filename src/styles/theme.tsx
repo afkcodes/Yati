@@ -22,10 +22,6 @@ export const themes = {
       tertiary: colors.text.dark.gray[700],
       accent: colors.brand.primary[500],
     },
-    opacity: opacity,
-    spacing: spacing,
-    borderWidths: borderWidths,
-    borderRadius: borderRadius,
     typography: typography,
   },
 
@@ -43,10 +39,13 @@ export const themes = {
       tertiary: colors.text.light.gray[500],
       accent: colors.brand.primary[500],
     },
-    opacity: opacity,
-    spacing: spacing,
-    borderWidths: borderWidths,
-    borderRadius: borderRadius,
     typography: typography,
   },
+};
+
+export const styleUtils = {
+  opacity: opacity,
+  spacing: spacing,
+  borderWidths: borderWidths,
+  borderRadius: borderRadius,
 };

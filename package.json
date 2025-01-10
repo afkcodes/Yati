@@ -16,7 +16,9 @@
     "react-i18next": "^15.4.0",
     "react-native": "0.76.5",
     "react-native-edge-to-edge": "^1.2.0",
-    "react-native-localize": "^3.3.0"
+    "react-native-gesture-handler": "^2.21.2",
+    "react-native-localize": "^3.3.0",
+    "react-native-reanimated": "^3.16.6"
   },
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.7",
@@ -44,5 +46,13 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "expo": {
+    "autolinking": {
+      "exclude": [
+        "expo-keep-awake",
+        "expo-font"
+      ]
+    }
   }
 }

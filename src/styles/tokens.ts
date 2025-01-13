@@ -138,6 +138,7 @@ export const typography = {
     medium: 'Gilroy-Medium',
     semibold: 'Gilroy-Semibold',
     bold: 'Gilroy-Bold',
+    title: 'JosefinSans-Bold',
   },
   fontSizes: {
     '3xs': font(8),

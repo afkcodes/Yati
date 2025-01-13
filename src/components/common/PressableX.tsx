@@ -1,11 +1,10 @@
+import {SquircleView} from 'expo-squircle-view';
 import React, {useMemo} from 'react';
 import {
-  Platform,
   Pressable,
   type PressableProps,
   type StyleProp,
   StyleSheet,
-  View,
   type ViewStyle,
 } from 'react-native';
 
@@ -25,7 +24,7 @@ const PressableX: React.FC<PressableXProps> = ({
   testID,
   accessibilityLabel,
   rippleColor = 'rgba(0, 0, 0, 0.2)',
-  borderRadius,
+  borderRadius = 10,
   ...rest
 }) => {
   const styleProps = JSON.stringify(rest);
@@ -43,12 +42,19 @@ const PressableX: React.FC<PressableXProps> = ({
   }, [styleProps, borderRadius]);
 
   return (
-    <View style={styles.wrapper}>
+    <SquircleView
+      style={[styles.pressable, styles.wrapper]}
+      cornerSmoothing={100}
+      preserveSmoothing>
       <Pressable
-        style={({pressed}) => [
-          styles.pressable,
+        style={[
+          {
+            flex: 1,
+            width: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+          },
           style,
-          pressed && Platform.OS !== 'android' && {opacity: 0.7},
         ]}
         onPress={onPress}
         onLongPress={onLongPress}
@@ -62,7 +68,7 @@ const PressableX: React.FC<PressableXProps> = ({
         }}>
         {children}
       </Pressable>
-    </View>
+    </SquircleView>
   );
 };
 

@@ -24,7 +24,7 @@ const ViewX: React.FC<ViewXProps> = ({
   onLayout,
   testID,
   accessibilityLabel,
-  variant = 'primary',
+  variant = 'transparent',
   ...rest
 }) => {
   const styleProps = JSON.stringify(rest);
@@ -35,10 +35,10 @@ const ViewX: React.FC<ViewXProps> = ({
     return StyleSheet.create({
       container: {
         ...JSON.parse(styleProps),
-        backgroundColor: bgColor,
+        backgroundColor: rest.backgroundColor || bgColor,
       },
     });
-  }, [styleProps, bgColor]);
+  }, [styleProps, bgColor, rest.backgroundColor]);
 
   return (
     <View

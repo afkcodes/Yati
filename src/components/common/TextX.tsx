@@ -5,7 +5,7 @@ import {themes} from '~styles/theme';
 import type {FontSize, FontWeight} from '~types/common.types';
 
 interface TextXProps
-  extends Omit<TextStyle, 'fontSize' | 'fontWeight' | 'color' | 'lineHeight'> {
+  extends Omit<TextStyle, 'fontSize' | 'fontWeight' | 'color'> {
   children?: React.ReactNode;
   style?: StyleProp<TextStyle>;
   color?: 'primary' | 'secondary' | 'tertiary' | 'accent';

@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import {SquircleView} from 'expo-squircle-view';
 import React, {useMemo} from 'react';
 import {

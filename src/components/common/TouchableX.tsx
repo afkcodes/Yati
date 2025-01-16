@@ -1,8 +1,8 @@
+import {SquircleButton} from 'expo-squircle-view';
 import React, {useMemo} from 'react';
 import {
   type StyleProp,
   StyleSheet,
-  TouchableOpacity,
   type TouchableOpacityProps,
   type ViewStyle,
 } from 'react-native';
@@ -19,7 +19,7 @@ const TouchableX: React.FC<TouchableXProps> = ({
   onLongPress,
   onPressIn,
   onPressOut,
-  activeOpacity,
+  activeOpacity = 0.7,
   testID,
   accessibilityLabel,
   ...rest
@@ -35,7 +35,7 @@ const TouchableX: React.FC<TouchableXProps> = ({
   }, [styleProps]);
 
   return (
-    <TouchableOpacity
+    <SquircleButton
       style={[styles.touchable, style]}
       onPress={onPress}
       onLongPress={onLongPress}
@@ -45,7 +45,7 @@ const TouchableX: React.FC<TouchableXProps> = ({
       testID={testID}
       accessibilityLabel={accessibilityLabel}>
       {children}
-    </TouchableOpacity>
+    </SquircleButton>
   );
 };
 

@@ -10,9 +10,9 @@ import {
 export const themes = {
   dark: {
     background: {
-      primary: colors.neutral.dark[800],
-      secondary: colors.neutral.dark[600],
-      tertiary: colors.neutral.dark[500],
+      primary: colors.neutral.dark[900],
+      secondary: colors.neutral.dark[700],
+      tertiary: colors.neutral.dark[600],
       accent: colors.brand.primary[500],
       transparent: 'transparent',
     },
@@ -20,7 +20,7 @@ export const themes = {
       primary: colors.text.dark.primary,
       secondary: colors.text.dark.gray[500],
       tertiary: colors.text.dark.gray[700],
-      accent: colors.brand.primary[500],
+      accent: colors.brand.primary[400],
     },
     typography: typography,
   },

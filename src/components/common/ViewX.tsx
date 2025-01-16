@@ -38,7 +38,7 @@ const ViewX: React.FC<ViewXProps> = ({
         backgroundColor: rest.backgroundColor || bgColor,
       },
     });
-  }, [styleProps, bgColor, rest.backgroundColor]);
+  }, [styleProps, rest.backgroundColor, bgColor]);
 
   return (
     <View

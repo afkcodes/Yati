@@ -10,16 +10,26 @@ import {font, ms, vs} from '~utils/screenUtil';
 
 const brand = {
   primary: {
-    '50': '#FFF0F2', // Soft stage light
-    '100': '#FFE2E7', // Gentle spotlight
-    '200': '#FFCCD5', // Soft curtain light
-    '300': '#FF8FA3', // Drama accent
-    '400': '#E84A6A', // Emotional accent
-    '500': '#C8234A', // New primary crimson
-    '600': '#A81D3D', // Theater curtain red
-    '700': '#8A1731', // Deep dramatic red
-    '800': '#6C1226', // Shadow red
-    '900': '#4E0C1B', // Dark theater red
+    // '50': '#FFF0F2', // Soft stage light
+    // '100': '#FFE2E7', // Gentle spotlight
+    // '200': '#FFCCD5', // Soft curtain light
+    // '300': '#FF8FA3', // Drama accent
+    // '400': '#E84A6A', // Emotional accent
+    // '500': '#C8234A', // New primary crimson
+    // '600': '#A81D3D', // Theater curtain red
+    // '700': '#8A1731', // Deep dramatic red
+    // '800': '#6C1226', // Shadow red
+    // '900': '#4E0C1B', // Dark theater red
+    50: '#F0F2FF', // Softer light tint for better legibility on light backgrounds
+    100: '#DEE1FE', // Light tint with slightly more contrast
+    200: '#BFC4FC', // Balanced tint for subtle elements
+    300: '#9EA3FA', // Secondary elements with good contrast
+    400: '#7D82F8', // Brighter accents for visibility
+    500: '#5C63F6', // Main brand color, slightly more vivid
+    600: '#4A52D0', // Contrast variant for text on dark mode
+    700: '#383EAA', // Darker accent with legibility in focus
+    800: '#262A84', // Deep contrast without losing saturation
+    900: '#131549', // Retained deepest shade for dark contrasts
   },
 };
 
@@ -37,16 +47,31 @@ const neutral = {
     900: '#9B9EAC',
   },
   dark: {
-    50: '#C1C2C6',
-    100: '#A3A4A8',
-    200: '#85868B',
-    300: '#68696E',
-    400: '#4A4B50',
-    500: '#202225', // Muted dark
-    600: '#1A1D1F', // Elevated dark
-    700: '#141517', // Paper dark
-    800: '#0A0A0B', // Background dark
-    900: '#050506', // Deepest dark
+    // 50: '#B0B1B5', // Light blackish (soft, almost gray but still blackish)
+    // 100: '#8F9094', // Slightly darker, distinct from 50
+    // 200: '#6E6F73', // Medium blackish, clear step down
+    // 300: '#4D4E52', // Darker, leaning into black
+    // 400: '#3A3B3F', // Rich blackish, distinct from 300
+    // 500: '#28292D', // Muted dark (core blackish tone)
+    // 600: '#1F2024', // Elevated dark (deeper, more contrast)
+    // 700: '#16171B', // Paper dark (almost pure black)
+    // 800: '#0D0E12', // Background dark (deep black)
+    // 900: '#040506', // Deepest black (near black, maximum depth)
+    // Light shades (for text and accents)
+    50: '#FFFFFF', // Pure white (for high-contrast text)
+    100: '#F5F5F5', // Off-white (for subtle text)
+    200: '#E0E0E0', // Light gray (for borders or muted text)
+
+    // Mid-tones (for surfaces and cards)
+    300: '#9E9E9E', // Medium gray (for secondary text)
+    400: '#616161', // Dark gray (for muted accents)
+    500: '#424242', // Dark gray (for card backgrounds)
+    600: '#303030', // Darker gray (for elevated cards)
+    700: '#212121', // Very dark gray (for dark surfaces)
+
+    // Dark shades (for backgrounds and depth)
+    800: '#121212', // Near-black (for dark backgrounds)
+    900: '#000000', // Pure black (for deepest dark)
   },
 };
 

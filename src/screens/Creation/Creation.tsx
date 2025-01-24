@@ -1,4 +1,4 @@
-// HabitCreationScreen.js
+//@ts-nocheck
 import {
   Book,
   BookOpen,

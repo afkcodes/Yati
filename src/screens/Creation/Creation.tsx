@@ -19,7 +19,6 @@ import {
 } from 'lucide-react-native';
 import {useState} from 'react';
 import {ScrollView, StyleSheet, Text, TextInput, View} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {TextX, TouchableX, ViewX} from '~components/common';
 import Input from '~components/common/Input';
 import CardContainer from '~containers/SquircleViewContainer';
@@ -235,13 +234,13 @@ const HabitCreationScreen = () => {
     }
   };
 
-  const insets = useSafeAreaInsets();
+  // const insets = useSafeAreaInsets();
 
   return (
     <ViewX flex={1} variant="primary">
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={{paddingVertical: insets.top}}
+        contentContainerStyle={{paddingVertical: 40}}
         showsVerticalScrollIndicator={false}>
         {/* Header */}
 

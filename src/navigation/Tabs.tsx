@@ -19,7 +19,7 @@ const BottomTabs = () => {
   const homeNavigator = useMemo(() => {
     const nav = new StateNavigator([
       {key: 'home'},
-      {key: 'profile', trackCrumbTrail: true},
+      {key: 'create', trackCrumbTrail: true},
     ]);
     nav.navigate('home');
     return nav;

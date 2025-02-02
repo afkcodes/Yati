@@ -2,22 +2,17 @@
 // import {
 //   Brain,
 //   CheckCircle2,
-//   ChevronDown,
 //   Circle,
 //   Clock,
 //   Coffee,
 //   Moon,
-//   Pause,
-//   Pencil,
-//   Play,
 //   Plus,
-//   RotateCcw,
 //   Sun,
-//   Timer,
 //   Trophy,
 //   Zap,
 // } from 'lucide-react-native';
-// import {useState} from 'react';
+// import {NavigationContext} from 'navigation-react';
+// import {useContext, useState} from 'react';
 // import {
 //   Dimensions,
 //   ScrollView,
@@ -27,7 +22,10 @@
 //   View,
 // } from 'react-native';
 // import {useSafeAreaInsets} from 'react-native-safe-area-context';
-// import {ViewX} from '~components/common';
+// import {TouchableX, ViewX} from '~components/common';
+// import {CalendarStrip} from '~components/common/CalenderStrip';
+// import {styleUtils, themes} from '~styles/theme';
+// import {h, w} from '~utils/screenUtil';
 
 // const {width} = Dimensions.get('window');
 
@@ -86,6 +84,10 @@
 
 //   const insets = useSafeAreaInsets();
 
+//   const [selectedDate, setSelectedDate] = useState(new Date());
+//   const startDate = new Date(2025, 0, 1); // Jan 1, 2024
+//   const endDate = new Date(2025, 0, 31); // Dec 31, 2024
+
 //   return (
 //     <ViewX flex={1} variant="primary">
 //       <ScrollView
@@ -105,91 +107,37 @@
 //                 })}
 //               </Text>
 //             </View>
+
 //             <View style={styles.trophyContainer}>
 //               <Trophy color="#F59E0B" size={20} style={styles.trophyIcon} />
 //               <Text style={styles.trophyText}>15 day streak</Text>
 //             </View>
 //           </View>
 
-//           {/* Stats Cards */}
-//           {/* <ScrollView
-//             horizontal
-//             showsHorizontalScrollIndicator={false}
-//             contentContainerStyle={styles.statsCardsContainer}>
-//             <View style={styles.statsCard}>
-//               <View style={styles.statsIconContainer}>
-//                 <View
-//                   style={[
-//                     styles.iconBackground,
-//                     {backgroundColor: 'rgba(34, 197, 94, 0.1)'},
-//                   ]}>
-//                   <CheckCircle2 color="#22C55E" size={20} />
-//                 </View>
-//                 <Text style={styles.statsLabel}>Completion</Text>
-//               </View>
-//               <View style={styles.statsValueContainer}>
-//                 <Text style={styles.statsValue}>87%</Text>
-//                 <Text style={styles.statsTrend}>↑ 12%</Text>
-//               </View>
-//             </View>
-
-//             <View style={styles.statsCard}>
-//               <View style={styles.statsIconContainer}>
-//                 <View
-//                   style={[
-//                     styles.iconBackground,
-//                     {backgroundColor: 'rgba(168, 85, 247, 0.1)'},
-//                   ]}>
-//                   <Zap color="#A855F7" size={20} />
-//                 </View>
-//                 <Text style={styles.statsLabel}>Current Streak</Text>
-//               </View>
-//               <View style={styles.statsValueContainer}>
-//                 <Text style={styles.statsValue}>15</Text>
-//                 <Text style={styles.statsUnit}>days</Text>
-//               </View>
-//             </View>
-
-//             <View style={styles.statsCard}>
-//               <View style={styles.statsIconContainer}>
-//                 <View
-//                   style={[
-//                     styles.iconBackground,
-//                     {backgroundColor: 'rgba(59, 130, 246, 0.1)'},
-//                   ]}>
-//                   <Clock color="#3B82F6" size={20} />
-//                 </View>
-//                 <Text style={styles.statsLabel}>Today's Progress</Text>
-//               </View>
-//               <View style={styles.statsValueContainer}>
-//                 <Text style={styles.statsValue}>4/6</Text>
-//                 <Text style={styles.statsUnit}>habits</Text>
-//               </View>
-//             </View>
-//           </ScrollView> */}
-
 //           {/* Weekly Progress */}
-//           <View style={styles.weeklyProgress}>
-//             <View style={styles.weeklyHeader}>
-//               <Text style={styles.weeklyTitle}>Weekly Progress</Text>
-//               <Text style={styles.weeklySubtitle}>Last 7 days</Text>
+//           <ViewX padding={16}>
+//             <View style={styles.weeklyProgress}>
+//               <View style={styles.weeklyHeader}>
+//                 <Text style={styles.weeklyTitle}>Weekly Progress</Text>
+//                 <Text style={styles.weeklySubtitle}>Last 7 days</Text>
+//               </View>
+//               <View style={styles.weeklyChart}>
+//                 {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(
+//                   (day, index) => {
+//                     const height = [70, 90, 85, 100, 75, 80, 60][index];
+//                     return (
+//                       <View key={day} style={styles.weeklyBar}>
+//                         <View
+//                           style={[styles.weeklyBarFill, {height: `${height}%`}]}
+//                         />
+//                         <Text style={styles.weeklyBarLabel}>{day}</Text>
+//                       </View>
+//                     );
+//                   },
+//                 )}
+//               </View>
 //             </View>
-//             <View style={styles.weeklyChart}>
-//               {['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].map(
-//                 (day, index) => {
-//                   const height = [70, 90, 85, 100, 75, 80, 60][index];
-//                   return (
-//                     <View key={day} style={styles.weeklyBar}>
-//                       <View
-//                         style={[styles.weeklyBarFill, {height: `${height}%`}]}
-//                       />
-//                       <Text style={styles.weeklyBarLabel}>{day}</Text>
-//                     </View>
-//                   );
-//                 },
-//               )}
-//             </View>
-//           </View>
+//           </ViewX>
 //         </View>
 
 //         {/* Time Sections */}
@@ -209,159 +157,71 @@
 //           ))}
 //         </View>
 
-//         {/* Habits List */}
 //         <View style={styles.habitsList}>
 //           {habits.map(habit => (
-//             <View
-//               key={habit.id}
-//               style={[
-//                 styles.habitCard,
-//                 expandedHabitId === habit.id && styles.habitCardExpanded,
-//               ]}>
-//               {/* Habit Header */}
-//               <TouchableOpacity
-//                 style={styles.habitHeader}
-//                 onPress={() => toggleExpand(habit.id)}>
-//                 <TouchableOpacity
-//                   style={[
-//                     styles.checkButton,
-//                     habit.completed && styles.checkButtonCompleted,
-//                   ]}
-//                   onPress={() => toggleHabit(habit.id)}>
-//                   {habit.completed ? (
-//                     <CheckCircle2 size={24} color="#FFF" />
-//                   ) : (
-//                     <Circle size={24} color="#9CA3AF" />
-//                   )}
-//                 </TouchableOpacity>
+//             <ViewX
+//               flexDirection="row"
+//               gap={8}
+//               paddingVertical={12}
+//               key={habit.id}>
+//               <TouchableX
+//                 style={[
+//                   styles.checkButton,
+//                   habit.completed && styles.checkButtonCompleted,
+//                 ]}
+//                 onPress={() => toggleHabit(habit.id)}>
+//                 {habit.completed ? (
+//                   <CheckCircle2 size={24} color="#FFF" />
+//                 ) : (
+//                   <Circle size={24} color="#9CA3AF" />
+//                 )}
+//               </TouchableX>
 
-//                 <View style={styles.habitInfo}>
-//                   <View style={styles.habitNameRow}>
-//                     <habit.icon size={16} color={habit.color} />
-//                     <Text style={styles.habitName}>{habit.name}</Text>
-//                   </View>
-
-//                   <View style={styles.habitMetrics}>
-//                     <View style={styles.habitMetric}>
-//                       <Clock size={14} color="#9CA3AF" />
-//                       <Text style={styles.habitMetricText}>{habit.time}</Text>
-//                     </View>
-//                     <View style={styles.habitMetric}>
-//                       <Zap size={14} color="#9CA3AF" />
-//                       <Text style={styles.habitMetricText}>
-//                         {habit.streak} days
-//                       </Text>
-//                     </View>
-//                   </View>
+//               <View style={styles.habitInfo}>
+//                 <View style={styles.habitNameRow}>
+//                   <habit.icon size={16} color={habit.color} />
+//                   <Text style={styles.habitName}>{habit.name}</Text>
 //                 </View>
 
-//                 <ChevronDown
-//                   size={20}
-//                   color="#9CA3AF"
-//                   style={[
-//                     styles.expandIcon,
-//                     expandedHabitId === habit.id && styles.expandIconRotated,
-//                   ]}
-//                 />
-//               </TouchableOpacity>
-
-//               {/* Expanded Content */}
-//               {expandedHabitId === habit.id && (
-//                 <View style={styles.expandedContent}>
-//                   {/* Timer or Progress */}
-//                   {habit.timer ? (
-//                     <View style={styles.timerContainer}>
-//                       <View style={styles.timerHeader}>
-//                         <Text style={styles.timerTitle}>Timer</Text>
-//                         <Text style={styles.timerValue}>
-//                           {Math.floor(habit.timer.elapsed / 60)}:
-//                           {String(habit.timer.elapsed % 60).padStart(2, '0')}
-//                         </Text>
-//                       </View>
-//                       <View style={styles.timerControls}>
-//                         <TouchableOpacity style={styles.timerButton}>
-//                           <RotateCcw size={20} color="#FFF" />
-//                         </TouchableOpacity>
-//                         <TouchableOpacity
-//                           style={[
-//                             styles.timerButton,
-//                             styles.timerButtonPrimary,
-//                           ]}>
-//                           {habit.timer.running ? (
-//                             <Pause size={20} color="#FFF" />
-//                           ) : (
-//                             <Play size={20} color="#FFF" />
-//                           )}
-//                         </TouchableOpacity>
-//                       </View>
-//                     </View>
-//                   ) : (
-//                     <View style={styles.progressContainer}>
-//                       <View style={styles.progressHeader}>
-//                         <Text style={styles.progressTitle}>Progress</Text>
-//                         <Text style={styles.progressValue}>
-//                           {habit.progress.current}/{habit.progress.target}{' '}
-//                           {habit.progress.unit}
-//                         </Text>
-//                       </View>
-//                     </View>
-//                   )}
-
-//                   {/* Mood Tracking */}
-//                   <View style={styles.moodSection}>
-//                     <Text style={styles.moodTitle}>How did it feel?</Text>
-//                     <View style={styles.moodButtons}>
-//                       {['😊', '😌', '😐', '😔', '😤'].map(mood => (
-//                         <TouchableOpacity
-//                           key={mood}
-//                           style={[
-//                             styles.moodButton,
-//                             habit.todayMood === mood &&
-//                               styles.moodButtonSelected,
-//                           ]}>
-//                           <Text style={styles.moodEmoji}>{mood}</Text>
-//                         </TouchableOpacity>
-//                       ))}
-//                     </View>
+//                 <View style={styles.habitMetrics}>
+//                   <View style={styles.habitMetric}>
+//                     <Clock size={14} color="#9CA3AF" />
+//                     <Text style={styles.habitMetricText}>{habit.time}</Text>
 //                   </View>
-
-//                   {/* Recent Moods */}
-//                   <View style={styles.recentMoods}>
-//                     <Text style={styles.recentMoodsTitle}>Recent Moods</Text>
-//                     <View style={styles.recentMoodsGrid}>
-//                       {habit.recentMoods.map((mood, idx) => (
-//                         <View key={idx} style={styles.recentMoodItem}>
-//                           <Text style={styles.recentMoodEmoji}>{mood}</Text>
-//                           <Text style={styles.recentMoodDay}>
-//                             {idx === 0 ? 'Today' : `${idx}d ago`}
-//                           </Text>
-//                         </View>
-//                       ))}
-//                     </View>
-//                   </View>
-
-//                   {/* Quick Actions */}
-//                   <View style={styles.quickActions}>
-//                     <TouchableOpacity style={styles.quickActionButton}>
-//                       <Timer size={16} color="#FFF" />
-//                       <Text style={styles.quickActionText}>Set Reminder</Text>
-//                     </TouchableOpacity>
-//                     <TouchableOpacity style={styles.quickActionButton}>
-//                       <Pencil size={16} color="#FFF" />
-//                       <Text style={styles.quickActionText}>Add Note</Text>
-//                     </TouchableOpacity>
+//                   <View style={styles.habitMetric}>
+//                     <Zap size={14} color="#9CA3AF" />
+//                     <Text style={styles.habitMetricText}>
+//                       {habit.streak} days
+//                     </Text>
 //                   </View>
 //                 </View>
-//               )}
-//             </View>
+//               </View>
+//             </ViewX>
 //           ))}
 //         </View>
 //       </ScrollView>
 
 //       {/* Add Habit FAB */}
-//       <TouchableOpacity style={styles.fabButton}>
-//         <Plus size={24} color="#FFF" />
-//       </TouchableOpacity>
+//       <ViewX variant="secondary" width={w(100)}>
+//         <ViewX
+//           flexDirection="row"
+//           justifyContent="space-between"
+//           alignItems="center"
+//           paddingVertical={4}
+//           width={w(100)}>
+//           <ViewX
+//             overflow="hidden"
+//             justifyContent="center"
+//             alignItems="flex-start">
+//             <CalendarStrip
+//               selectedDate={selectedDate}
+//               onDateSelect={setSelectedDate}
+//               startDate={startDate}
+//               endDate={endDate}
+//             />
+//           </ViewX>
+//         </ViewX>
+//       </ViewX>
 //     </ViewX>
 //   );
 // };
@@ -375,7 +235,7 @@
 
 //   // Stats Section
 //   statsContainer: {
-//     padding: 16,
+//     // padding: 16,
 //     backgroundColor: 'transparent',
 //   },
 //   header: {
@@ -383,6 +243,7 @@
 //     justifyContent: 'space-between',
 //     alignItems: 'center',
 //     marginBottom: 24,
+//     padding: 16,
 //   },
 //   title: {
 //     fontSize: 24,
@@ -544,8 +405,10 @@
 //   },
 //   checkButton: {
 //     padding: 8,
-//     borderRadius: 20,
+//     borderRadius: 50,
 //     backgroundColor: '#374151',
+//     height: 40,
+//     width: 40,
 //   },
 //   checkButtonCompleted: {
 //     backgroundColor: '#22C55E',
@@ -699,9 +562,9 @@
 
 //   // FAB
 //   fabButton: {
-//     position: 'absolute',
-//     bottom: 24,
-//     right: 24,
+//     // position: 'absolute',
+//     // bottom: 24,
+//     // right: 24,
 //     width: 56,
 //     height: 56,
 //     borderRadius: 28,
@@ -719,21 +582,140 @@
 //   },
 // });
 
-// export default TodayScreen;
+// const Home = () => {
+//   const {stateNavigator} = useContext(NavigationContext);
 
-import {ViewX} from '~components/common';
-import HabitCreationScreen from '~screens/Creation/Creation';
+//   return (
+//     <ViewX variant="primary" flex={1} position="relative">
+//       <TodayScreen />
+//       <TouchableX
+//         position="absolute"
+//         justifyContent="center"
+//         alignItems="center"
+//         bottom={h(10)}
+//         right={w(2)}
+//         onPress={() => {
+//           stateNavigator.navigate('create');
+//         }}
+//         height={56}
+//         width={56}
+//         backgroundColor={themes.dark.background.accent}
+//         borderRadius={styleUtils.borderRadius.lg}>
+//         <Plus size={24} color="#FFF" />
+//       </TouchableX>
+//     </ViewX>
+//   );
+// };
+
+// export default Home;
+
+import {Plus} from 'lucide-react-native';
+import {NavigationContext} from 'navigation-react';
+import {useContext, useState} from 'react';
+import {ScrollView} from 'react-native';
+import {TouchableX, ViewX} from '~components/common';
+import {CalendarStrip} from '~components/common/CalenderStrip';
+import GreetingHeader from '~components/specific/home/Greeting';
+import HabitCard from '~components/specific/home/Habit';
+import TimeFilter from '~components/specific/home/TimFilter';
+import {habitData} from '~data/habits';
+
+import {styleUtils, themes} from '~styles/theme';
+import {h, w} from '~utils/screenUtil';
+
+const historyData = [
+  {date: '2024-01-30', completed: true},
+  {date: '2024-01-29', completed: true},
+  {date: '2024-01-28', completed: false},
+  {date: '2024-01-27', completed: true},
+  {date: '2024-01-26', completed: true},
+];
 
 const Home = () => {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const startDate = new Date(2025, 0, 1); // Jan 1, 2024
+  const endDate = new Date(2025, 0, 31); // Dec 31, 2024
+  const {stateNavigator} = useContext(NavigationContext);
+
+  const [selectedTime, setSelectedTime] = useState<any>('morning');
+  const [habits, setHabits] = useState(habitData);
+
+  const filteredHabits = habits.filter(
+    habit => selectedTime === 'all' || habit.timePeriod === selectedTime,
+  );
+
   return (
-    <ViewX
-      variant="primary"
-      flex={1}
-      // alignItems="center"
-      // justifyContent="center">
-    >
-      {/* <TextX>Home</TextX> */}
-      <HabitCreationScreen />
+    <ViewX variant="primary" flex={1}>
+      <GreetingHeader
+        username="Ashish"
+        avatar="https://scontent.fblr20-3.fna.fbcdn.net/v/t39.30808-6/465060097_27423369417308920_7431623941390111522_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=127cfc&_nc_ohc=4Eg-13Pt4rIQ7kNvgFXRQe6&_nc_zt=23&_nc_ht=scontent.fblr20-3.fna&_nc_gid=AHN09A_YGpMOyzUiUEtmbUZ&oh=00_AYApkwAunJronsyYoln5bKE1Hvc-pG33DlD3nUAq4JF61A&oe=67A28901"
+        streakCount={5}
+        hasUnreadNotifications={true}
+        onPressNotification={() => {
+          // Show notifications screen/modal
+        }}
+        onPressStreak={() => {
+          // Show streak details/achievements
+        }}
+      />
+      <ViewX
+        variant="secondary"
+        width={w(100)}
+        position="absolute"
+        bottom={0}
+        zIndex={100}
+        paddingVertical={styleUtils.spacing['2xs']}>
+        <ViewX
+          overflow="hidden"
+          justifyContent="center"
+          alignItems="flex-start">
+          <CalendarStrip
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        </ViewX>
+      </ViewX>
+      <TouchableX
+        position="absolute"
+        justifyContent="center"
+        alignItems="center"
+        bottom={h(10)}
+        right={w(2)}
+        zIndex={100}
+        onPress={() => {
+          stateNavigator.navigate('create');
+        }}
+        height={56}
+        width={56}
+        backgroundColor={themes.dark.background.accent}
+        borderRadius={styleUtils.borderRadius.lg}>
+        <Plus size={24} color="#FFF" />
+      </TouchableX>
+
+      <ViewX flex={1} paddingTop={12}>
+        <ViewX paddingTop={12}>
+          <TimeFilter
+            selectedTime={selectedTime}
+            onSelectTime={setSelectedTime}
+          />
+        </ViewX>
+        <ScrollView
+          style={{flex: 1, paddingTop: 12}}
+          contentContainerStyle={{paddingBottom: 72, paddingTop: 16}}>
+          {filteredHabits.map(habit => (
+            <HabitCard
+              period={habit.timePeriod}
+              isCompleted={false}
+              key={habit.id}
+              {...habit}
+              // onToggleComplete={date => handleToggleComplete(habit.title, date)}
+              onToggleComplete={() => {}}
+            />
+          ))}
+        </ScrollView>
+      </ViewX>
     </ViewX>
   );
 };

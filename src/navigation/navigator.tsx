@@ -1,4 +1,5 @@
 import {StateNavigator} from 'navigation';
+import HabitCreationScreen from '~screens/Creation/Creation';
 import Home from '~screens/Home/Home';
 import Profile from '~screens/Profile/Profile';
 import Settings from '~screens/Settings/Settings';
@@ -19,7 +20,10 @@ const getTabsConfig = (theme: Theme) => {
       fontSize: 14,
       fontFamily: themes[theme].typography.fontFamily.semibold,
       navigatorState: 'homeNavigator',
-      scenes: [{key: 'home', component: Home}],
+      scenes: [
+        {key: 'home', component: Home},
+        {key: 'create', component: HabitCreationScreen},
+      ],
     },
     {
       id: 'Profile',

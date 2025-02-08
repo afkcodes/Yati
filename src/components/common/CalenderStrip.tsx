@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: ITEM_MARGIN,
     borderRadius: 10,
-    backgroundColor: themes.dark.background.tertiary,
+    backgroundColor: themes.dark.background.secondary,
   },
   selectedItem: {
     backgroundColor: themes.dark.background.secondary,

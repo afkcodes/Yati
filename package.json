@@ -28,6 +28,7 @@
     "react-native": "^0.77.0",
     "react-native-calendar-strip": "^2.2.6",
     "react-native-calendars": "^1.1308.1",
+    "react-native-chart-kit": "^6.12.0",
     "react-native-edge-to-edge": "^1.2.0",
     "react-native-gesture-handler": "^2.22.0",
     "react-native-haptic-feedback": "^2.3.3",

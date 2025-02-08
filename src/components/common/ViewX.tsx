@@ -15,7 +15,13 @@ interface ViewXProps extends ViewStyle {
   onLayout?: (event: LayoutChangeEvent) => void;
   testID?: string;
   accessibilityLabel?: string;
-  variant?: 'primary' | 'secondary' | 'tertiary' | 'accent' | 'transparent';
+  variant?:
+    | 'primary'
+    | 'secondary'
+    | 'tertiary'
+    | 'accent'
+    | 'transparent'
+    | 'nav';
 }
 
 const ViewX: React.FC<ViewXProps> = ({

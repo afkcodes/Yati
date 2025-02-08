@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 // // TodayScreen.js
 // import {
 //   Brain,
@@ -634,10 +635,10 @@ const historyData = [
 const Home = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const startDate = new Date(2025, 0, 1); // Jan 1, 2024
-  const endDate = new Date(2025, 0, 31); // Dec 31, 2024
+  const endDate = new Date(2025, 1, 8); // Dec 31, 2024
   const {stateNavigator} = useContext(NavigationContext);
 
-  const [selectedTime, setSelectedTime] = useState<any>('morning');
+  const [selectedTime, setSelectedTime] = useState<any>('all');
   const [habits, setHabits] = useState(habitData);
 
   const filteredHabits = habits.filter(
@@ -659,7 +660,7 @@ const Home = () => {
         }}
       />
       <ViewX
-        variant="secondary"
+        variant="nav"
         width={w(100)}
         position="absolute"
         bottom={0}

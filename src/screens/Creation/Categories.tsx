@@ -11,7 +11,10 @@ import {
   Palette,
 } from 'lucide-react-native';
 import React, {useState} from 'react';
-import {Modal, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Modal, ScrollView} from 'react-native';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {styleUtils} from '~styles/theme';
+import {h} from '~utils/screenUtil';
 
 interface Category {
   id: string;
@@ -90,7 +93,7 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
   onSelectCategory,
 }) => {
   const [showModal, setShowModal] = useState(false);
-  const [recentCategories, setRecentCategories] = useState<Category[]>([]);
+  // const [recentCategories, setRecentCategories] = useState<Category[]>([]);
 
   const handleSelectCategory = (category: Category) => {
     onSelectCategory(category);
@@ -99,234 +102,147 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({
   };
 
   const updateRecentCategories = (category: Category) => {
-    setRecentCategories(prev => {
-      const newRecent = prev.filter(c => c.id !== category.id);
-      newRecent.unshift(category);
-      return newRecent.slice(0, 3);
-    });
+    // setRecentCategories(prev => {
+    //   const newRecent = prev.filter(c => c.id !== category.id);
+    //   newRecent.unshift(category);
+    //   return newRecent.slice(0, 3);
+    // });
+    console.log(category);
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Category</Text>
-
-      <TouchableOpacity
-        style={styles.mainButton}
+    <ViewX>
+      <TextX
+        fontSize="lg"
+        fontWeight="semibold"
+        marginBottom={styleUtils.spacing.sm}>
+        Category
+      </TextX>
+      <TouchableX
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+        backgroundColor="#2C2C2E"
+        padding={16}
+        borderRadius={12}
         onPress={() => setShowModal(true)}>
-        <View style={styles.selectedCategory}>
+        <ViewX
+          flexDirection="row"
+          gap={styleUtils.spacing.md}
+          alignItems="center">
           {selectedCategory ? (
             <>
-              <View
-                style={[
-                  styles.iconContainer,
-                  {backgroundColor: selectedCategory.color},
-                ]}>
+              <ViewX
+                width={32}
+                height={32}
+                borderRadius={8}
+                justifyContent="center"
+                alignItems="center"
+                backgroundColor={selectedCategory.color}>
                 <selectedCategory.icon size={20} color="#FFFFFF" />
-              </View>
-              <Text style={styles.selectedText}>{selectedCategory.name}</Text>
+              </ViewX>
+              <TextX fontSize="lg" color="primary">
+                {selectedCategory.name}
+              </TextX>
             </>
           ) : (
-            <Text style={styles.placeholderText}>Select a category</Text>
+            <TextX fontSize="lg" color="tertiary">
+              Select a category
+            </TextX>
           )}
-        </View>
+        </ViewX>
         <ChevronRight size={20} color="#8E8E93" />
-      </TouchableOpacity>
+      </TouchableX>
 
       <Modal
         visible={showModal}
         transparent={true}
         animationType="slide"
         onRequestClose={() => setShowModal(false)}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Choose Category</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowModal(false)}>
-                <Text style={styles.closeButtonText}>Done</Text>
-              </TouchableOpacity>
-            </View>
+        <ViewX
+          flex={1}
+          justifyContent="flex-end"
+          backgroundColor="rgba(0, 0, 0, 0.5)">
+          <ViewX
+            maxHeight={h(90)}
+            backgroundColor="#1C1C1E"
+            borderTopLeftRadius={12}
+            borderTopRightRadius={12}>
+            {/* Fixed Header */}
+            <ViewX
+              flexDirection="row"
+              justifyContent="space-between"
+              alignItems="center"
+              padding={16}
+              borderBottomWidth={1}
+              borderBottomColor="#2C2C2E">
+              <TextX fontSize="lg" fontWeight="semibold">
+                Choose Category
+              </TextX>
+              <TouchableX padding={8} onPress={() => setShowModal(false)}>
+                <TextX fontSize="lg" fontWeight="semibold" color="accent">
+                  Done
+                </TextX>
+              </TouchableX>
+            </ViewX>
 
-            {recentCategories.length > 0 && (
-              <View style={styles.recentSection}>
-                <Text style={styles.sectionTitle}>Recent</Text>
-                <View style={styles.recentGrid}>
-                  {recentCategories.map(category => (
-                    <TouchableOpacity
+            {/* Content Container */}
+            <ViewX flexShrink={1}>
+              {/* Categories List - Scrollable */}
+              <ScrollView>
+                <ViewX padding={16}>
+                  <TextX
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    color="tertiary"
+                    marginBottom={12}
+                    textTransform="uppercase">
+                    All Categories
+                  </TextX>
+                  {CATEGORIES.map(category => (
+                    <TouchableX
                       key={category.id}
-                      style={styles.recentItem}
+                      flexDirection="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      paddingVertical={12}
+                      borderBottomWidth={1}
+                      borderBottomColor="#2C2C2E"
                       onPress={() => handleSelectCategory(category)}>
-                      <View
-                        style={[
-                          styles.iconContainer,
-                          {backgroundColor: category.color},
-                        ]}>
-                        <category.icon size={20} color="#FFFFFF" />
-                      </View>
-                      <Text style={styles.recentItemText}>{category.name}</Text>
-                    </TouchableOpacity>
+                      <ViewX
+                        flexDirection="row"
+                        alignItems="center"
+                        gap={12}
+                        flex={1}>
+                        <ViewX
+                          width={32}
+                          height={32}
+                          borderRadius={8}
+                          justifyContent="center"
+                          alignItems="center"
+                          backgroundColor={category.color}>
+                          <category.icon size={20} color="#FFFFFF" />
+                        </ViewX>
+                        <ViewX flex={1}>
+                          <TextX fontSize="lg" color="primary" marginBottom={4}>
+                            {category.name}
+                          </TextX>
+                          <TextX fontSize="sm" color="tertiary">
+                            {category.description}
+                          </TextX>
+                        </ViewX>
+                      </ViewX>
+                      {selectedCategory?.id === category.id && (
+                        <Check size={20} color={category.color} />
+                      )}
+                    </TouchableX>
                   ))}
-                </View>
-              </View>
-            )}
-
-            <View style={styles.categoriesList}>
-              <Text style={styles.sectionTitle}>All Categories</Text>
-              {CATEGORIES.map(category => (
-                <TouchableOpacity
-                  key={category.id}
-                  style={styles.categoryItem}
-                  onPress={() => handleSelectCategory(category)}>
-                  <View style={styles.categoryInfo}>
-                    <View
-                      style={[
-                        styles.iconContainer,
-                        {backgroundColor: category.color},
-                      ]}>
-                      <category.icon size={20} color="#FFFFFF" />
-                    </View>
-                    <View style={styles.categoryText}>
-                      <Text style={styles.categoryName}>{category.name}</Text>
-                      <Text style={styles.categoryDescription}>
-                        {category.description}
-                      </Text>
-                    </View>
-                  </View>
-                  {selectedCategory?.id === category.id && (
-                    <Check size={20} color={category.color} />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
+                </ViewX>
+              </ScrollView>
+            </ViewX>
+          </ViewX>
+        </ViewX>
       </Modal>
-    </View>
+    </ViewX>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
-  label: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#FFFFFF',
-    marginBottom: 12,
-  },
-  mainButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#2C2C2E',
-    padding: 16,
-    borderRadius: 12,
-  },
-  selectedCategory: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  selectedText: {
-    fontSize: 17,
-    color: '#FFFFFF',
-  },
-  placeholderText: {
-    fontSize: 17,
-    color: '#8E8E93',
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: '#1C1C1E',
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    maxHeight: '90%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#2C2C2E',
-  },
-  modalTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  closeButton: {
-    padding: 8,
-  },
-  closeButtonText: {
-    color: '#34C759',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  recentSection: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#2C2C2E',
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#8E8E93',
-    marginBottom: 12,
-    textTransform: 'uppercase',
-  },
-  recentGrid: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  recentItem: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  recentItemText: {
-    fontSize: 12,
-    color: '#FFFFFF',
-  },
-  categoriesList: {
-    padding: 16,
-  },
-  categoryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#2C2C2E',
-  },
-  categoryInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-  },
-  categoryText: {
-    flex: 1,
-  },
-  categoryName: {
-    fontSize: 17,
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  categoryDescription: {
-    fontSize: 13,
-    color: '#8E8E93',
-  },
-});

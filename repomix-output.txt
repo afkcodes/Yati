@@ -1,0 +1,7257 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+================================================================
+File Summary
+================================================================
+
+Purpose:
+--------
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+
+File Format:
+------------
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Multiple file entries, each consisting of:
+  a. A separator line (================)
+  b. The file path (File: path/to/file)
+  c. Another separator line
+  d. The full contents of the file
+  e. A blank line
+
+Usage Guidelines:
+-----------------
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+
+Notes:
+------
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+
+Additional Info:
+----------------
+
+================================================================
+Directory Structure
+================================================================
+components/
+  common/
+    AnimatedContainer.tsx
+    CalenderStrip.tsx
+    Collapsible.tsx
+    index.ts
+    Input.tsx
+    MasonaryGrid.tsx
+    Modal.tsx
+    PressableX.tsx
+    TextX.tsx
+    TouchableX.tsx
+    ViewX.tsx
+    X.tsx
+  specific/
+    home/
+      Greeting.tsx
+      Habit.tsx
+      TimFilter.tsx
+    onboarding/
+      TestimonialCard.tsx
+    BottomSheet.tsx
+containers/
+  SquircleViewContainer.tsx
+data/
+  habits.ts
+  testimonials.ts
+hooks/
+  ThemeContext.tsx
+  useModalControl.tsx
+i18n/
+  locales/
+    en.json
+    es.json
+    index.ts
+  i18n.ts
+  localeHelper.ts
+navigation/
+  navigator.tsx
+  Tabs.tsx
+screens/
+  Creation/
+    CategorySelect/
+      CategorySelectModal.tsx
+      CategorySelectTrigger.tsx
+    Evaluation/
+      EvaluationDetailInput.tsx
+      EvaluationSelectModal.tsx
+      EvaluationTrigger.tsx
+    Frequency/
+      FrequencyDetail.tsx
+      FrequencyModalContent.tsx
+      FrequencyTrigger.tsx
+    Categories.tsx
+    Creation.tsx
+    data.ts
+    Goal.tsx
+    Reminders.tsx
+    styles.ts
+  Explore/
+    Explore.tsx
+  Home/
+    Home.tsx
+  Onboarding/
+    Welcome.tsx
+  Profile/
+    Profile.tsx
+  Settings/
+    Settings.tsx
+styles/
+  theme.tsx
+  tokens.ts
+types/
+  common.types.ts
+  style.types.ts
+utils/
+  store/
+    createStore.ts
+    notifier.ts
+  common.ts
+  screenutil.readme.md
+  screenUtil.ts
+
+================================================================
+Files
+================================================================
+
+================
+File: components/common/AnimatedContainer.tsx
+================
+// import React, {useState} from 'react';
+// import {Dimensions, Pressable, StyleSheet, Text, View} from 'react-native';
+// import Animated, {
+//   interpolate,
+//   runOnJS,
+//   useAnimatedStyle,
+//   useSharedValue,
+//   withSpring,
+// } from 'react-native-reanimated';
+
+// const {width: SCREEN_WIDTH} = Dimensions.get('window');
+
+// type Position = 'left' | 'right' | 'center';
+
+// interface ExpandableFeedbackProps {
+//   position?: Position;
+// }
+
+// const SPRING_CONFIG = {
+//   damping: 15,
+//   stiffness: 150,
+//   mass: 0.5,
+// };
+
+// const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+// const ExpandableFeedback: React.FC<ExpandableFeedbackProps> = ({
+//   position = 'center',
+// }) => {
+//   const [isExpanded, setIsExpanded] = useState(false);
+//   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+
+//   const progress = useSharedValue(0);
+//   const positionValue = useSharedValue<Position>(position);
+
+//   const getOriginX = (pos: Position): number => {
+//     'worklet';
+//     switch (pos) {
+//       case 'left':
+//         return 20;
+//       case 'right':
+//         return SCREEN_WIDTH - 140;
+//       default:
+//         return (SCREEN_WIDTH - 120) / 2;
+//     }
+//   };
+
+//   const containerStyle = useAnimatedStyle(() => {
+//     const originX = getOriginX(positionValue.value);
+//     const targetX = (SCREEN_WIDTH - (SCREEN_WIDTH - 40)) / 2;
+
+//     return {
+//       transform: [
+//         {
+//           translateX: interpolate(progress.value, [0, 1], [originX, targetX], {
+//             extrapolateLeft: 'clamp',
+//             extrapolateRight: 'clamp',
+//           }),
+//         },
+//       ],
+//       width: interpolate(progress.value, [0, 1], [120, SCREEN_WIDTH - 40], {
+//         extrapolateLeft: 'clamp',
+//         extrapolateRight: 'clamp',
+//       }),
+//       height: interpolate(progress.value, [0, 1], [40, 300], {
+//         extrapolateLeft: 'clamp',
+//         extrapolateRight: 'clamp',
+//       }),
+//       borderRadius: interpolate(progress.value, [0, 1], [20, 12], {
+//         extrapolateLeft: 'clamp',
+//         extrapolateRight: 'clamp',
+//       }),
+//     };
+//   });
+
+//   const contentStyle = useAnimatedStyle(() => {
+//     return {
+//       opacity: progress.value,
+//       transform: [
+//         {
+//           scale: interpolate(progress.value, [0, 1], [0.8, 1], {
+//             extrapolateLeft: 'clamp',
+//             extrapolateRight: 'clamp',
+//           }),
+//         },
+//       ],
+//     };
+//   });
+
+//   const buttonTextStyle = useAnimatedStyle(() => {
+//     return {
+//       opacity: interpolate(progress.value, [0, 0.5], [1, 0], {
+//         extrapolateLeft: 'clamp',
+//         extrapolateRight: 'clamp',
+//       }),
+//     };
+//   });
+
+//   const handlePress = () => {
+//     if (!isExpanded && !feedbackSubmitted) {
+//       runOnJS(setIsExpanded)(true);
+//       progress.value = withSpring(1, SPRING_CONFIG);
+//     }
+//   };
+
+//   const handleClose = () => {
+//     progress.value = withSpring(0, SPRING_CONFIG, finished => {
+//       if (finished) {
+//         runOnJS(setIsExpanded)(false);
+//       }
+//     });
+//   };
+
+//   const handleSubmit = () => {
+//     runOnJS(setFeedbackSubmitted)(true);
+//     handleClose();
+//   };
+
+//   return (
+//     <AnimatedPressable
+//       onPress={handlePress}
+//       style={[styles.container, containerStyle]}>
+//       <Animated.View style={[styles.buttonTextContainer, buttonTextStyle]}>
+//         <Text style={styles.buttonText}>
+//           {feedbackSubmitted ? 'Thanks for the feedback!' : 'Feedback'}
+//         </Text>
+//       </Animated.View>
+
+//       {isExpanded && (
+//         <Animated.View style={[styles.content, contentStyle]}>
+//           <View style={styles.header}>
+//             <Text style={styles.title}>Send Feedback</Text>
+//             <Pressable
+//               onPress={handleClose}
+//               style={styles.closeButton}
+//               hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+//               <Text style={styles.closeButtonText}>×</Text>
+//             </Pressable>
+//           </View>
+
+//           <View style={styles.formContainer}>
+//             <Text style={styles.label}>What's on your mind?</Text>
+
+//             <Pressable style={styles.submitButton} onPress={handleSubmit}>
+//               <Text style={styles.submitButtonText}>Submit Feedback</Text>
+//             </Pressable>
+//           </View>
+//         </Animated.View>
+//       )}
+//     </AnimatedPressable>
+//   );
+// };
+
+// const styles = StyleSheet.create({
+//   container: {
+//     backgroundColor: 'white',
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//     elevation: 5,
+//     shadowColor: '#000',
+//     shadowOffset: {
+//       width: 0,
+//       height: 2,
+//     },
+//     shadowOpacity: 0.25,
+//     shadowRadius: 3.84,
+//     position: 'absolute',
+//     bottom: 40,
+//     overflow: 'hidden',
+//   },
+//   buttonTextContainer: {
+//     position: 'absolute',
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+//   buttonText: {
+//     color: '#000',
+//     fontSize: 16,
+//     fontWeight: '500',
+//   },
+//   content: {
+//     width: '100%',
+//     height: '100%',
+//     padding: 16,
+//     position: 'absolute',
+//   },
+//   header: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     marginBottom: 20,
+//   },
+//   title: {
+//     fontSize: 20,
+//     fontWeight: '600',
+//   },
+//   closeButton: {
+//     padding: 8,
+//   },
+//   closeButtonText: {
+//     fontSize: 24,
+//     fontWeight: '600',
+//   },
+//   formContainer: {
+//     flex: 1,
+//   },
+//   label: {
+//     fontSize: 16,
+//     marginBottom: 8,
+//     color: '#333',
+//   },
+//   submitButton: {
+//     backgroundColor: '#007AFF',
+//     padding: 14,
+//     borderRadius: 8,
+//     alignItems: 'center',
+//     marginTop: 'auto',
+//   },
+//   submitButtonText: {
+//     color: 'white',
+//     fontSize: 16,
+//     fontWeight: '500',
+//   },
+// });
+
+// export default ExpandableFeedback;
+
+import React, {useState} from 'react';
+import {Dimensions, Pressable, StyleSheet, View} from 'react-native';
+import Animated, {
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+
+const {width: SCREEN_WIDTH} = Dimensions.get('window');
+
+type Position = 'left' | 'right' | 'center';
+
+interface ExpandableProps {
+  trigger: React.ReactNode;
+  children: (props: {onClose: () => void}) => React.ReactNode;
+  position?: Position;
+  triggerWidth?: number; // Custom width for the trigger
+  triggerHeight?: number; // Custom height for the trigger
+  expandedWidth?: number; // Custom width for the expanded state
+  expandedHeight?: number; // Custom height for the expanded state
+}
+
+const SPRING_CONFIG = {
+  damping: 15,
+  stiffness: 150,
+  mass: 0.5,
+};
+
+// Wrap the Pressable component from react-native with Animated
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const Expandable: React.FC<ExpandableProps> = ({
+  trigger,
+  children,
+  position = 'center',
+  triggerWidth = 120, // Default trigger width
+  triggerHeight = 40, // Default trigger height
+  expandedWidth = SCREEN_WIDTH - 40, // Default expanded width
+  expandedHeight = 300, // Default expanded height
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const progress = useSharedValue(0);
+  const positionValue = useSharedValue<Position>(position);
+
+  const getOriginX = (pos: Position): number => {
+    'worklet';
+    switch (pos) {
+      case 'left':
+        return 20;
+      case 'right':
+        return SCREEN_WIDTH - triggerWidth - 20;
+      default:
+        return (SCREEN_WIDTH - triggerWidth) / 2;
+    }
+  };
+
+  const containerStyle = useAnimatedStyle(() => {
+    const originX = getOriginX(positionValue.value);
+    const targetX = (SCREEN_WIDTH - expandedWidth) / 2;
+
+    return {
+      transform: [
+        {
+          translateX: interpolate(progress.value, [0, 1], [originX, targetX], {
+            extrapolateLeft: 'clamp',
+            extrapolateRight: 'clamp',
+          }),
+        },
+      ],
+      width: interpolate(
+        progress.value,
+        [0, 1],
+        [triggerWidth, expandedWidth],
+        {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'},
+      ),
+      height: interpolate(
+        progress.value,
+        [0, 1],
+        [triggerHeight, expandedHeight],
+        {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'},
+      ),
+      borderRadius: interpolate(progress.value, [0, 1], [20, 12], {
+        extrapolateLeft: 'clamp',
+        extrapolateRight: 'clamp',
+      }),
+    };
+  });
+
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [
+      {
+        scale: interpolate(progress.value, [0, 1], [0.8, 1], {
+          extrapolateLeft: 'clamp',
+          extrapolateRight: 'clamp',
+        }),
+      },
+    ],
+  }));
+
+  const handlePress = () => {
+    if (!isExpanded) {
+      runOnJS(setIsExpanded)(true);
+      progress.value = withSpring(1, SPRING_CONFIG);
+    }
+  };
+
+  const handleClose = () => {
+    progress.value = withSpring(0, SPRING_CONFIG, finished => {
+      if (finished) {
+        runOnJS(setIsExpanded)(false);
+      }
+    });
+  };
+
+  return (
+    <AnimatedPressable
+      onPress={handlePress}
+      style={[styles.container, containerStyle]}>
+      {isExpanded ? (
+        <Animated.View style={[styles.content, contentStyle]}>
+          {children({onClose: handleClose})}
+        </Animated.View>
+      ) : (
+        <View style={styles.triggerContainer}>{trigger}</View>
+      )}
+    </AnimatedPressable>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#fff', //themes.dark.background.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    // elevation: 5,
+    // shadowColor: '#000',
+    // shadowOffset: {width: 0, height: 2},
+    // shadowOpacity: 0.25,
+    // shadowRadius: 3.84,
+    // position: 'absolute',
+    // bottom: 0,
+  },
+  triggerContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  content: {
+    width: '100%',
+    height: '100%',
+  },
+});
+
+export default Expandable;
+
+================
+File: components/common/CalenderStrip.tsx
+================
+import {LegendList} from '@legendapp/list';
+import {
+  addDays,
+  differenceInDays,
+  format,
+  isSameDay,
+  isWithinInterval,
+} from 'date-fns';
+import React, {useCallback, useMemo, useRef} from 'react';
+import {Dimensions, StyleSheet, View} from 'react-native';
+import {themes} from '~styles/theme';
+import {s} from '~utils/screenUtil';
+import TextX from './TextX';
+import TouchableX from './TouchableX';
+
+interface DateItem {
+  date: Date;
+  dayName: string;
+  dayNumber: string;
+  isToday: boolean;
+  isDisabled: boolean;
+}
+
+interface CalendarStripProps {
+  onDateSelect: (date: Date) => void;
+  selectedDate: Date;
+  startDate: Date;
+  endDate: Date;
+  style?: object;
+}
+
+const ITEM_WIDTH = 50;
+const ITEM_MARGIN = 4;
+const TOTAL_ITEM_WIDTH = ITEM_WIDTH + ITEM_MARGIN * 2;
+const SCREEN_WIDTH = Dimensions.get('window').width;
+// const VISIBLE_ITEMS = 7;
+// const TOTAL_LIST_WIDTH = VISIBLE_ITEMS * (ITEM_WIDTH + ITEM_MARGIN * 2);
+// const CENTER_PADDING = (SCREEN_WIDTH - TOTAL_LIST_WIDTH) / 2;
+
+const generateDateList = (start: Date, end: Date): DateItem[] => {
+  const today = new Date();
+  const daysCount = differenceInDays(end, start) + 1;
+
+  return Array.from({length: daysCount}, (_, index) => {
+    const date = addDays(start, index);
+    return {
+      date,
+      dayName: format(date, 'EEE'),
+      dayNumber: format(date, 'd'),
+      isToday: isSameDay(date, today),
+      isDisabled: !isWithinInterval(date, {start, end}),
+    };
+  });
+};
+
+export const CalendarStrip: React.FC<CalendarStripProps> = ({
+  onDateSelect,
+  selectedDate,
+  startDate,
+  endDate,
+  style,
+}) => {
+  const listRef = useRef<any>(null);
+  const dateList = useMemo(
+    () => generateDateList(startDate, endDate),
+    [startDate, endDate],
+  );
+
+  // const todayIndex = useMemo(
+  //   () => Math.max(0, dateList.findIndex(item => item.isToday) - 3),
+  //   [dateList],
+  // );
+
+  const renderItem = useCallback(
+    ({item}: {item: DateItem}) => {
+      const isSelected = isSameDay(item.date, selectedDate);
+      return (
+        <TouchableX
+          onPress={() => !item.isDisabled && onDateSelect(item.date)}
+          disabled={item.isDisabled}
+          style={[
+            styles.dateItem,
+            isSelected && styles.selectedItem,
+            item.isToday && styles.todayItem,
+            item.isDisabled && styles.disabledItem,
+          ]}>
+          <TextX
+            style={[
+              styles.dayName,
+              isSelected && styles.selectedText,
+              item.isDisabled && styles.disabledText,
+            ]}>
+            {item.dayName}
+          </TextX>
+          <TextX
+            style={[
+              styles.dayNumber,
+              isSelected && styles.selectedText,
+              item.isDisabled && styles.disabledText,
+            ]}>
+            {item.dayNumber}
+          </TextX>
+        </TouchableX>
+      );
+    },
+    [selectedDate, onDateSelect],
+  );
+
+  return (
+    <View style={[styles.container, style]}>
+      <LegendList
+        ref={listRef}
+        data={dateList}
+        renderItem={renderItem}
+        keyExtractor={item => item.date.toISOString()}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        estimatedItemSize={TOTAL_ITEM_WIDTH}
+        initialScrollIndex={dateList.length}
+        contentContainerStyle={{
+          paddingHorizontal: s(4),
+        }}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    height: 55,
+    width: SCREEN_WIDTH,
+    backgroundColor: '#16171B',
+  },
+  dateItem: {
+    width: ITEM_WIDTH,
+    height: 55,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: ITEM_MARGIN,
+    borderRadius: 10,
+    backgroundColor: themes.dark.background.secondary,
+  },
+  selectedItem: {
+    backgroundColor: themes.dark.background.secondary,
+    borderWidth: 1,
+    borderColor: themes.dark.text.accent,
+  },
+  todayItem: {
+    backgroundColor: themes.dark.background.accent,
+    borderColor: themes.dark.background.accent,
+  },
+  disabledItem: {
+    backgroundColor: '#e0e0e0',
+    opacity: 0.6,
+  },
+  dayName: {
+    fontSize: 14,
+    marginBottom: 4,
+    color: '#fff',
+  },
+  dayNumber: {
+    fontSize: 20,
+    fontWeight: '600',
+  },
+  selectedText: {
+    color: themes.dark.text.primary,
+  },
+  disabledText: {
+    color: '#999',
+  },
+});
+
+================
+File: components/common/Collapsible.tsx
+================
+import {ChevronDown} from 'lucide-react-native';
+import React, {
+  createContext,
+  memo,
+  useCallback,
+  useContext,
+  useState,
+} from 'react';
+import {LayoutChangeEvent, StyleSheet, View} from 'react-native';
+import Animated, {
+  Extrapolation,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  WithTimingConfig,
+} from 'react-native-reanimated';
+import SquircleViewContainer from '~containers/SquircleViewContainer';
+import {styleUtils, themes} from '~styles/theme';
+import {w} from '~utils/screenUtil';
+import TouchableX from './TouchableX';
+import ViewX from './ViewX';
+
+// Types
+interface CollapsibleContextType {
+  isExpanded: boolean;
+  isAnimating: boolean;
+  onPress: () => void;
+  progress: Animated.SharedValue<number>;
+  setContentHeight: (height: number) => void;
+  contentHeight: number;
+}
+
+interface CollapsibleProps {
+  children: React.ReactNode;
+  initiallyExpanded?: boolean;
+}
+
+interface CollapsibleHeaderProps {
+  children: React.ReactNode;
+}
+
+interface CollapsibleContentProps {
+  children: React.ReactNode;
+}
+
+// Animation config
+const animationConfig: WithTimingConfig = {
+  duration: 300,
+};
+
+// Context
+const CollapsibleContext = createContext<CollapsibleContextType | null>(null);
+
+// Hook for child components to consume context
+const useCollapsible = () => {
+  const context = useContext(CollapsibleContext);
+  if (!context) {
+    throw new Error(
+      'Collapsible compound components cannot be rendered outside the Collapsible component',
+    );
+  }
+  return context;
+};
+
+// Create animated chevron component
+const AnimatedChevron = Animated.createAnimatedComponent(ChevronDown);
+
+// Main Component
+const CollapsibleComponent = memo(
+  ({children, initiallyExpanded = false}: CollapsibleProps) => {
+    const [isExpanded, setIsExpanded] = useState<boolean>(initiallyExpanded);
+    const [isAnimating, setIsAnimating] = useState<boolean>(false);
+    const [contentHeight, setContentHeight] = useState<number>(0);
+    const progress = useSharedValue<number>(initiallyExpanded ? 1 : 0);
+
+    const onAnimationComplete = useCallback(() => {
+      setIsAnimating(false);
+    }, []);
+
+    const onPress = useCallback(() => {
+      if (isAnimating) {
+        return;
+      }
+
+      setIsAnimating(true);
+      setIsExpanded(prev => !prev);
+
+      progress.value = withTiming(isExpanded ? 0 : 1, animationConfig, () => {
+        runOnJS(onAnimationComplete)();
+      });
+    }, [isExpanded, isAnimating, progress, onAnimationComplete]);
+
+    const contextValue = {
+      isExpanded,
+      isAnimating,
+      onPress,
+      progress,
+      setContentHeight,
+      contentHeight,
+    };
+
+    return (
+      <CollapsibleContext.Provider value={contextValue}>
+        <SquircleViewContainer
+          borderRadius="md"
+          variant="transparent"
+          borderColor={
+            isExpanded ? themes.dark.background.accent : 'transparent'
+          }
+          borderWidth={isExpanded ? 2 : 0}>
+          {children}
+        </SquircleViewContainer>
+      </CollapsibleContext.Provider>
+    );
+  },
+);
+
+// Header Component
+const Header = memo(({children}: CollapsibleHeaderProps) => {
+  const {onPress, isAnimating, progress} = useCollapsible();
+
+  const chevronStyle = useAnimatedStyle(
+    () => ({
+      transform: [
+        {
+          rotate: `${interpolate(
+            progress.value,
+            [0, 1],
+            [0, 180],
+            Extrapolation.CLAMP,
+          )}deg`,
+        },
+      ],
+    }),
+    [],
+  );
+
+  return (
+    <TouchableX
+      onPress={onPress}
+      flexDirection="row"
+      alignItems="center"
+      paddingHorizontal={styleUtils.spacing.xs}
+      activeOpacity={0.7}
+      disabled={isAnimating}>
+      <ViewX width={w(80)}>{children}</ViewX>
+      <ViewX width={w(20)}>
+        <AnimatedChevron
+          size={24}
+          color={themes.dark.text.secondary}
+          style={chevronStyle}
+        />
+      </ViewX>
+    </TouchableX>
+  );
+});
+
+// Content Component
+const Content = memo(({children}: CollapsibleContentProps) => {
+  const {progress, contentHeight, setContentHeight} = useCollapsible();
+
+  const onLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      setContentHeight(event.nativeEvent.layout.height);
+    },
+    [setContentHeight],
+  );
+
+  const contentStyle = useAnimatedStyle(
+    () => ({
+      height: interpolate(
+        progress.value,
+        [0, 1],
+        [0, contentHeight],
+        Extrapolation.CLAMP,
+      ),
+      opacity: interpolate(
+        progress.value,
+        [0, 0.5, 1],
+        [0, 0.7, 1],
+        Extrapolation.CLAMP,
+      ),
+    }),
+    [contentHeight],
+  );
+
+  return (
+    <Animated.View style={[styles.content, contentStyle]}>
+      <View style={styles.measureContainer} onLayout={onLayout}>
+        {children}
+      </View>
+    </Animated.View>
+  );
+});
+
+// Set display names
+CollapsibleComponent.displayName = 'Collapsible';
+Header.displayName = 'Collapsible.Header';
+Content.displayName = 'Collapsible.Content';
+
+// Compose the compound component
+const Collapsible = Object.assign(CollapsibleComponent, {
+  Header,
+  Content,
+});
+
+const styles = StyleSheet.create({
+  container: {
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    marginVertical: 4,
+    overflow: 'hidden',
+    borderWidth: 1,
+    // borderColor: '#e1e1e1',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: 'transparent',
+  },
+  content: {
+    overflow: 'hidden',
+  },
+  measureContainer: {
+    position: 'absolute',
+    width: '100%',
+    padding: 16,
+  },
+});
+
+export default Collapsible;
+
+================
+File: components/common/index.ts
+================
+import PressableX from './PressableX';
+import TextX from './TextX';
+import TouchableX from './TouchableX';
+import ViewX from './ViewX';
+
+export {PressableX, TextX, TouchableX, ViewX};
+
+================
+File: components/common/Input.tsx
+================
+//@ts-nocheck
+import {forwardRef, useState} from 'react';
+import {
+  Platform,
+  StyleProp,
+  StyleSheet,
+  TextInput,
+  TextInputProps,
+  TextStyle,
+  ViewStyle,
+} from 'react-native';
+import {TextX, ViewX} from '~components/common';
+import {useTheme} from '~hooks/ThemeContext';
+import {styleUtils, themes} from '~styles/theme';
+import type {FontSize, FontWeight} from '~types/common.types';
+import SquircleViewContainer from '../../containers/SquircleViewContainer';
+
+interface InputProps extends Omit<TextInputProps, 'style'> {
+  label?: string;
+  error?: string;
+  fontSize?: FontSize;
+  fontWeight?: FontWeight;
+  containerStyle?: StyleProp<ViewStyle>;
+  inputStyle?: StyleProp<TextStyle>;
+  bgColor?: string;
+  cornerRadius?: number;
+  // Validation props
+  validate?: (text: string) => string | null;
+  onChangeWithError?: (text: string, error: string | null) => void;
+}
+
+export const Input = forwardRef<TextInput, InputProps>(
+  (
+    {
+      label,
+      error: externalError,
+      fontSize = 'md',
+      fontWeight = 'regular',
+      containerStyle,
+      inputStyle,
+      validate,
+      onChangeWithError,
+      onChangeText,
+      bgColor,
+      ...restProps
+    },
+    ref,
+  ) => {
+    const {theme} = useTheme();
+    const [internalError, setInternalError] = useState<string | null>(null);
+
+    // Display external error if provided, otherwise show internal validation error
+    const error = externalError || internalError;
+
+    // Get cursor/selection color based on validation state
+    const caretColor = error
+      ? themes[theme].text.tertiary
+      : themes[theme].text.accent;
+
+    const handleChangeText = (text: string) => {
+      // Call the original onChangeText if provided
+      onChangeText?.(text);
+
+      if (validate) {
+        // Run validation
+        const validationError = validate(text);
+        setInternalError(validationError);
+
+        // Call onChangeWithError if provided
+        onChangeWithError?.(text, validationError);
+      }
+    };
+
+    return (
+      <ViewX style={[styles.container, containerStyle]}>
+        {label && (
+          <TextX
+            fontSize={fontSize}
+            fontWeight={fontWeight}
+            style={styles.label}
+            color={error ? 'accent' : 'primary'}>
+            {label}
+          </TextX>
+        )}
+
+        <SquircleViewContainer
+          padding="2xs"
+          borderRadius="xs"
+          backgroundColor={bgColor}
+          variant="secondary">
+          <TextInput
+            ref={ref}
+            placeholderTextColor={themes[theme].text.tertiary}
+            selectionColor={caretColor}
+            cursorColor={caretColor}
+            style={[
+              styles.input,
+              {
+                color: themes[theme].text.primary,
+              },
+              inputStyle,
+            ]}
+            onChangeText={handleChangeText}
+            {...restProps}
+          />
+        </SquircleViewContainer>
+
+        {error && (
+          <TextX fontSize="xs" color="accent" style={styles.error}>
+            {error}
+          </TextX>
+        )}
+      </ViewX>
+    );
+  },
+);
+
+const styles = StyleSheet.create({
+  container: {
+    marginBottom: styleUtils.spacing.md,
+  },
+  label: {
+    marginBottom: styleUtils.spacing.xs,
+  },
+  squircleContainer: {
+    width: '100%',
+    height: 150,
+    // borderWidth: 1,
+  },
+  input: {
+    flex: 1,
+    paddingHorizontal: styleUtils.spacing.sm,
+    height: '100%',
+    ...Platform.select({
+      web: {
+        outlineStyle: 'none',
+      },
+    }),
+  },
+  error: {
+    marginTop: styleUtils.spacing.xs,
+  },
+});
+
+export default Input;
+
+================
+File: components/common/MasonaryGrid.tsx
+================
+/* eslint-disable react-native/no-inline-styles */
+import type React from 'react';
+import {useEffect, useMemo, useState} from 'react';
+import {Dimensions, StyleSheet, View, type ViewStyle} from 'react-native';
+import Animated, {
+  cancelAnimation,
+  Easing,
+  useAnimatedReaction,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
+
+const {width: SCREEN_WIDTH} = Dimensions.get('window');
+
+interface MasonryGridProps {
+  data: any[];
+  renderItem: (item: any) => React.ReactNode;
+  numColumns?: number;
+  containerStyle?: ViewStyle;
+  scrollDuration?: number;
+  columnGap?: number;
+  itemGap?: number;
+}
+
+const MasonryGrid: React.FC<MasonryGridProps> = ({
+  data,
+  renderItem,
+  numColumns = 2,
+  containerStyle,
+  scrollDuration = 50000,
+  columnGap = 8,
+  itemGap = 8,
+}) => {
+  const [columns, setColumns] = useState<any[][]>(
+    Array.from({length: numColumns}, () => []),
+  );
+  const [contentHeight, setContentHeight] = useState(0);
+  const scrollY = useSharedValue(0);
+  const isResetNeeded = useSharedValue(false);
+
+  // Memoize the distribution of items into columns
+  const distributeItems = useMemo(() => {
+    const columnData: any[][] = Array.from({length: numColumns}, () => []);
+    const heights: number[] = Array.from({length: numColumns}, () => 0);
+
+    const tripleData = [...data, ...data, ...data];
+    tripleData.forEach((item, index) => {
+      const shortestColumnIndex = heights.indexOf(Math.min(...heights));
+      columnData[shortestColumnIndex].push({
+        ...item,
+        uniqueKey: `${item.id}-${index}-${shortestColumnIndex}`,
+      });
+
+      heights[shortestColumnIndex] += 100; // Adjust this height calculation as needed
+    });
+
+    setContentHeight(Math.max(...heights));
+    return columnData;
+  }, [data, numColumns]);
+
+  useEffect(() => {
+    setColumns(distributeItems);
+  }, [distributeItems]);
+
+  // Animate scrolling
+  useEffect(() => {
+    if (contentHeight > 0) {
+      // Reset animation
+      cancelAnimation(scrollY);
+      scrollY.value = 0;
+
+      // Start animation
+      scrollY.value = withRepeat(
+        withTiming(-contentHeight / 3, {
+          duration: scrollDuration,
+          easing: Easing.linear,
+        }),
+        -1, // Infinite loop
+        false,
+      );
+    }
+  }, [contentHeight, scrollDuration, scrollY]);
+
+  // Reset scroll position when it reaches the end
+  useAnimatedReaction(
+    () => scrollY.value < -contentHeight / 3,
+    shouldReset => {
+      if (shouldReset) {
+        isResetNeeded.value = true;
+      }
+    },
+    [contentHeight],
+  );
+
+  const animatedStyle = useAnimatedStyle(() => {
+    if (isResetNeeded.value) {
+      scrollY.value = scrollY.value + contentHeight / 3;
+      isResetNeeded.value = false;
+    }
+    return {
+      transform: [{translateY: scrollY.value}],
+    };
+  });
+
+  const onLayout = (event: {nativeEvent: {layout: {height: number}}}) => {
+    const {height} = event.nativeEvent.layout;
+    setContentHeight(height);
+  };
+
+  return (
+    <View style={[styles.container, containerStyle]}>
+      <Animated.View
+        style={[styles.masonryContainer, animatedStyle]}
+        onLayout={onLayout}>
+        {columns.map((column, columnIndex) => (
+          <View
+            key={`column-${columnIndex}`}
+            style={[
+              styles.column,
+              {
+                width: SCREEN_WIDTH / numColumns - columnGap,
+                marginRight: columnIndex < numColumns - 1 ? columnGap : 0,
+              },
+            ]}>
+            {column.map((item: any) => (
+              <View key={item.uniqueKey} style={{marginBottom: itemGap}}>
+                {renderItem(item)}
+              </View>
+            ))}
+          </View>
+        ))}
+      </Animated.View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+  masonryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: SCREEN_WIDTH,
+  },
+  column: {
+    flexDirection: 'column',
+  },
+});
+
+export default MasonryGrid;
+
+================
+File: components/common/Modal.tsx
+================
+import {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+  BottomSheetModal,
+  BottomSheetView,
+} from '@gorhom/bottom-sheet';
+import {Fragment, useCallback, useEffect, useRef} from 'react';
+import {StyleSheet} from 'react-native';
+import {SpringConfig} from 'react-native-reanimated/lib/typescript/animation/springUtils';
+import {themes} from '~styles/theme';
+import {create} from '~utils/store/createStore';
+
+const springAnimationConfig: SpringConfig = {
+  damping: 45,
+  stiffness: 650,
+  mass: 0.9,
+  overshootClamping: false,
+  restSpeedThreshold: 0.3,
+  restDisplacementThreshold: 0.3,
+};
+
+const {
+  useStore: useModalStore,
+  set: setModal,
+  subscribe: subscribeModalState,
+} = create('MODAL', {isOpen: false, children: null} as {
+  isOpen: boolean;
+  children: React.ReactNode | null;
+});
+
+interface AnimatedModalProps {
+  handleModalChanges?: (state: {isOpen: boolean; index: number}) => void;
+}
+
+const AnimatedModal: React.FC<AnimatedModalProps> = ({handleModalChanges}) => {
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const [modalState] = useModalStore();
+
+  const handleSheetChanges = useCallback(
+    (index: number) => {
+      if (index === -1) {
+        setModal({isOpen: false, children: null});
+      }
+      if (handleModalChanges) {
+        handleModalChanges({isOpen: modalState.isOpen, index});
+      }
+    },
+    [handleModalChanges, modalState],
+  );
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        pressBehavior="none"
+        opacity={0.5}
+      />
+    ),
+    [],
+  );
+
+  useEffect(() => {
+    if (modalState.isOpen && modalState.children) {
+      bottomSheetModalRef.current?.present();
+    } else {
+      bottomSheetModalRef.current?.close();
+      setModal({isOpen: false, children: null});
+    }
+  }, [modalState]);
+
+  return (
+    <Fragment>
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        onChange={handleSheetChanges}
+        animationConfigs={springAnimationConfig}
+        handleIndicatorStyle={{
+          backgroundColor: themes.dark.background.tertiary,
+        }}
+        backgroundStyle={{backgroundColor: '#1C1C1E'}}
+        backdropComponent={renderBackdrop}
+        enablePanDownToClose={true}>
+        <BottomSheetView style={styles.contentContainer}>
+          {modalState.children}
+        </BottomSheetView>
+      </BottomSheetModal>
+    </Fragment>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  contentContainer: {
+    flex: 1,
+    zIndex: 999,
+  },
+});
+
+export default AnimatedModal;
+export {setModal, subscribeModalState, useModalStore};
+
+================
+File: components/common/PressableX.tsx
+================
+/* eslint-disable react-native/no-inline-styles */
+import {SquircleView} from 'expo-squircle-view';
+import React, {useMemo} from 'react';
+import {
+  Pressable,
+  type PressableProps,
+  type StyleProp,
+  StyleSheet,
+  type ViewStyle,
+} from 'react-native';
+
+interface PressableXProps extends PressableProps, ViewStyle {
+  children?: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+  rippleColor?: string;
+}
+
+const PressableX: React.FC<PressableXProps> = ({
+  children,
+  style,
+  onPress,
+  onLongPress,
+  onPressIn,
+  onPressOut,
+  testID,
+  accessibilityLabel,
+  rippleColor = 'rgba(0, 0, 0, 0.2)',
+  borderRadius = 10,
+  ...rest
+}) => {
+  const styleProps = JSON.stringify(rest);
+
+  const styles = useMemo(() => {
+    return StyleSheet.create({
+      pressable: {
+        ...JSON.parse(styleProps),
+      },
+      wrapper: {
+        borderRadius,
+        overflow: 'hidden',
+      },
+    });
+  }, [styleProps, borderRadius]);
+
+  return (
+    <SquircleView
+      style={[styles.pressable, styles.wrapper]}
+      cornerSmoothing={100}
+      preserveSmoothing>
+      <Pressable
+        style={[
+          {
+            flex: 1,
+            width: '100%',
+            alignItems: 'center',
+            justifyContent: 'center',
+          },
+          style,
+        ]}
+        onPress={onPress}
+        onLongPress={onLongPress}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        testID={testID}
+        accessibilityLabel={accessibilityLabel}
+        android_ripple={{
+          color: rippleColor,
+          borderless: false,
+        }}>
+        {children}
+      </Pressable>
+    </SquircleView>
+  );
+};
+
+PressableX.displayName = 'PressableX';
+
+export default React.memo(PressableX);
+
+================
+File: components/common/TextX.tsx
+================
+import React, {useMemo} from 'react';
+import {type StyleProp, StyleSheet, Text, type TextStyle} from 'react-native';
+import {useTheme} from '~hooks/ThemeContext';
+import {themes} from '~styles/theme';
+import type {FontSize, FontWeight} from '~types/common.types';
+
+interface TextXProps
+  extends Omit<TextStyle, 'fontSize' | 'fontWeight' | 'color'> {
+  children?: React.ReactNode;
+  style?: StyleProp<TextStyle>;
+  color?: 'primary' | 'secondary' | 'tertiary' | 'accent';
+  fontSize?: FontSize;
+  fontWeight?: FontWeight;
+}
+
+const TextX: React.FC<TextXProps> = ({
+  children,
+  style,
+  color = 'primary',
+  fontSize = 'md',
+  fontWeight = 'regular',
+  ...rest
+}) => {
+  const styleProps = JSON.stringify(rest);
+  const {theme} = useTheme();
+  const textColor = themes[theme].text[color];
+  const textSize = themes[theme].typography.fontSizes[fontSize];
+  const fontFamilyWeight = themes[theme].typography.fontFamily[fontWeight];
+
+  const styles = useMemo(() => {
+    return StyleSheet.create({
+      text: {
+        ...JSON.parse(styleProps),
+        color: textColor,
+        fontSize: textSize,
+        fontFamily: fontFamilyWeight,
+      },
+    });
+  }, [styleProps, textColor, textSize, fontFamilyWeight]);
+
+  return <Text style={[styles.text, style]}>{children}</Text>;
+};
+
+TextX.displayName = 'TextX';
+
+export default React.memo(TextX);
+
+================
+File: components/common/TouchableX.tsx
+================
+import {SquircleButton} from 'expo-squircle-view';
+import React, {useMemo} from 'react';
+import {
+  type StyleProp,
+  StyleSheet,
+  type TouchableOpacityProps,
+  type ViewStyle,
+} from 'react-native';
+
+interface TouchableXProps extends TouchableOpacityProps, ViewStyle {
+  children?: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+}
+
+const TouchableX: React.FC<TouchableXProps> = ({
+  children,
+  style,
+  onPress,
+  onLongPress,
+  onPressIn,
+  onPressOut,
+  activeOpacity = 0.7,
+  testID,
+  accessibilityLabel,
+  ...rest
+}) => {
+  const styleProps = JSON.stringify(rest);
+
+  const styles = useMemo(() => {
+    return StyleSheet.create({
+      touchable: {
+        ...JSON.parse(styleProps),
+      },
+    });
+  }, [styleProps]);
+
+  return (
+    <SquircleButton
+      style={[styles.touchable, style]}
+      onPress={onPress}
+      onLongPress={onLongPress}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
+      activeOpacity={activeOpacity}
+      testID={testID}
+      accessibilityLabel={accessibilityLabel}>
+      {children}
+    </SquircleButton>
+  );
+};
+
+TouchableX.displayName = 'TouchableX';
+
+// Memoize the component to prevent unnecessary re-renders
+export default React.memo(TouchableX);
+
+================
+File: components/common/ViewX.tsx
+================
+import React, {useMemo} from 'react';
+import {
+  type LayoutChangeEvent,
+  type StyleProp,
+  StyleSheet,
+  View,
+  type ViewStyle,
+} from 'react-native';
+import {useTheme} from '~hooks/ThemeContext';
+import {themes} from '~styles/theme';
+
+interface ViewXProps extends ViewStyle {
+  children?: React.ReactNode;
+  style?: StyleProp<ViewStyle>;
+  onLayout?: (event: LayoutChangeEvent) => void;
+  testID?: string;
+  accessibilityLabel?: string;
+  variant?:
+    | 'primary'
+    | 'secondary'
+    | 'tertiary'
+    | 'accent'
+    | 'transparent'
+    | 'nav';
+}
+
+const ViewX: React.FC<ViewXProps> = ({
+  children,
+  style,
+  onLayout,
+  testID,
+  accessibilityLabel,
+  variant = 'transparent',
+  ...rest
+}) => {
+  const styleProps = JSON.stringify(rest);
+  const {theme} = useTheme();
+  const bgColor = themes[theme].background[variant];
+
+  const styles = useMemo(() => {
+    return StyleSheet.create({
+      container: {
+        ...JSON.parse(styleProps),
+        backgroundColor: rest.backgroundColor || bgColor,
+      },
+    });
+  }, [styleProps, rest.backgroundColor, bgColor]);
+
+  return (
+    <View
+      style={[styles.container, style]}
+      onLayout={onLayout}
+      testID={testID}
+      accessibilityLabel={accessibilityLabel}>
+      {children}
+    </View>
+  );
+};
+
+ViewX.displayName = 'ViewX';
+
+export default React.memo(ViewX);
+
+================
+File: components/common/X.tsx
+================
+import {Plus, X} from 'lucide-react-native'; // Assuming you're using lucide icons
+import {Pressable, StyleSheet, Text, View} from 'react-native';
+import Expandable from './AnimatedContainer';
+
+const App = () => {
+  // Your trigger component
+  const triggerButton = (
+    <View style={styles.triggerButton}>
+      <Plus size={24} color="#FFF" />
+    </View>
+  );
+
+  // Your expanded content with close button
+  const expandedContent = ({onClose}) => (
+    <View style={styles.expandedContent}>
+      {/* Header with close button */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Create New</Text>
+        <Pressable onPress={onClose} style={styles.closeButton}>
+          <X size={24} color="#000" />
+        </Pressable>
+      </View>
+
+      {/* Content */}
+      <View style={styles.content}>
+        <Text>Your content goes here</Text>
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={styles.container}>
+      <Expandable trigger={triggerButton}>{expandedContent}</Expandable>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  triggerButton: {
+    width: 56,
+    height: 56,
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  expandedContent: {
+    flex: 1,
+    padding: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '600',
+  },
+  closeButton: {
+    padding: 8,
+    marginRight: -8,
+  },
+  content: {
+    flex: 1,
+  },
+});
+
+export default App;
+
+================
+File: components/specific/home/Greeting.tsx
+================
+import {Bell} from 'lucide-react-native';
+import React from 'react';
+import {Image, StyleSheet, Text, View} from 'react-native';
+import {useAnimatedStyle, useSharedValue} from 'react-native-reanimated';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {styleUtils, themes} from '~styles/theme';
+import {s} from '~utils/screenUtil';
+
+interface GreetingHeaderProps {
+  username: string;
+  avatar?: string;
+  streakCount: number;
+  hasUnreadNotifications?: boolean;
+  onPressNotification?: () => void;
+  onPressStreak?: () => void;
+}
+
+const GreetingHeader: React.FC<GreetingHeaderProps> = ({
+  username,
+  avatar,
+  hasUnreadNotifications = false,
+  onPressNotification,
+  onPressStreak,
+}) => {
+  const bellScale = useSharedValue(1);
+
+  const bellAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{scale: bellScale.value}],
+  }));
+
+  const {top} = useSafeAreaInsets();
+
+  return (
+    <ViewX
+      flexDirection="row"
+      justifyContent="space-between"
+      alignItems="center"
+      paddingTop={top + 8}
+      paddingHorizontal={styleUtils.spacing.sm}>
+      <TouchableX
+        onPress={onPressStreak}
+        style={styles.avatarContainer}
+        alignSelf="flex-start"
+        borderColor="white"
+        height={s(48)}
+        width={s(48)}
+        borderRadius={styleUtils.borderRadius.full}
+        overflow="hidden"
+        borderWidth={s(3)}>
+        {avatar ? (
+          <Image
+            source={{uri: avatar}}
+            style={{flex: 1, borderRadius: styleUtils.borderRadius.full}}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={[styles.avatar, styles.avatarFallback]}>
+            <Text style={styles.avatarText}>{username[0].toUpperCase()}</Text>
+          </View>
+        )}
+      </TouchableX>
+
+      <ViewX justifyContent="center" flexDirection="row" alignItems="center">
+        <TextX fontSize="2xl" fontWeight="bold">
+          Hey,{' '}
+        </TextX>
+        <TextX fontSize="2xl" fontWeight="bold">
+          {username}
+        </TextX>
+      </ViewX>
+
+      <TouchableX
+        height={s(48)}
+        width={s(48)}
+        onPress={onPressNotification}
+        style={[styles.notificationButton, bellAnimatedStyle]}>
+        <Bell size={24} color={themes.dark.text.primary} strokeWidth={2} />
+        {hasUnreadNotifications && <View style={styles.notificationDot} />}
+      </TouchableX>
+    </ViewX>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  leftContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 12,
+  },
+  avatarContainer: {
+    position: 'relative',
+  },
+  avatar: {
+    width: 56,
+    height: 56,
+    borderRadius: 24,
+  },
+  avatarFallback: {
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#4B5563',
+  },
+  streakBadge: {
+    position: 'absolute',
+    bottom: -4,
+    right: -4,
+    backgroundColor: '#FF4757',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  streakText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  textContainer: {
+    flex: 1,
+    gap: 2,
+  },
+  greeting: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  username: {
+    fontSize: 20,
+    color: '#1F2937',
+    fontWeight: '700',
+  },
+  message: {
+    fontSize: 13,
+    color: '#6B7280',
+  },
+  notificationButton: {
+    padding: 8,
+    borderRadius: 20,
+  },
+  notificationDot: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#FF4757',
+    borderWidth: 1.5,
+    borderColor: '#FFFFFF',
+  },
+});
+
+export default React.memo(GreetingHeader);
+
+================
+File: components/specific/home/Habit.tsx
+================
+/* eslint-disable react-native/no-inline-styles */
+import {CheckCircle2, Clock, Flame} from 'lucide-react-native';
+import React, {useCallback} from 'react';
+import {StyleSheet, View} from 'react-native';
+import Animated, {
+  Easing,
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {styleUtils, themes} from '~styles/theme';
+
+interface HabitCardProps {
+  title: string;
+  frequency: string;
+  period: 'morning' | 'evening' | 'night';
+  color: string;
+  isCompleted: boolean;
+  streak?: number;
+  onToggleComplete: () => void;
+}
+
+const HabitCard: React.FC<HabitCardProps> = ({
+  title,
+  frequency,
+  period,
+  color,
+  isCompleted,
+  streak = 0,
+  onToggleComplete,
+}) => {
+  // Animation values
+  const scale = useSharedValue(1);
+  const checkScale = useSharedValue(isCompleted ? 1 : 0);
+  const checkRotate = useSharedValue(isCompleted ? 1 : 0);
+  const backgroundProgress = useSharedValue(isCompleted ? 100 : 0);
+  const glowOpacity = useSharedValue(0);
+  const streakBounce = useSharedValue(1);
+
+  const handlePress = useCallback(() => {
+    const newState = !isCompleted;
+
+    // Card scale animation
+    scale.value = withSequence(
+      withTiming(0.98, {duration: 100}),
+      withTiming(1, {duration: 150}),
+    );
+
+    if (newState) {
+      checkScale.value = withSpring(1, {
+        mass: 0.5,
+        damping: 12,
+        stiffness: 200,
+      });
+
+      // Rotate animation
+      checkRotate.value = withTiming(1, {
+        duration: 400,
+        easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+      });
+
+      // Background fill animation
+      backgroundProgress.value = withTiming(100, {
+        duration: 500,
+        easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+      });
+
+      // Glow effect
+      glowOpacity.value = withSequence(
+        withTiming(0.6, {duration: 200}),
+        withDelay(200, withTiming(0, {duration: 300})),
+      );
+
+      // Streak bounce animation
+      if (streak > 0) {
+        streakBounce.value = withSequence(
+          withTiming(1.2, {duration: 150}),
+          withSpring(1, {
+            mass: 1,
+            damping: 10,
+            stiffness: 100,
+          }),
+        );
+      }
+    } else {
+      checkScale.value = withTiming(0, {duration: 200});
+      checkRotate.value = withTiming(0, {duration: 200});
+      backgroundProgress.value = withTiming(0, {duration: 300});
+      streakBounce.value = 1;
+    }
+
+    runOnJS(onToggleComplete)();
+  }, [
+    backgroundProgress,
+    checkRotate,
+    checkScale,
+    glowOpacity,
+    isCompleted,
+    onToggleComplete,
+    scale,
+    streak,
+    streakBounce,
+  ]);
+
+  // Animated styles
+  const containerStyle = useAnimatedStyle(() => ({
+    transform: [{scale: scale.value}],
+  }));
+
+  const backgroundStyle = useAnimatedStyle(() => ({
+    width: `${backgroundProgress.value}%`,
+  }));
+
+  const glowStyle = useAnimatedStyle(() => ({
+    opacity: glowOpacity.value,
+  }));
+
+  const checkStyle = useAnimatedStyle(() => ({
+    transform: [
+      {scale: checkScale.value},
+      {rotate: `${interpolate(checkRotate.value, [0, 1], [0, 360])}deg`},
+    ],
+    opacity: checkScale.value,
+  }));
+
+  return (
+    <TouchableX
+      onPress={handlePress}
+      style={[styles.container, containerStyle]}
+      borderRadius={styleUtils.borderRadius.lg}>
+      <ViewX position="absolute" height="100%" width="100%">
+        <Animated.View
+          style={[
+            styles.progressFill,
+            {backgroundColor: color + '10'},
+            backgroundStyle,
+          ]}
+        />
+        <Animated.View
+          style={[
+            styles.glowEffect,
+            {backgroundColor: color + '30'},
+            glowStyle,
+          ]}
+        />
+      </ViewX>
+
+      {/* Content */}
+      <ViewX
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+        padding={styleUtils.spacing.md}
+        gap={styleUtils.spacing.sm}>
+        <ViewX flex={1} gap={styleUtils.spacing.xs}>
+          <ViewX
+            flexDirection="row"
+            alignItems="center"
+            gap={styleUtils.spacing.xs}>
+            <TextX fontSize="lg" fontWeight="semibold" color="primary">
+              {title}
+            </TextX>
+            {/* <View style={[styles.periodBadge, {backgroundColor: color + '20'}]}>
+              <TextX style={[styles.periodText, {color}]}>{period}</TextX>
+            </View> */}
+          </ViewX>
+
+          <ViewX
+            flexDirection="row"
+            alignItems="center"
+            gap={styleUtils.spacing.sm}>
+            <ViewX
+              flexDirection="row"
+              alignItems="center"
+              gap={styleUtils.spacing['2xs']}>
+              <Clock
+                size={14}
+                color={themes.dark.text.secondary}
+                strokeWidth={2}
+              />
+              <TextX fontSize="sm" fontWeight="medium" color="secondary">
+                {frequency}
+              </TextX>
+            </ViewX>
+            {streak > 0 && (
+              <ViewX
+                flexDirection="row"
+                alignItems="center"
+                gap={styleUtils.spacing['3xs']}
+                paddingLeft={styleUtils.spacing['3xs']}>
+                <Flame size={14} color={color} fill={color} strokeWidth={2} />
+                <TextX fontSize="xs" fontWeight="medium" style={{color}}>
+                  {streak}D
+                </TextX>
+              </ViewX>
+            )}
+          </ViewX>
+        </ViewX>
+
+        <View
+          style={[
+            styles.checkContainer,
+            {
+              backgroundColor: isCompleted ? color + '10' : '#343A40',
+            },
+          ]}>
+          <Animated.View style={checkStyle}>
+            <CheckCircle2 size={24} color={color} strokeWidth={2} />
+          </Animated.View>
+        </View>
+      </ViewX>
+    </TouchableX>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    marginHorizontal: 16,
+    marginVertical: 8,
+    backgroundColor: '#1A1A1A',
+    overflow: 'hidden',
+  },
+  backgroundLayer: {
+    ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    width: 0,
+  },
+  glowEffect: {
+    ...StyleSheet.absoluteFillObject,
+    opacity: 0,
+  },
+  checkContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+
+export default React.memo(HabitCard);
+
+================
+File: components/specific/home/TimFilter.tsx
+================
+import {SquircleView} from 'expo-squircle-view';
+import {Clock, Moon, Sun, Sunset} from 'lucide-react-native';
+import React from 'react';
+import {AccessibilityInfo, Pressable, StyleSheet, View} from 'react-native';
+import {trigger} from 'react-native-haptic-feedback';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
+import {TextX} from '~components/common';
+import {themes} from '~styles/theme';
+
+type TimePeriod = 'morning' | 'evening' | 'night' | 'all';
+
+interface TimeFilterProps {
+  selectedTime: TimePeriod;
+  onSelectTime: (time: TimePeriod) => void;
+}
+
+const TIME_OPTIONS = [
+  {id: 'all', label: 'All', Icon: Clock},
+  {id: 'morning', label: 'Morning', Icon: Sun},
+  {id: 'evening', label: 'Evening', Icon: Sunset},
+  {id: 'night', label: 'Night', Icon: Moon},
+] as const;
+
+const TimeFilter = ({selectedTime, onSelectTime}: TimeFilterProps) => {
+  const [positions, setPositions] = React.useState<{[key: string]: number}>({});
+  const translateX = useSharedValue(0);
+  const scale = useSharedValue(1);
+  const [prevSelectedTime, setPrevSelectedTime] = React.useState(selectedTime);
+
+  const onLayout = React.useCallback((event: any, id: string) => {
+    const {x} = event.nativeEvent.layout;
+    setPositions(prev => ({
+      ...prev,
+      [id]: x,
+    }));
+  }, []);
+
+  React.useEffect(() => {
+    if (
+      positions[selectedTime] !== undefined &&
+      prevSelectedTime !== selectedTime
+    ) {
+      translateX.value = withSpring(positions[selectedTime], {
+        damping: 50,
+        stiffness: 200,
+      });
+      scale.value = withTiming(1.1, {duration: 150});
+      setTimeout(() => (scale.value = withTiming(1, {duration: 150})), 150);
+      setPrevSelectedTime(selectedTime);
+    } else if (positions[selectedTime] !== undefined && !prevSelectedTime) {
+      // Initial position without animation
+      translateX.value = positions[selectedTime];
+      setPrevSelectedTime(selectedTime);
+    }
+  }, [selectedTime, positions, translateX, scale, prevSelectedTime]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{translateX: translateX.value}, {scale: scale.value}],
+  }));
+
+  const handlePress = React.useCallback(
+    (id: TimePeriod) => {
+      onSelectTime(id);
+      trigger('selection', {
+        enableVibrateFallback: true,
+        ignoreAndroidSystemSettings: false,
+      });
+      AccessibilityInfo.announceForAccessibility(
+        `Selected ${TIME_OPTIONS.find(opt => opt.id === id)?.label}`,
+      );
+    },
+    [onSelectTime],
+  );
+
+  return (
+    <View style={styles.container}>
+      <SquircleView style={styles.filterContainer}>
+        <Animated.View style={[animatedStyle, styles.selectedBackground]}>
+          <SquircleView style={styles.selectedIndicator} />
+        </Animated.View>
+        {TIME_OPTIONS.map(({id, label, Icon}) => {
+          const isSelected = selectedTime === id;
+          return (
+            <Pressable
+              key={id}
+              onPress={() => handlePress(id)}
+              onLayout={e => onLayout(e, id)}
+              style={styles.button}>
+              <View style={styles.buttonContent}>
+                <Icon
+                  size={16}
+                  color={isSelected ? themes.dark.text.primary : '#8E8E93'}
+                  strokeWidth={2}
+                />
+                <TextX
+                  color={isSelected ? 'primary' : 'secondary'}
+                  fontSize="sm"
+                  fontWeight={isSelected ? 'bold' : 'medium'}>
+                  {label}
+                </TextX>
+              </View>
+            </Pressable>
+          );
+        })}
+      </SquircleView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 16,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    padding: 4,
+    height: 56,
+    position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  selectedBackground: {
+    position: 'absolute',
+    top: 4,
+    bottom: 4,
+    width: '25%',
+  },
+  selectedIndicator: {
+    flex: 1,
+    backgroundColor: themes.dark.background.accent,
+    borderRadius: 12,
+  },
+  button: {
+    flex: 1,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pressedButton: {
+    opacity: 0.7,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 44,
+    gap: 6,
+  },
+  buttonText: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
+  },
+  selectedText: {
+    color: '#000000',
+  },
+  unselectedText: {
+    color: '#8E8E93',
+  },
+});
+
+export default React.memo(TimeFilter);
+
+================
+File: components/specific/onboarding/TestimonialCard.tsx
+================
+import {LinearGradient} from 'expo-linear-gradient';
+import {Quote} from 'lucide-react-native';
+import {Image, StyleSheet} from 'react-native';
+import {themes} from '~styles/theme';
+import {s, vs} from '~utils/screenUtil';
+import TextX from '../../common/TextX';
+import ViewX from '../../common/ViewX';
+
+interface UserHabit {
+  id: string;
+  name: string;
+  streak: string;
+  habit: string;
+  quote: string;
+  avatar: string;
+}
+
+const TestimonialCard = ({testimonial}: {testimonial: UserHabit}) => {
+  return (
+    <ViewX
+      paddingHorizontal={s(8)}
+      paddingVertical={vs(14)}
+      margin={vs(4)}
+      width="100%">
+      <ViewX
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="flex-start"
+        marginBottom={vs(10)}>
+        <ViewX
+          flexDirection="row"
+          alignItems="center"
+          flex={1}
+          marginRight={s(8)}>
+          <LinearGradient
+            colors={['#a78bfa', '#8b5cf6']}
+            style={styles.avatarContainer}>
+            <Image
+              source={{uri: testimonial.avatar}}
+              style={{height: 40, width: 40, borderRadius: 1000}}
+            />
+          </LinearGradient>
+          <ViewX marginLeft={s(12)} flex={1}>
+            <TextX fontSize="xs">{testimonial.name}</TextX>
+            <TextX color="accent" fontSize="xs" fontStyle="italic">
+              {testimonial.streak} {testimonial.habit} streak
+            </TextX>
+          </ViewX>
+        </ViewX>
+        <Quote
+          size={12}
+          color={themes.dark.text.accent}
+          style={{opacity: 0.9}}
+          fill={themes.dark.text.accent}
+        />
+      </ViewX>
+
+      <TextX fontSize="xs" lineHeight={vs(18)} marginBottom={vs(8)}>
+        "{testimonial.quote}"
+      </TextX>
+    </ViewX>
+  );
+};
+
+const styles = StyleSheet.create({
+  avatarContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 4,
+  },
+});
+
+export default TestimonialCard;
+
+================
+File: components/specific/BottomSheet.tsx
+================
+import BottomSheet, {BottomSheetScrollView} from '@gorhom/bottom-sheet';
+import {useCallback, useMemo, useRef} from 'react';
+import {Button, StyleSheet, Text, View} from 'react-native';
+import {TextX, TouchableX, ViewX} from '~components/common';
+
+const BottomSheetSlider = () => {
+  // hooks
+  const sheetRef = useRef<BottomSheet>(null);
+
+  // variables
+  const data = useMemo(
+    () =>
+      Array(50)
+        .fill(0)
+        .map((_, index) => `index-${index}`),
+    [],
+  );
+  const snapPoints = useMemo(() => ['90%'], []);
+
+  // callbacks
+  const handleSheetChange = useCallback(index => {
+    console.log('handleSheetChange', index);
+  }, []);
+  const handleSnapPress = useCallback(index => {
+    sheetRef.current?.snapToIndex(index);
+  }, []);
+  const handleClosePress = useCallback(() => {
+    sheetRef.current?.close();
+  }, []);
+
+  // render
+  const renderItem = useCallback(
+    item => (
+      <View key={item} style={styles.itemContainer}>
+        <Text>{item}</Text>
+      </View>
+    ),
+    [],
+  );
+  return (
+    <>
+      <ViewX flex={1} paddingTop={40} justifyContent="center">
+        <Button title="Snap To 90%" onPress={() => handleSnapPress(0)} />
+        <Button title="Close" onPress={() => handleClosePress()} />
+      </ViewX>
+      <BottomSheet
+        ref={sheetRef}
+        snapPoints={snapPoints}
+        index={-1}
+        enableDynamicSizing={false}
+        onChange={handleSheetChange}>
+        <ViewX
+          flexDirection="row"
+          justifyContent="space-between"
+          alignItems="center"
+          padding={16}
+          borderBottomWidth={1}
+          borderBottomColor="#2C2C2E">
+          <TextX fontSize="lg" fontWeight="semibold">
+            Track Progress
+          </TextX>
+          <TouchableX padding={8} onPress={() => sheetRef.current?.close()}>
+            <TextX fontSize="lg" fontWeight="semibold" color="accent">
+              Done
+            </TextX>
+          </TouchableX>
+        </ViewX>
+        <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
+          {data.map(renderItem)}
+        </BottomSheetScrollView>
+      </BottomSheet>
+    </>
+  );
+};
+
+const styles = StyleSheet.create({
+  contentContainer: {
+    backgroundColor: 'white',
+    bottom: 0,
+  },
+  itemContainer: {
+    padding: 6,
+    margin: 6,
+    backgroundColor: '#eee',
+  },
+});
+
+export default BottomSheetSlider;
+
+================
+File: containers/SquircleViewContainer.tsx
+================
+import {SquircleView} from 'expo-squircle-view';
+import {DimensionValue} from 'react-native';
+import {useTheme} from '~hooks/ThemeContext';
+import {styleUtils, themes} from '~styles/theme';
+import {BorderRadiusSize, Size} from '~types/common.types';
+
+interface SquircleViewContainer {
+  children: React.ReactNode;
+  borderRadius: BorderRadiusSize;
+  padding?: Size;
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'transparent';
+  backgroundColor?: string;
+  borderColor?: string;
+  borderWidth?: number;
+  height?: DimensionValue;
+  width?: DimensionValue;
+}
+
+const SquircleViewContainer: React.FC<SquircleViewContainer> = ({
+  children,
+  padding,
+  borderRadius = 'md',
+  borderColor = 'transparent',
+  borderWidth = 0,
+  variant = 'secondary',
+  backgroundColor,
+  height = 'auto',
+  width = 'auto',
+}) => {
+  const spacing = padding ? styleUtils.spacing[padding] : 0;
+  const radius = styleUtils.borderRadius[borderRadius];
+  const {theme} = useTheme();
+  return (
+    <SquircleView
+      cornerSmoothing={100}
+      backgroundColor={
+        backgroundColor ? backgroundColor : themes[theme].background[variant]
+      }
+      style={{
+        padding: spacing,
+        borderColor,
+        borderWidth,
+        height,
+        width,
+      }}
+      borderRadius={radius}>
+      {children}
+    </SquircleView>
+  );
+};
+
+export default SquircleViewContainer;
+
+================
+File: data/habits.ts
+================
+export interface Habit {
+  id: string;
+  title: string;
+  frequency: string;
+  timePeriod: TimePeriod;
+  color: string;
+  weekDays: Array<{
+    day: string;
+    date: number;
+    isCompleted?: boolean;
+  }>;
+  target: number;
+  current: number;
+  streak: number;
+  startDate: string;
+  description?: string;
+  category: 'health' | 'learning' | 'productivity' | 'mindfulness';
+}
+
+export const habitData: Habit[] = [
+  {
+    id: '1',
+    title: 'Morning Meditation',
+    frequency: 'Everyday',
+    timePeriod: 'morning',
+    color: '#FF6B6B', // Coral red
+    weekDays: [
+      {day: 'Tue', date: 15},
+      {day: 'Mon', date: 14, isCompleted: true},
+      {day: 'Sun', date: 13, isCompleted: true},
+      {day: 'Sat', date: 12},
+      {day: 'Fri', date: 11, isCompleted: true},
+      {day: 'Thu', date: 10, isCompleted: true},
+      {day: 'Wed', date: 9},
+    ],
+    target: 10,
+    current: 7,
+    streak: 2,
+    startDate: '2024-01-01',
+    description: '10 minutes mindful meditation',
+    category: 'mindfulness',
+  },
+  {
+    id: '2',
+    title: 'Learn English',
+    frequency: '4 times a week',
+    timePeriod: 'evening',
+    color: '#3478F6', // Blue
+    weekDays: [
+      {day: 'Tue', date: 15},
+      {day: 'Mon', date: 14, isCompleted: true},
+      {day: 'Sun', date: 13, isCompleted: true},
+      {day: 'Sat', date: 12, isCompleted: true},
+      {day: 'Fri', date: 11, isCompleted: true},
+      {day: 'Thu', date: 10},
+      {day: 'Wed', date: 9},
+    ],
+    target: 4,
+    current: 4,
+    streak: 4,
+    startDate: '2024-01-05',
+    description: '30 minutes language practice',
+    category: 'learning',
+  },
+  {
+    id: '3',
+    title: 'Evening Yoga',
+    frequency: '3 times a week',
+    timePeriod: 'evening',
+    color: '#32D74B', // Green
+    weekDays: [
+      {day: 'Tue', date: 15},
+      {day: 'Mon', date: 14, isCompleted: true},
+      {day: 'Sun', date: 13, isCompleted: true},
+      {day: 'Sat', date: 12},
+      {day: 'Fri', date: 11, isCompleted: true},
+      {day: 'Thu', date: 10},
+      {day: 'Wed', date: 9},
+    ],
+    target: 3,
+    current: 3,
+    streak: 3,
+    startDate: '2024-01-10',
+    description: '20 minutes yoga session',
+    category: 'health',
+  },
+  {
+    id: '4',
+    title: 'Read Books',
+    frequency: 'Everyday',
+    timePeriod: 'night',
+    color: '#BF5AF2', // Purple
+    weekDays: [
+      {day: 'Tue', date: 15},
+      {day: 'Mon', date: 14, isCompleted: true},
+      {day: 'Sun', date: 13, isCompleted: true},
+      {day: 'Sat', date: 12, isCompleted: true},
+      {day: 'Fri', date: 11, isCompleted: true},
+      {day: 'Thu', date: 10, isCompleted: true},
+      {day: 'Wed', date: 9, isCompleted: true},
+    ],
+    target: 7,
+    current: 7,
+    streak: 7,
+    startDate: '2024-01-01',
+    description: 'Read for 30 minutes',
+    category: 'learning',
+  },
+  {
+    id: '5',
+    title: 'Morning Exercise',
+    frequency: '5 times a week',
+    timePeriod: 'morning',
+    color: '#FF9F0A', // Orange
+    weekDays: [
+      {day: 'Tue', date: 15},
+      {day: 'Mon', date: 14, isCompleted: true},
+      {day: 'Sun', date: 13},
+      {day: 'Sat', date: 12, isCompleted: true},
+      {day: 'Fri', date: 11, isCompleted: true},
+      {day: 'Thu', date: 10, isCompleted: true},
+      {day: 'Wed', date: 9, isCompleted: true},
+    ],
+    target: 5,
+    current: 4,
+    streak: 4,
+    startDate: '2024-01-03',
+    description: '30 minutes workout',
+    category: 'health',
+  },
+  {
+    id: '6',
+    title: 'Journal Writing',
+    frequency: 'Everyday',
+    timePeriod: 'night',
+    color: '#64D2FF', // Light blue
+    weekDays: [
+      {day: 'Tue', date: 15},
+      {day: 'Mon', date: 14, isCompleted: true},
+      {day: 'Sun', date: 13, isCompleted: true},
+      {day: 'Sat', date: 12, isCompleted: true},
+      {day: 'Fri', date: 11},
+      {day: 'Thu', date: 10, isCompleted: true},
+      {day: 'Wed', date: 9, isCompleted: true},
+    ],
+    target: 7,
+    current: 5,
+    streak: 3,
+    startDate: '2024-01-01',
+    description: '15 minutes reflection',
+    category: 'mindfulness',
+  },
+];
+
+// Helper function to filter habits by time period
+export const filterHabitsByTime = (
+  habits: Habit[],
+  timePeriod: TimePeriod | 'all',
+) => {
+  if (timePeriod === 'all') {
+    return habits;
+  }
+  return habits.filter(habit => habit.timePeriod === timePeriod);
+};
+
+// Helper function to get stats for habits
+export const getHabitStats = (habits: Habit[]) => {
+  return {
+    total: habits.length,
+    completed: habits.filter(h => h.current >= h.target).length,
+    streaks: Math.max(...habits.map(h => h.streak)),
+    byCategory: habits.reduce((acc, habit) => {
+      acc[habit.category] = (acc[habit.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>),
+  };
+};
+
+// Types file (types.ts)
+export type TimePeriod = 'morning' | 'evening' | 'night';
+export type HabitCategory =
+  | 'health'
+  | 'learning'
+  | 'productivity'
+  | 'mindfulness';
+
+================
+File: data/testimonials.ts
+================
+export const testimonials = [
+  {
+    id: '1',
+    name: 'Sarah L.',
+    streak: '100 days',
+    habit: 'meditation',
+    quote:
+      'Found inner peace and boosted productivity! Yati made it easy to maintain my daily practice.',
+    avatar: 'https://mighty.tools/mockmind-api/content/human/65.jpg',
+  },
+  {
+    id: '2',
+    name: 'Mike R.',
+    streak: '30 days',
+    habit: 'running',
+    quote:
+      'Lost 15 pounds and completed my first 5K! The streak feature kept me motivated even on tough days.',
+    avatar: 'https://mighty.tools/mockmind-api/content/human/66.jpg',
+  },
+  {
+    id: '3',
+    name: 'Emily K.',
+    streak: '52 weeks',
+    habit: 'reading',
+    quote:
+      'Read 52 books in a year! Yati helped me track my progress and discover new authors.',
+    avatar: 'https://mighty.tools/mockmind-api/content/human/67.jpg',
+  },
+  {
+    id: '4',
+    name: 'Alex T.',
+    streak: '60 days',
+    habit: 'healthy eating',
+    quote:
+      'Kicked my junk food addiction! Yati helped me plan and stick to nutritious meals.',
+    avatar: 'https://mighty.tools/mockmind-api/content/human/68.jpg',
+  },
+  {
+    id: '5',
+    name: 'Lisa M.',
+    streak: '45 days',
+    habit: 'writing',
+    quote:
+      'Finally finished my novel draft! The progress tracking feature was a game-changer for my writing habit.',
+    avatar: 'https://mighty.tools/mockmind-api/content/human/69.jpg',
+  },
+  {
+    id: '6',
+    name: 'Tom K.',
+    streak: '90 days',
+    habit: 'coding',
+    quote:
+      'Landed my dream job as a developer! Daily practice with Yati really paid off.',
+    avatar: 'https://mighty.tools/mockmind-api/content/human/70.jpg',
+  },
+  {
+    id: '7',
+    name: 'Olivia P.',
+    streak: '120 days',
+    habit: 'yoga',
+    quote:
+      "Transformed my body and mind with daily yoga. Yati's reminders kept me consistent.",
+    avatar: 'https://mighty.tools/mockmind-api/content/human/71.jpg',
+  },
+  {
+    id: '8',
+    name: 'David H.',
+    streak: '75 days',
+    habit: 'journaling',
+    quote:
+      'Reduced anxiety through daily journaling. Yati made it easy to build this life-changing habit.',
+    avatar: 'https://mighty.tools/mockmind-api/content/human/72.jpg',
+  },
+];
+
+================
+File: hooks/ThemeContext.tsx
+================
+import type React from 'react';
+import {createContext, useCallback, useContext, useState} from 'react';
+import type {Theme} from '~types/common.types';
+
+interface ThemeContextType {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({
+  children,
+}) => {
+  const [currentTheme, setCurrentTheme] = useState<Theme>('dark');
+
+  const setTheme = useCallback((newTheme: Theme) => {
+    setCurrentTheme(newTheme);
+  }, []);
+
+  return (
+    <ThemeContext.Provider value={{theme: currentTheme, setTheme}}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return {theme: context.theme, setTheme: context.setTheme};
+};
+
+================
+File: hooks/useModalControl.tsx
+================
+import {useCallback, useMemo} from 'react';
+import {setModal} from '~components/common/Modal';
+
+export const useModalControl = <P extends object>(
+  ModalComponent: React.ComponentType<P>,
+  props: P,
+  {isOpen}: {isOpen: boolean},
+) => {
+  const modalContent = useMemo(
+    () => <ModalComponent {...props} />,
+    [ModalComponent, props],
+  );
+
+  const openModal = useCallback(() => {
+    setModal({
+      isOpen: isOpen,
+      children: modalContent,
+    });
+  }, [isOpen, modalContent]);
+
+  return openModal;
+};
+
+export const closeModal = () => {
+  setModal({
+    isOpen: false,
+    children: null,
+  });
+};
+
+================
+File: i18n/locales/en.json
+================
+{
+  "name": "Yati",
+  "tagline": "Your Journey to a Better You."
+}
+
+================
+File: i18n/locales/es.json
+================
+{
+  "name": "Yati",
+  "tagline": "Su viaje hacia un yo mejor."
+}
+
+================
+File: i18n/locales/index.ts
+================
+import en from './en.json';
+import es from './es.json';
+
+export {en, es};
+
+================
+File: i18n/i18n.ts
+================
+import i18n, {LanguageDetectorAsyncModule} from 'i18next';
+import {initReactI18next} from 'react-i18next';
+
+import * as RNLocalize from 'react-native-localize';
+import LANGUAGES, {LanguageCode, resources} from './localeHelper';
+
+const LANG_CODES = Object.keys(LANGUAGES) as LanguageCode[];
+
+const LANGUAGE_DETECTOR: LanguageDetectorAsyncModule = {
+  type: 'languageDetector',
+  async: true,
+  detect: callback => {
+    const tag = RNLocalize.findBestLanguageTag(LANG_CODES);
+    // AsyncStorage.getItem('user-language', (err, language) => {
+    //   if (err || !language) {
+    //     if (err) {
+    //       console.log('Error fetching Languages from asyncstorage ', err);
+    //     } else {
+    //       console.log('No language is set, choosing English as fallback');
+    //     }
+    //     const findBestAvailableLanguage =
+    //       RNLocalize.findBestAvailableLanguage(LANG_CODES);
+    //     callback(findBestAvailableLanguage?.languageTag || 'en');
+    //     return;
+    //   }
+    //   callback(language);
+    // });
+    callback(tag?.languageTag);
+  },
+  init: () => {},
+  cacheUserLanguage: _language => {
+    // AsyncStorage.setItem('user-language', language);
+  },
+};
+
+i18n
+  .use(LANGUAGE_DETECTOR)
+  .use(initReactI18next)
+  .init({
+    resources,
+    lng: 'en',
+    interpolation: {
+      escapeValue: false,
+    },
+    compatibilityJSON: 'v4',
+    fallbackLng: 'en',
+  });
+
+export default i18n;
+
+================
+File: i18n/localeHelper.ts
+================
+import {en, es} from './locales';
+
+export type Resources = {
+  [K in LanguageCode]: {translation: {[key in string]: string}};
+};
+
+const LANGUAGES = {
+  en: 'en',
+  es: 'es',
+  fr: 'fr',
+  de: 'de',
+  it: 'it',
+  pt: 'pt',
+  ru: 'ru',
+  zh: 'zh',
+  ja: 'ja',
+  ko: 'ko',
+  ar: 'ar',
+  hi: 'hi',
+  tr: 'tr',
+  nl: 'nl',
+  pl: 'pl',
+  sv: 'sv',
+  da: 'da',
+  fi: 'fi',
+  no: 'no',
+  el: 'el',
+  he: 'he',
+};
+
+export const resources: Partial<Resources> = {
+  en: {
+    translation: en,
+  },
+  es: {
+    translation: es,
+  },
+};
+
+export type LanguageCode = keyof typeof LANGUAGES;
+export default LANGUAGES;
+
+================
+File: navigation/navigator.tsx
+================
+import {StateNavigator} from 'navigation';
+import HabitCreationScreen from '~screens/Creation/Creation';
+import Home from '~screens/Home/Home';
+import Profile from '~screens/Profile/Profile';
+import Settings from '~screens/Settings/Settings';
+import {themes} from '~styles/theme';
+import {Theme} from '~types/common.types';
+
+const baseNavigator = new StateNavigator([
+  {key: 'welcome'},
+  {key: 'tabs', trackCrumbTrail: true},
+]);
+
+const getTabsConfig = (theme: Theme) => {
+  return [
+    {
+      id: 'Home',
+      title: 'Home',
+      icon: require('../../assets/icons/navigation/home.png'),
+      fontSize: 14,
+      fontFamily: themes[theme].typography.fontFamily.semibold,
+      navigatorState: 'homeNavigator',
+      scenes: [
+        {key: 'home', component: Home},
+        {key: 'create', component: HabitCreationScreen},
+      ],
+    },
+    {
+      id: 'Profile',
+      title: 'Profile',
+      icon: require('../../assets/icons/navigation/profile.png'),
+      fontSize: 14,
+      fontFamily: themes[theme].typography.fontFamily.semibold,
+      navigatorState: 'profileNavigator',
+      scenes: [{key: 'profile', component: Profile}],
+    },
+    {
+      id: 'Settings',
+      title: 'Settings',
+      icon: require('../../assets/icons/navigation/settings.png'),
+      fontSize: 14,
+      fontFamily: themes[theme].typography.fontFamily.semibold,
+      navigatorState: 'settingsNavigator',
+      scenes: [{key: 'settings', component: Settings}],
+    },
+  ];
+};
+
+export {baseNavigator, getTabsConfig};
+
+================
+File: navigation/Tabs.tsx
+================
+/* eslint-disable react-native/no-inline-styles */
+import {StateNavigator} from 'navigation';
+import {NavigationHandler} from 'navigation-react';
+import {
+  NavigationBar,
+  NavigationStack,
+  Scene,
+  TabBar,
+  TabBarItem,
+} from 'navigation-react-native';
+import {Fragment, useMemo, useRef} from 'react';
+import {useTheme} from '~hooks/ThemeContext';
+import {themes} from '../styles/theme';
+import {getTabsConfig} from './navigator';
+
+const BottomTabs = () => {
+  const {theme} = useTheme();
+
+  const homeNavigator = useMemo(() => {
+    const nav = new StateNavigator([
+      {key: 'home'},
+      {key: 'create', trackCrumbTrail: true},
+    ]);
+    nav.navigate('home');
+    return nav;
+  }, []);
+  const discoverNavigator = useMemo(() => {
+    const nav = new StateNavigator([{key: 'Discover', trackCrumbTrail: true}]);
+    return nav;
+  }, []);
+
+  const settingsNavigator = useMemo(() => {
+    const nav = new StateNavigator([{key: 'settings', trackCrumbTrail: true}]);
+    return nav;
+  }, []);
+
+  const profileNavigator = useMemo(() => {
+    const nav = new StateNavigator([{key: 'profile', trackCrumbTrail: true}]);
+    return nav;
+  }, []);
+
+  const navigatorRef = useRef({
+    homeNavigator,
+    discoverNavigator,
+    settingsNavigator,
+    profileNavigator,
+  });
+
+  return (
+    <Fragment>
+      <NavigationBar hidden={true} />
+      <TabBar
+        primary={true}
+        preventFouc={true}
+        bottomTabs={true}
+        labelVisibilityMode="labeled"
+        selectedTintColor={themes[theme].text.accent}
+        barTintColor={'#16171B'}>
+        {getTabsConfig(theme).map(tab => (
+          <TabBarItem
+            key={tab.id}
+            title={tab.title}
+            image={tab.icon}
+            fontFamily={tab.fontFamily}
+            fontWeight="bold"
+            fontSize={tab.fontSize}>
+            <NavigationHandler
+              stateNavigator={
+                navigatorRef.current[
+                  tab.navigatorState as keyof typeof navigatorRef.current
+                ]
+              }>
+              <NavigationStack
+                backgroundColor={() => themes[theme].text.secondary}
+                crumbStyle={[
+                  {type: 'translate', startX: '-10%', duration: 300},
+                  {type: 'alpha', start: 50},
+                ]}
+                unmountStyle={[
+                  {type: 'translate', startX: '100%', duration: 300},
+                  {type: 'alpha', start: 100},
+                ]}>
+                {tab.scenes?.map(scene => (
+                  <Scene key={scene.key} stateKey={scene.key}>
+                    <scene.component />
+                  </Scene>
+                ))}
+              </NavigationStack>
+            </NavigationHandler>
+          </TabBarItem>
+        ))}
+      </TabBar>
+    </Fragment>
+  );
+};
+
+export default BottomTabs;
+
+================
+File: screens/Creation/CategorySelect/CategorySelectModal.tsx
+================
+import {
+  Book,
+  Brain,
+  Briefcase,
+  Check,
+  Coffee,
+  Dumbbell,
+  GraduationCap,
+  Heart,
+  Palette,
+} from 'lucide-react-native';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {closeModal} from '~hooks/useModalControl';
+import {h} from '~utils/screenUtil';
+
+export interface Category {
+  id: string;
+  name: string;
+  icon: any;
+  color: string;
+  description: string;
+}
+
+const CATEGORIES: Category[] = [
+  {
+    id: 'health',
+    name: 'Health',
+    icon: Heart,
+    color: '#FF2D55',
+    description: 'Physical wellbeing and healthy habits',
+  },
+  {
+    id: 'fitness',
+    name: 'Fitness',
+    icon: Dumbbell,
+    color: '#5856D6',
+    description: 'Exercise and physical activity',
+  },
+  {
+    id: 'learning',
+    name: 'Learning',
+    icon: GraduationCap,
+    color: '#FF9500',
+    description: 'Education and skill development',
+  },
+  {
+    id: 'mindfulness',
+    name: 'Mindfulness',
+    icon: Brain,
+    color: '#34C759',
+    description: 'Mental health and meditation',
+  },
+  {
+    id: 'productivity',
+    name: 'Productivity',
+    icon: Coffee,
+    color: '#007AFF',
+    description: 'Time management and efficiency',
+  },
+  {
+    id: 'creativity',
+    name: 'Creativity',
+    icon: Palette,
+    color: '#AF52DE',
+    description: 'Artistic and creative pursuits',
+  },
+  {
+    id: 'career',
+    name: 'Career',
+    icon: Briefcase,
+    color: '#5856D6',
+    description: 'Professional development',
+  },
+  {
+    id: 'reading',
+    name: 'Reading',
+    icon: Book,
+    color: '#FF3B30',
+    description: 'Books and literature',
+  },
+];
+
+const CategorySelectModal = ({selectedCategory, handleSelectCategory}: any) => {
+  return (
+    <ViewX
+      flex={1}
+      justifyContent="flex-end"
+      backgroundColor="rgba(0, 0, 0, 0.5)">
+      <ViewX maxHeight={h(90)} backgroundColor="#1C1C1E">
+        {/* Fixed Header */}
+        <ViewX
+          flexDirection="row"
+          justifyContent="space-between"
+          alignItems="center"
+          paddingHorizontal={16}
+          paddingVertical={8}
+          borderBottomWidth={1}
+          borderBottomColor="#2C2C2E">
+          <TextX fontSize="lg" fontWeight="semibold">
+            Choose Category
+          </TextX>
+          <TouchableX
+            padding={8}
+            onPress={() => {
+              closeModal();
+            }}>
+            <TextX fontSize="lg" fontWeight="semibold" color="accent">
+              Done
+            </TextX>
+          </TouchableX>
+        </ViewX>
+
+        {/* Content Container */}
+        <ViewX flexShrink={1}>
+          {/* Categories List - Scrollable */}
+          <ViewX padding={16}>
+            <TextX
+              fontSize="sm"
+              fontWeight="semibold"
+              color="tertiary"
+              marginBottom={12}
+              textTransform="uppercase">
+              All Categories
+            </TextX>
+            {CATEGORIES.map(category => (
+              <TouchableX
+                key={category.id}
+                flexDirection="row"
+                alignItems="center"
+                justifyContent="space-between"
+                paddingVertical={12}
+                borderBottomWidth={1}
+                borderBottomColor="#2C2C2E"
+                onPress={() => handleSelectCategory(category)}>
+                <ViewX
+                  flexDirection="row"
+                  alignItems="center"
+                  gap={12}
+                  flex={1}>
+                  <ViewX
+                    width={32}
+                    height={32}
+                    borderRadius={8}
+                    justifyContent="center"
+                    alignItems="center"
+                    backgroundColor={category.color}>
+                    <category.icon size={20} color="#FFFFFF" />
+                  </ViewX>
+                  <ViewX flex={1}>
+                    <TextX fontSize="lg" color="primary" marginBottom={4}>
+                      {category.name}
+                    </TextX>
+                    <TextX fontSize="sm" color="tertiary">
+                      {category.description}
+                    </TextX>
+                  </ViewX>
+                </ViewX>
+                {selectedCategory?.id === category.id && (
+                  <Check size={20} color={category.color} />
+                )}
+              </TouchableX>
+            ))}
+          </ViewX>
+        </ViewX>
+      </ViewX>
+    </ViewX>
+  );
+};
+
+export default CategorySelectModal;
+
+================
+File: screens/Creation/CategorySelect/CategorySelectTrigger.tsx
+================
+import {ChevronRight} from 'lucide-react-native';
+import {useState} from 'react';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {closeModal, useModalControl} from '~hooks/useModalControl';
+import {styleUtils} from '~styles/theme';
+import CategorySelectModal, {Category} from './CategorySelectModal';
+
+const CategorySelectTrigger = () => {
+  const [selectedCategory, setSelectedCategory] = useState<Category>();
+  const handleSelectCategory = (category: any) => {
+    setSelectedCategory(category as Category);
+    closeModal();
+  };
+
+  const openCategoryModal = useModalControl(
+    CategorySelectModal,
+    {handleSelectCategory},
+    {isOpen: true},
+  );
+
+  return (
+    <ViewX>
+      <TextX
+        fontSize="lg"
+        fontWeight="semibold"
+        marginBottom={styleUtils.spacing.sm}>
+        Category
+      </TextX>
+      <TouchableX
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+        backgroundColor="#2C2C2E"
+        padding={16}
+        borderRadius={12}
+        onPress={() => {
+          openCategoryModal();
+        }}>
+        <ViewX
+          flexDirection="row"
+          gap={styleUtils.spacing.md}
+          alignItems="center">
+          {selectedCategory ? (
+            <>
+              <ViewX
+                width={32}
+                height={32}
+                borderRadius={8}
+                justifyContent="center"
+                alignItems="center"
+                backgroundColor={selectedCategory.color}>
+                <selectedCategory.icon size={20} color="#FFFFFF" />
+              </ViewX>
+              <TextX fontSize="lg">{selectedCategory.name}</TextX>
+            </>
+          ) : (
+            <TextX fontSize="lg">Select a category</TextX>
+          )}
+        </ViewX>
+        <ChevronRight size={20} color="#8E8E93" />
+      </TouchableX>
+    </ViewX>
+  );
+};
+
+export default CategorySelectTrigger;
+
+================
+File: screens/Creation/Evaluation/EvaluationDetailInput.tsx
+================
+import {Plus, Trash2} from 'lucide-react-native';
+import {StyleProp, StyleSheet, TextInput, ViewStyle} from 'react-native';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {themes} from '~styles/theme';
+
+// Type definitions
+interface NumericDetails {
+  goal: string;
+  unit: string;
+}
+
+interface TimerDetails {
+  goal: number;
+  unit: 'minutes' | 'hours';
+}
+
+interface ChecklistDetails {
+  items: string[];
+}
+
+interface EvaluationDetails {
+  numeric: NumericDetails;
+  timer: TimerDetails;
+  checklist: ChecklistDetails;
+}
+
+type EvaluationType = keyof EvaluationDetails;
+
+interface BaseProps {
+  evaluationDetails: EvaluationDetails;
+  onDetailsChange: (details: Partial<EvaluationDetails>) => void;
+}
+
+// Styles
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#2C2C2E',
+    borderRadius: 12,
+    padding: 16,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: '#3A3A3C',
+    borderRadius: 8,
+    padding: 12,
+    color: '#FFFFFF',
+    fontSize: 17,
+  },
+  title: {
+    // fontSize: 'md',
+    // fontWeight: 'semibold',
+    marginBottom: 12,
+  },
+});
+
+// Common input component
+interface EvaluationInputProps extends React.ComponentProps<typeof TextInput> {
+  style?: StyleProp<ViewStyle>;
+}
+
+const EvaluationInput: React.FC<EvaluationInputProps> = ({style, ...props}) => (
+  <TextInput
+    style={[styles.input, style]}
+    placeholderTextColor="#8E8E93"
+    {...props}
+  />
+);
+
+// Numeric evaluation component
+const NumericEvaluation: React.FC<BaseProps> = ({
+  evaluationDetails,
+  onDetailsChange,
+}) => {
+  const {goal, unit} = evaluationDetails.numeric;
+
+  return (
+    <ViewX style={styles.container}>
+      <TextX style={styles.title} fontSize="md" fontWeight="semibold">
+        Set Target
+      </TextX>
+      <ViewX flexDirection="row" gap={12}>
+        <EvaluationInput
+          value={goal}
+          onChangeText={(text: string) =>
+            onDetailsChange({
+              numeric: {...evaluationDetails.numeric, goal: text},
+            })
+          }
+          keyboardType="numeric"
+          placeholder="Amount"
+        />
+        <EvaluationInput
+          style={{flex: 2}}
+          value={unit}
+          onChangeText={(text: string) =>
+            onDetailsChange({
+              numeric: {...evaluationDetails.numeric, unit: text},
+            })
+          }
+          placeholder="Unit (e.g., steps)"
+        />
+      </ViewX>
+    </ViewX>
+  );
+};
+
+// Timer evaluation component
+const TimerEvaluation: React.FC<BaseProps> = ({
+  evaluationDetails,
+  onDetailsChange,
+}) => {
+  const {goal, unit} = evaluationDetails.timer;
+
+  const toggleUnit = () => {
+    const newUnit: TimerDetails['unit'] =
+      unit === 'minutes' ? 'hours' : 'minutes';
+    onDetailsChange({
+      timer: {
+        ...evaluationDetails.timer,
+        unit: newUnit,
+      },
+    });
+  };
+
+  return (
+    <ViewX style={styles.container}>
+      <TextX style={styles.title}>Set Duration</TextX>
+      <ViewX flexDirection="row" gap={12}>
+        <EvaluationInput
+          value={goal.toString()}
+          onChangeText={(text: string) =>
+            onDetailsChange({
+              timer: {
+                ...evaluationDetails.timer,
+                goal: parseInt(text, 10) || 0,
+              },
+            })
+          }
+          keyboardType="numeric"
+          placeholder="Duration"
+        />
+        <TouchableX
+          backgroundColor="#3A3A3C"
+          borderRadius={8}
+          padding={12}
+          minWidth={100}
+          alignItems="center"
+          onPress={toggleUnit}>
+          <TextX fontSize="lg">{unit}</TextX>
+        </TouchableX>
+      </ViewX>
+    </ViewX>
+  );
+};
+
+// Checklist item component
+interface ChecklistItemProps {
+  item: string;
+  index: number;
+  onUpdate: (index: number, text: string) => void;
+  onDelete: (index: number) => void;
+}
+
+const ChecklistItem: React.FC<ChecklistItemProps> = ({
+  item,
+  index,
+  onUpdate,
+  onDelete,
+}) => (
+  <ViewX flexDirection="row" alignItems="center" gap={12} marginBottom={8}>
+    <EvaluationInput
+      value={item}
+      onChangeText={(text: string) => onUpdate(index, text)}
+      placeholder={`Item ${index + 1}`}
+    />
+    <TouchableX onPress={() => onDelete(index)}>
+      <Trash2 size={20} color="#FF3B30" />
+    </TouchableX>
+  </ViewX>
+);
+
+// Checklist evaluation component
+const ChecklistEvaluation: React.FC<BaseProps> = ({
+  evaluationDetails,
+  onDetailsChange,
+}) => {
+  const {items} = evaluationDetails.checklist;
+
+  const updateItem = (index: number, text: string) => {
+    const newItems = [...items];
+    newItems[index] = text;
+    onDetailsChange({
+      checklist: {items: newItems},
+    });
+  };
+
+  const deleteItem = (index: number) => {
+    const newItems = items.filter((_, i) => i !== index);
+    onDetailsChange({
+      checklist: {items: newItems},
+    });
+  };
+
+  const addItem = () => {
+    const newItems = [...items, ''];
+    onDetailsChange({
+      checklist: {items: newItems},
+    });
+  };
+
+  return (
+    <ViewX style={styles.container}>
+      <TextX style={styles.title}>Checklist Items</TextX>
+      {items.map((item, index) => (
+        <ChecklistItem
+          key={index}
+          item={item}
+          index={index}
+          onUpdate={updateItem}
+          onDelete={deleteItem}
+        />
+      ))}
+      <TouchableX
+        flexDirection="row"
+        alignItems="center"
+        gap={8}
+        paddingVertical={12}
+        onPress={addItem}>
+        <Plus size={20} color={themes.dark.background.accent} />
+        <TextX color="accent" fontSize="lg" fontWeight="medium">
+          Add Item
+        </TextX>
+      </TouchableX>
+    </ViewX>
+  );
+};
+
+// Main component
+interface EvaluationDetailInputProps extends BaseProps {
+  evaluationType: EvaluationType;
+}
+
+const EvaluationDetailInput: React.FC<EvaluationDetailInputProps> = ({
+  evaluationType,
+  evaluationDetails,
+  onDetailsChange,
+}) => {
+  const components: Record<EvaluationType, React.FC<BaseProps>> = {
+    numeric: NumericEvaluation,
+    timer: TimerEvaluation,
+    checklist: ChecklistEvaluation,
+  };
+
+  const Component = components[evaluationType];
+  return Component ? (
+    <Component
+      evaluationDetails={evaluationDetails}
+      onDetailsChange={onDetailsChange}
+    />
+  ) : null;
+};
+
+export type {
+  ChecklistDetails,
+  EvaluationDetails,
+  EvaluationType,
+  NumericDetails,
+  TimerDetails,
+};
+
+export default EvaluationDetailInput;
+
+================
+File: screens/Creation/Evaluation/EvaluationSelectModal.tsx
+================
+import {
+  Check,
+  CheckCircle2,
+  Hash,
+  ListChecks,
+  Timer,
+} from 'lucide-react-native';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {closeModal} from '~hooks/useModalControl';
+import {EVALUATION_TYPES, EvaluationType} from '../data';
+
+const EVALUATION_CONFIG = {
+  boolean: {
+    icon: CheckCircle2,
+    color: '#34C759',
+    example: 'Simple yes/no completion',
+  },
+  numeric: {
+    icon: Hash,
+    color: '#5856D6',
+    example: 'e.g., 5000 steps, 3 glasses of water',
+  },
+  timer: {
+    icon: Timer,
+    color: '#FF9500',
+    example: 'e.g., 30 minutes of reading',
+  },
+  checklist: {
+    icon: ListChecks,
+    color: '#FF2D55',
+    example: 'e.g., Morning routine tasks',
+  },
+};
+
+interface EvaluationTypeSelectorProps {
+  evaluationType: EvaluationType;
+  onTypeChange: (type: EvaluationType) => void;
+}
+
+const EvaluationSelectModal: React.FC<EvaluationTypeSelectorProps> = ({
+  evaluationType,
+  onTypeChange,
+}) => {
+  const handleSelectType = (type: EvaluationType) => {
+    onTypeChange(type);
+    closeModal();
+  };
+
+  return (
+    <ViewX
+      backgroundColor="#1C1C1E"
+      borderTopLeftRadius={12}
+      borderTopRightRadius={12}
+      paddingBottom={32}>
+      <ViewX
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        padding={16}
+        borderBottomWidth={1}
+        borderBottomColor="#2C2C2E">
+        <TextX fontSize="lg" fontWeight="semibold">
+          Track Progress
+        </TextX>
+        <TouchableX
+          padding={8}
+          onPress={() => {
+            closeModal();
+          }}>
+          <TextX fontSize="lg" fontWeight="semibold" color="accent">
+            Done
+          </TextX>
+        </TouchableX>
+      </ViewX>
+
+      <ViewX padding={16} gap={12}>
+        {Object.entries(EVALUATION_CONFIG).map(([type, config]) => {
+          const Icon = config.icon;
+          const isSelected = evaluationType === type;
+          return (
+            <TouchableX
+              key={type}
+              flexDirection="row"
+              alignItems="center"
+              justifyContent="space-between"
+              padding={16}
+              backgroundColor="#2C2C2E"
+              borderRadius={12}
+              borderWidth={1}
+              borderColor={isSelected ? config.color : 'transparent'}
+              onPress={() => handleSelectType(type as EvaluationType)}>
+              <ViewX flexDirection="row" alignItems="center" gap={12} flex={1}>
+                <Icon size={24} color={config.color} />
+                <ViewX flex={1}>
+                  <TextX fontSize="lg" fontWeight="semibold" marginBottom={4}>
+                    {EVALUATION_TYPES.find(t => t.id === type)?.label}
+                  </TextX>
+                  <TextX fontSize="sm" color="tertiary">
+                    {config.example}
+                  </TextX>
+                </ViewX>
+              </ViewX>
+              {isSelected && <Check size={20} color={config.color} />}
+            </TouchableX>
+          );
+        })}
+      </ViewX>
+    </ViewX>
+  );
+};
+
+export default EvaluationSelectModal;
+
+================
+File: screens/Creation/Evaluation/EvaluationTrigger.tsx
+================
+import {
+  CheckCircle2,
+  ChevronRight,
+  Hash,
+  ListChecks,
+  Timer,
+} from 'lucide-react-native';
+import React from 'react';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {useModalControl} from '~hooks/useModalControl';
+import {EvaluationType} from '../data';
+import EvaluationDetailInput from './EvaluationDetailInput';
+import EvaluationSelectModal from './EvaluationSelectModal';
+
+interface EvaluationDetails {
+  numeric: {goal: string; unit: string};
+  timer: {goal: number; unit: 'minutes' | 'hours'};
+  checklist: {items: string[]};
+}
+
+interface EvaluationTypeSelectorProps {
+  evaluationType: EvaluationType;
+  evaluationDetails: EvaluationDetails;
+  onTypeChange: (type: EvaluationType) => void;
+  onDetailsChange: (details: Partial<EvaluationDetails>) => void;
+}
+
+const EVALUATION_CONFIG: any = {
+  boolean: {
+    icon: CheckCircle2,
+    color: '#34C759',
+    example: 'Simple yes/no completion',
+  },
+  numeric: {
+    icon: Hash,
+    color: '#5856D6',
+    example: 'e.g., 5000 steps, 3 glasses of water',
+  },
+  timer: {
+    icon: Timer,
+    color: '#FF9500',
+    example: 'e.g., 30 minutes of reading',
+  },
+  checklist: {
+    icon: ListChecks,
+    color: '#FF2D55',
+    example: 'e.g., Morning routine tasks',
+  },
+};
+
+export const EvaluationTypeSelector: React.FC<EvaluationTypeSelectorProps> = ({
+  evaluationType,
+  evaluationDetails,
+  onTypeChange,
+  onDetailsChange,
+}) => {
+  const getDisplayText = () => {
+    switch (evaluationType) {
+      case 'boolean':
+        return 'Simple yes/no completion';
+      case 'numeric':
+        return evaluationDetails.numeric.goal
+          ? `${evaluationDetails.numeric.goal} ${evaluationDetails.numeric.unit}`
+          : 'Track a number';
+      case 'timer':
+        return evaluationDetails.timer.goal
+          ? `${evaluationDetails.timer.goal} ${evaluationDetails.timer.unit}`
+          : 'Track duration';
+      case 'checklist':
+        return `${evaluationDetails.checklist.items.length} items checklist`;
+      default:
+        return 'Set tracking method';
+    }
+  };
+
+  const openEvaluationModal = useModalControl(
+    EvaluationSelectModal,
+    {evaluationType, onTypeChange},
+    {isOpen: true},
+  );
+
+  return (
+    <>
+      <ViewX>
+        <TextX fontSize="lg" fontWeight="semibold" marginBottom={12}>
+          Track Progress
+        </TextX>
+
+        <TouchableX
+          flexDirection="row"
+          alignItems="center"
+          justifyContent="space-between"
+          backgroundColor="#2C2C2E"
+          padding={16}
+          borderRadius={12}
+          marginBottom={16}
+          onPress={openEvaluationModal}>
+          <ViewX flexDirection="row" alignItems="center" gap={12}>
+            {(() => {
+              const Icon = EVALUATION_CONFIG[evaluationType].icon;
+              return (
+                <Icon
+                  size={20}
+                  color={EVALUATION_CONFIG[evaluationType].color}
+                />
+              );
+            })()}
+            <TextX fontSize="lg">{getDisplayText()}</TextX>
+          </ViewX>
+          <ChevronRight size={20} color="#8E8E93" />
+        </TouchableX>
+
+        {evaluationType !== 'boolean' && (
+          <EvaluationDetailInput
+            evaluationDetails={evaluationDetails}
+            evaluationType={evaluationType}
+            onDetailsChange={onDetailsChange}
+          />
+        )}
+      </ViewX>
+    </>
+  );
+};
+
+================
+File: screens/Creation/Frequency/FrequencyDetail.tsx
+================
+/* eslint-disable react-native/no-inline-styles */
+import {Clock} from 'lucide-react-native';
+import {StyleSheet, TextInput} from 'react-native';
+import {TextX, TouchableX, ViewX} from '~components/common';
+
+// Constants
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+const MONTHLY_DATES = [1, 5, 10, 15, 20, 25] as const;
+
+// Types
+type WeekDay = (typeof WEEKDAYS)[number];
+type MonthlyDate = (typeof MONTHLY_DATES)[number];
+
+interface HourlyDetails {
+  interval: number;
+}
+
+interface DailyDetails {
+  timeOfDay: Date;
+}
+
+interface WeeklyDetails {
+  days: WeekDay[];
+}
+
+interface MonthlyDetails {
+  dates: MonthlyDate[];
+}
+
+interface FrequencyDetails {
+  hourly: {interval: number};
+  daily: {timeOfDay: Date};
+  weekly: {days: string[]};
+  monthly: {dates: number[]};
+}
+
+type FrequencyType = keyof FrequencyDetails;
+
+interface BaseProps {
+  frequencyDetails: FrequencyDetails;
+  onFrequencyDetailsChange: (details: Partial<FrequencyDetails>) => void;
+}
+
+// Styles
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#2C2C2E',
+    borderRadius: 12,
+    padding: 16,
+  },
+  hourlyInput: {
+    backgroundColor: '#3A3A3C',
+    padding: 12,
+    borderRadius: 8,
+    width: 60,
+    color: '#FFFFFF',
+    fontSize: 17,
+    textAlign: 'center',
+  },
+  dayButton: {
+    padding: 12,
+    borderRadius: 8,
+    minWidth: 45,
+    alignItems: 'center',
+  },
+  dateButton: {
+    width: 45,
+    height: 45,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+});
+
+// Hourly frequency component
+const HourlyFrequency: React.FC<BaseProps> = ({
+  frequencyDetails,
+  onFrequencyDetailsChange,
+}) => (
+  <ViewX
+    style={styles.container}
+    flexDirection="row"
+    alignItems="center"
+    gap={12}>
+    <TextInput
+      style={styles.hourlyInput}
+      value={frequencyDetails.hourly.interval.toString()}
+      onChangeText={(text: string) => {
+        const interval = parseInt(text, 10) || 1;
+        onFrequencyDetailsChange({hourly: {interval}});
+      }}
+      keyboardType="numeric"
+      placeholder="1"
+      placeholderTextColor="#8E8E93"
+    />
+    <TextX fontSize="lg">hours</TextX>
+  </ViewX>
+);
+
+// Daily frequency component
+interface DailyFrequencyProps extends BaseProps {
+  onTimePickerPress: () => void;
+}
+
+const DailyFrequency: React.FC<DailyFrequencyProps> = ({
+  frequencyDetails,
+  onTimePickerPress,
+}) => (
+  <TouchableX
+    style={styles.container}
+    flexDirection="row"
+    alignItems="center"
+    gap={12}
+    onPress={onTimePickerPress}>
+    <Clock size={20} color="#FFFFFF" />
+    <TextX fontSize="lg">
+      {frequencyDetails.daily.timeOfDay.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      })}
+    </TextX>
+  </TouchableX>
+);
+
+// Weekly frequency component
+const WeeklyFrequency: React.FC<BaseProps> = ({
+  frequencyDetails,
+  onFrequencyDetailsChange,
+}) => {
+  const toggleDay = (day: WeekDay) => {
+    const days = frequencyDetails.weekly.days.includes(day)
+      ? frequencyDetails.weekly.days.filter(d => d !== day)
+      : [...frequencyDetails.weekly.days, day];
+    onFrequencyDetailsChange({weekly: {days}});
+  };
+
+  return (
+    <ViewX style={styles.container} flexDirection="row" flexWrap="wrap" gap={8}>
+      {WEEKDAYS.map(day => (
+        <TouchableX
+          key={day}
+          style={[
+            styles.dayButton,
+            {
+              backgroundColor: frequencyDetails.weekly.days.includes(day)
+                ? '#34C759'
+                : '#3A3A3C',
+            },
+          ]}
+          onPress={() => toggleDay(day)}>
+          <TextX
+            fontSize="md"
+            fontWeight={
+              frequencyDetails.weekly.days.includes(day)
+                ? 'semibold'
+                : 'regular'
+            }>
+            {day}
+          </TextX>
+        </TouchableX>
+      ))}
+    </ViewX>
+  );
+};
+
+// Monthly frequency component
+const MonthlyFrequency: React.FC<BaseProps> = ({
+  frequencyDetails,
+  onFrequencyDetailsChange,
+}) => {
+  const toggleDate = (date: MonthlyDate) => {
+    const dates = frequencyDetails.monthly.dates.includes(date)
+      ? frequencyDetails.monthly.dates.filter(d => d !== date)
+      : [...frequencyDetails.monthly.dates, date];
+    onFrequencyDetailsChange({monthly: {dates}});
+  };
+
+  return (
+    <ViewX style={styles.container} flexDirection="row" flexWrap="wrap" gap={8}>
+      {MONTHLY_DATES.map(date => (
+        <TouchableX
+          key={date}
+          style={[
+            styles.dateButton,
+            {
+              backgroundColor: frequencyDetails.monthly.dates.includes(date)
+                ? '#34C759'
+                : '#3A3A3C',
+            },
+          ]}
+          onPress={() => toggleDate(date)}>
+          <TextX
+            fontSize="md"
+            fontWeight={
+              frequencyDetails.monthly.dates.includes(date)
+                ? 'semibold'
+                : 'regular'
+            }>
+            {date}
+          </TextX>
+        </TouchableX>
+      ))}
+    </ViewX>
+  );
+};
+
+// Main component
+interface FrequencyDetailInputProps
+  extends Omit<BaseProps, 'frequencyDetails'> {
+  frequency: FrequencyType;
+  frequencyDetails: FrequencyDetails;
+  setShowTimePicker: (show: boolean) => void;
+}
+
+const FrequencyDetailInput: React.FC<FrequencyDetailInputProps> = ({
+  frequency,
+  frequencyDetails,
+  onFrequencyDetailsChange,
+  setShowTimePicker,
+}) => {
+  const components: Record<
+    FrequencyType,
+    React.FC<BaseProps | DailyFrequencyProps>
+  > = {
+    hourly: HourlyFrequency,
+    daily: props => (
+      <DailyFrequency
+        {...props}
+        onTimePickerPress={() => setShowTimePicker(true)}
+      />
+    ),
+    weekly: WeeklyFrequency,
+    monthly: MonthlyFrequency,
+  };
+
+  const Component = components[frequency];
+  return Component ? (
+    <Component
+      frequencyDetails={frequencyDetails}
+      onFrequencyDetailsChange={onFrequencyDetailsChange}
+    />
+  ) : null;
+};
+
+export type {
+  DailyDetails,
+  FrequencyDetails,
+  FrequencyType,
+  HourlyDetails,
+  MonthlyDate,
+  MonthlyDetails,
+  WeekDay,
+  WeeklyDetails,
+};
+
+export default FrequencyDetailInput;
+
+================
+File: screens/Creation/Frequency/FrequencyModalContent.tsx
+================
+import {Check} from 'lucide-react-native';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {closeModal} from '~hooks/useModalControl';
+import {FREQUENCIES, Frequency} from '../data';
+
+const renderFrequencyOptions = (
+  frequency: Frequency,
+  onFrequencyChange: (frequency: Frequency) => void,
+) => (
+  <ViewX padding={16}>
+    {FREQUENCIES.map(({id, label, icon: Icon}) => (
+      <TouchableX
+        key={id}
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+        padding={16}
+        borderBottomWidth={1}
+        borderBottomColor="#2C2C2E"
+        onPress={() => {
+          onFrequencyChange(id);
+          closeModal();
+        }}>
+        <ViewX flexDirection="row" alignItems="center" gap={12}>
+          <Icon size={20} color={frequency === id ? '#34C759' : '#FFFFFF'} />
+          <TextX fontSize="lg">{label}</TextX>
+        </ViewX>
+        {frequency === id && <Check size={20} color="#34C759" />}
+      </TouchableX>
+    ))}
+  </ViewX>
+);
+
+const FrequencyModalContent = ({
+  frequency,
+  onFrequencyChange,
+}: {
+  frequency: Frequency;
+  onFrequencyChange: (frequency: Frequency) => void;
+}) => {
+  return (
+    <ViewX
+      flex={1}
+      justifyContent="flex-end"
+      backgroundColor="rgba(0, 0, 0, 0.5)">
+      <ViewX backgroundColor="#1C1C1E" paddingBottom={32}>
+        <ViewX
+          flexDirection="row"
+          justifyContent="space-between"
+          alignItems="center"
+          padding={16}
+          borderBottomWidth={1}
+          borderBottomColor="#2C2C2E">
+          <TextX fontSize="lg" fontWeight="semibold">
+            Set Frequency
+          </TextX>
+          <TouchableX
+            padding={8}
+            onPress={() => {
+              closeModal();
+            }}>
+            <TextX fontSize="lg" fontWeight="semibold" color="accent">
+              Done
+            </TextX>
+          </TouchableX>
+        </ViewX>
+        {renderFrequencyOptions(frequency, onFrequencyChange)}
+      </ViewX>
+    </ViewX>
+  );
+};
+
+export default FrequencyModalContent;
+
+================
+File: screens/Creation/Frequency/FrequencyTrigger.tsx
+================
+import DateTimePicker from '@react-native-community/datetimepicker';
+import {Calendar, ChevronRight} from 'lucide-react-native';
+import {useState} from 'react';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {useModalControl} from '~hooks/useModalControl';
+import {Frequency} from '../data';
+import FrequencyDetailInput from './FrequencyDetail';
+import FrequencyModalContent from './FrequencyModalContent';
+
+interface FrequencyDetails {
+  hourly: {interval: number};
+  daily: {timeOfDay: Date};
+  weekly: {days: string[]};
+  monthly: {dates: number[]};
+}
+
+interface FrequencySelectorProps {
+  frequency: Frequency;
+  frequencyDetails: FrequencyDetails;
+  onFrequencyChange: (frequency: Frequency) => void;
+  onFrequencyDetailsChange: (details: Partial<FrequencyDetails>) => void;
+}
+
+const getDisplayText = (
+  frequency: Frequency,
+  frequencyDetails: FrequencyDetails,
+) => {
+  switch (frequency) {
+    case 'hourly':
+      return `Every ${frequencyDetails.hourly.interval} hours`;
+    case 'daily':
+      return `Daily at ${frequencyDetails.daily.timeOfDay.toLocaleTimeString(
+        [],
+        {
+          hour: '2-digit',
+          minute: '2-digit',
+        },
+      )}`;
+    case 'weekly':
+      return `Weekly on ${frequencyDetails.weekly.days.join(', ')}`;
+    case 'monthly':
+      return `Monthly on date${
+        frequencyDetails.monthly.dates.length > 1 ? 's' : ''
+      }: ${frequencyDetails.monthly.dates.join(', ')}`;
+    default:
+      return 'Set frequency';
+  }
+};
+
+const FrequencyTrigger: React.FC<FrequencySelectorProps> = ({
+  frequencyDetails,
+  frequency,
+  onFrequencyDetailsChange,
+  onFrequencyChange,
+}) => {
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
+  const handleTimeChange = (event: any, selectedDate?: Date) => {
+    setShowTimePicker(false);
+    if (selectedDate) {
+      onFrequencyDetailsChange({
+        daily: {timeOfDay: selectedDate},
+      });
+    }
+  };
+
+  const openFrequencyModal = useModalControl(
+    FrequencyModalContent,
+    {frequency, onFrequencyChange},
+    {isOpen: true},
+  );
+
+  return (
+    <ViewX marginVertical={16}>
+      <TextX fontSize="lg" fontWeight="semibold" marginBottom={12}>
+        Repeat
+      </TextX>
+
+      <TouchableX
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+        backgroundColor="#2C2C2E"
+        padding={16}
+        borderRadius={12}
+        marginBottom={16}
+        onPress={openFrequencyModal}>
+        <ViewX flexDirection="row" alignItems="center" gap={12}>
+          <Calendar size={20} color="#FFFFFF" />
+          <TextX fontSize="lg">
+            {getDisplayText(frequency, frequencyDetails)}
+          </TextX>
+        </ViewX>
+        <ChevronRight size={20} color="#8E8E93" />
+      </TouchableX>
+
+      <FrequencyDetailInput
+        frequency={frequency}
+        frequencyDetails={frequencyDetails}
+        setShowTimePicker={setShowTimePicker}
+        onFrequencyDetailsChange={onFrequencyDetailsChange}
+      />
+      {showTimePicker && (
+        <DateTimePicker
+          value={frequencyDetails.daily.timeOfDay}
+          mode="time"
+          is24Hour={true}
+          display="spinner"
+          onChange={handleTimeChange}
+        />
+      )}
+    </ViewX>
+  );
+};
+
+export default FrequencyTrigger;
+
+================
+File: screens/Creation/Categories.tsx
+================
+import {
+  Book,
+  Brain,
+  Briefcase,
+  Check,
+  ChevronRight,
+  Coffee,
+  Dumbbell,
+  GraduationCap,
+  Heart,
+  Palette,
+} from 'lucide-react-native';
+import React, {useState} from 'react';
+import {Modal, ScrollView} from 'react-native';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {styleUtils} from '~styles/theme';
+import {h} from '~utils/screenUtil';
+
+interface Category {
+  id: string;
+  name: string;
+  icon: any;
+  color: string;
+  description: string;
+}
+
+const CATEGORIES: Category[] = [
+  {
+    id: 'health',
+    name: 'Health',
+    icon: Heart,
+    color: '#FF2D55',
+    description: 'Physical wellbeing and healthy habits',
+  },
+  {
+    id: 'fitness',
+    name: 'Fitness',
+    icon: Dumbbell,
+    color: '#5856D6',
+    description: 'Exercise and physical activity',
+  },
+  {
+    id: 'learning',
+    name: 'Learning',
+    icon: GraduationCap,
+    color: '#FF9500',
+    description: 'Education and skill development',
+  },
+  {
+    id: 'mindfulness',
+    name: 'Mindfulness',
+    icon: Brain,
+    color: '#34C759',
+    description: 'Mental health and meditation',
+  },
+  {
+    id: 'productivity',
+    name: 'Productivity',
+    icon: Coffee,
+    color: '#007AFF',
+    description: 'Time management and efficiency',
+  },
+  {
+    id: 'creativity',
+    name: 'Creativity',
+    icon: Palette,
+    color: '#AF52DE',
+    description: 'Artistic and creative pursuits',
+  },
+  {
+    id: 'career',
+    name: 'Career',
+    icon: Briefcase,
+    color: '#5856D6',
+    description: 'Professional development',
+  },
+  {
+    id: 'reading',
+    name: 'Reading',
+    icon: Book,
+    color: '#FF3B30',
+    description: 'Books and literature',
+  },
+];
+
+interface CategorySelectorProps {
+  selectedCategory: Category | null;
+  onSelectCategory: (category: Category) => void;
+}
+
+export const CategorySelector: React.FC<CategorySelectorProps> = ({
+  selectedCategory,
+  onSelectCategory,
+}) => {
+  const [showModal, setShowModal] = useState(false);
+  // const [recentCategories, setRecentCategories] = useState<Category[]>([]);
+
+  const handleSelectCategory = (category: Category) => {
+    onSelectCategory(category);
+    updateRecentCategories(category);
+    setShowModal(false);
+  };
+
+  const updateRecentCategories = (category: Category) => {
+    // setRecentCategories(prev => {
+    //   const newRecent = prev.filter(c => c.id !== category.id);
+    //   newRecent.unshift(category);
+    //   return newRecent.slice(0, 3);
+    // });
+    console.log(category);
+  };
+
+  return (
+    <ViewX>
+      <TextX
+        fontSize="lg"
+        fontWeight="semibold"
+        marginBottom={styleUtils.spacing.sm}>
+        Category
+      </TextX>
+      <TouchableX
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="space-between"
+        backgroundColor="#2C2C2E"
+        padding={16}
+        borderRadius={12}
+        onPress={() => setShowModal(true)}>
+        <ViewX
+          flexDirection="row"
+          gap={styleUtils.spacing.md}
+          alignItems="center">
+          {selectedCategory ? (
+            <>
+              <ViewX
+                width={32}
+                height={32}
+                borderRadius={8}
+                justifyContent="center"
+                alignItems="center"
+                backgroundColor={selectedCategory.color}>
+                <selectedCategory.icon size={20} color="#FFFFFF" />
+              </ViewX>
+              <TextX fontSize="lg" color="primary">
+                {selectedCategory.name}
+              </TextX>
+            </>
+          ) : (
+            <TextX fontSize="lg" color="tertiary">
+              Select a category
+            </TextX>
+          )}
+        </ViewX>
+        <ChevronRight size={20} color="#8E8E93" />
+      </TouchableX>
+
+      <Modal
+        visible={showModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowModal(false)}>
+        <ViewX
+          flex={1}
+          justifyContent="flex-end"
+          backgroundColor="rgba(0, 0, 0, 0.5)">
+          <ViewX
+            maxHeight={h(90)}
+            backgroundColor="#1C1C1E"
+            borderTopLeftRadius={12}
+            borderTopRightRadius={12}>
+            {/* Fixed Header */}
+            <ViewX
+              flexDirection="row"
+              justifyContent="space-between"
+              alignItems="center"
+              padding={16}
+              borderBottomWidth={1}
+              borderBottomColor="#2C2C2E">
+              <TextX fontSize="lg" fontWeight="semibold">
+                Choose Category
+              </TextX>
+              <TouchableX padding={8} onPress={() => setShowModal(false)}>
+                <TextX fontSize="lg" fontWeight="semibold" color="accent">
+                  Done
+                </TextX>
+              </TouchableX>
+            </ViewX>
+
+            {/* Content Container */}
+            <ViewX flexShrink={1}>
+              {/* Categories List - Scrollable */}
+              <ScrollView>
+                <ViewX padding={16}>
+                  <TextX
+                    fontSize="sm"
+                    fontWeight="semibold"
+                    color="tertiary"
+                    marginBottom={12}
+                    textTransform="uppercase">
+                    All Categories
+                  </TextX>
+                  {CATEGORIES.map(category => (
+                    <TouchableX
+                      key={category.id}
+                      flexDirection="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      paddingVertical={12}
+                      borderBottomWidth={1}
+                      borderBottomColor="#2C2C2E"
+                      onPress={() => handleSelectCategory(category)}>
+                      <ViewX
+                        flexDirection="row"
+                        alignItems="center"
+                        gap={12}
+                        flex={1}>
+                        <ViewX
+                          width={32}
+                          height={32}
+                          borderRadius={8}
+                          justifyContent="center"
+                          alignItems="center"
+                          backgroundColor={category.color}>
+                          <category.icon size={20} color="#FFFFFF" />
+                        </ViewX>
+                        <ViewX flex={1}>
+                          <TextX fontSize="lg" color="primary" marginBottom={4}>
+                            {category.name}
+                          </TextX>
+                          <TextX fontSize="sm" color="tertiary">
+                            {category.description}
+                          </TextX>
+                        </ViewX>
+                      </ViewX>
+                      {selectedCategory?.id === category.id && (
+                        <Check size={20} color={category.color} />
+                      )}
+                    </TouchableX>
+                  ))}
+                </ViewX>
+              </ScrollView>
+            </ViewX>
+          </ViewX>
+        </ViewX>
+      </Modal>
+    </ViewX>
+  );
+};
+
+================
+File: screens/Creation/Creation.tsx
+================
+import DateTimePicker from '@react-native-community/datetimepicker';
+import {Calendar} from 'lucide-react-native';
+import React, {Fragment, useState} from 'react';
+import {ScrollView, TextInput} from 'react-native';
+import ColorPicker from 'react-native-wheel-color-picker';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import CategorySelectTrigger from './CategorySelect/CategorySelectTrigger';
+import {DEFAULT_HABIT_DATA, HabitData} from './data';
+import {EvaluationTypeSelector} from './Evaluation/EvaluationTrigger';
+import FrequencyTrigger from './Frequency/FrequencyTrigger';
+import {GoalSettings} from './Goal';
+import {Reminders} from './Reminders';
+
+// Component Types
+interface HeaderProps {
+  onSave: () => void;
+}
+
+interface BasicInfoProps {
+  name: string;
+  description: string;
+  onNameChange: (name: string) => void;
+  onDescriptionChange: (description: string) => void;
+}
+
+interface AppearanceProps {
+  color: string;
+  onColorSelect: (color: string) => void;
+  onColorPickerOpen: () => void;
+}
+
+interface DateRangeProps {
+  startDate: Date;
+  endDate: Date | null;
+  onStartDatePress: () => void;
+  onEndDatePress: () => void;
+}
+
+// Styled Components
+const StyledTextInput = ({style, ...props}: TextInput['props']) => (
+  <TextInput
+    style={[
+      {
+        backgroundColor: '#2C2C2E',
+        borderRadius: 8,
+        padding: 12,
+        color: '#FFFFFF',
+        fontSize: 15,
+      },
+      style,
+    ]}
+    placeholderTextColor="#8E8E93"
+    {...props}
+  />
+);
+
+// Sub-components
+const Header: React.FC<HeaderProps> = ({onSave}) => (
+  <ViewX
+    flexDirection="row"
+    justifyContent="space-between"
+    alignItems="center"
+    padding={16}
+    borderBottomWidth={1}
+    variant="secondary">
+    <TextX fontSize="xl" fontWeight="semibold">
+      Create New Habit
+    </TextX>
+    <TouchableX
+      // variant="primary"
+      paddingHorizontal={16}
+      paddingVertical={8}
+      borderRadius={8}
+      onPress={onSave}>
+      <TextX fontWeight="semibold">Save</TextX>
+    </TouchableX>
+  </ViewX>
+);
+
+const BasicInfo: React.FC<BasicInfoProps> = ({
+  name,
+  description,
+  onNameChange,
+  onDescriptionChange,
+}) => (
+  <ViewX marginBottom={24}>
+    <ViewX marginBottom={16}>
+      <TextX fontSize="lg" fontWeight="semibold" marginBottom={8}>
+        Name
+      </TextX>
+      <StyledTextInput
+        value={name}
+        onChangeText={onNameChange}
+        placeholder="Enter habit name"
+      />
+    </ViewX>
+
+    <ViewX>
+      <TextX fontSize="lg" fontWeight="semibold" marginBottom={8}>
+        Description
+      </TextX>
+      <StyledTextInput
+        value={description}
+        onChangeText={onDescriptionChange}
+        placeholder="Enter description"
+        multiline
+        numberOfLines={4}
+        style={{
+          height: 100,
+          textAlignVertical: 'top',
+        }}
+      />
+    </ViewX>
+  </ViewX>
+);
+
+const Appearance: React.FC<AppearanceProps> = ({
+  color,
+  onColorSelect,
+  onColorPickerOpen,
+}) => (
+  <ViewX marginBottom={24}>
+    <TextX fontSize="lg" fontWeight="semibold" marginBottom={8}>
+      Appearance
+    </TextX>
+    <ViewX flexDirection="row" gap={16} alignItems="center">
+      <TouchableX
+        width={40}
+        height={40}
+        borderRadius={20}
+        borderWidth={2}
+        borderColor="#FFFFFF"
+        backgroundColor={color}
+        onPress={onColorPickerOpen}
+      />
+    </ViewX>
+  </ViewX>
+);
+
+const DateRange: React.FC<DateRangeProps> = ({
+  startDate,
+  endDate,
+  onStartDatePress,
+  onEndDatePress,
+}) => (
+  <ViewX marginBottom={24}>
+    <TextX fontSize="lg" fontWeight="semibold" marginBottom={8}>
+      Date Range
+    </TextX>
+    <ViewX flexDirection="row" alignItems="center" gap={8}>
+      <TouchableX
+        // variant="secondary"
+        padding={12}
+        borderRadius={8}
+        flex={1}
+        flexDirection="row"
+        gap={8}
+        alignItems="center"
+        justifyContent="center"
+        onPress={onStartDatePress}>
+        <Calendar size={20} />
+        <TextX fontSize="md">{startDate.toLocaleDateString()}</TextX>
+      </TouchableX>
+      <TextX fontSize="md" color="tertiary">
+        to
+      </TextX>
+      <TouchableX
+        // variant="secondary"
+        padding={12}
+        borderRadius={8}
+        flex={1}
+        flexDirection="row"
+        gap={8}
+        alignItems="center"
+        justifyContent="center"
+        onPress={onEndDatePress}>
+        <Calendar size={20} />
+        <TextX fontSize="md">
+          {endDate ? endDate.toLocaleDateString() : 'No end date'}
+        </TextX>
+      </TouchableX>
+    </ViewX>
+  </ViewX>
+);
+
+const ColorPickerModal: React.FC<{
+  color: string;
+  onColorChange: (color: string) => void;
+  onClose: () => void;
+}> = ({color, onColorChange, onClose}) => (
+  <ViewX variant="secondary" padding={16} borderRadius={16} margin={16}>
+    <ColorPicker
+      color={color}
+      onColorChange={onColorChange}
+      thumbSize={40}
+      sliderSize={40}
+      noSnap={true}
+      row={false}
+    />
+    <TouchableX
+      variant="primary"
+      padding={12}
+      borderRadius={8}
+      alignItems="center"
+      marginTop={16}
+      onPress={onClose}>
+      <TextX fontWeight="semibold">Done</TextX>
+    </TouchableX>
+  </ViewX>
+);
+
+// Main Component
+const CreateHabitScreen: React.FC = () => {
+  const [habitData, setHabitData] = useState<HabitData>(DEFAULT_HABIT_DATA);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [currentReminder, setCurrentReminder] = useState<Date | null>(null);
+
+  const handleSave = () => {
+    console.log('Saving habit:', habitData);
+  };
+
+  const addReminder = (time: Date) => {
+    setHabitData(prev => ({
+      ...prev,
+      reminders: [...prev.reminders, time],
+    }));
+  };
+
+  const removeReminder = (index: number) => {
+    setHabitData(prev => ({
+      ...prev,
+      reminders: prev.reminders.filter((_, i) => i !== index),
+    }));
+  };
+
+  return (
+    <Fragment>
+      <ScrollView style={{flex: 1}}>
+        <Header onSave={handleSave} />
+
+        <ViewX padding={16} variant="nav">
+          <BasicInfo
+            name={habitData.name}
+            description={habitData.description}
+            onNameChange={name => setHabitData(prev => ({...prev, name}))}
+            onDescriptionChange={description =>
+              setHabitData(prev => ({...prev, description}))
+            }
+          />
+
+          <Appearance
+            color={habitData.color}
+            onColorSelect={color => setHabitData(prev => ({...prev, color}))}
+            onColorPickerOpen={() => setShowColorPicker(true)}
+          />
+
+          <CategorySelectTrigger selectedCategory={habitData.category} />
+
+          <FrequencyTrigger
+            frequency={habitData.frequency}
+            frequencyDetails={habitData.frequencyDetails}
+            onFrequencyChange={frequency => {
+              setHabitData(prev => ({...prev, frequency}));
+            }}
+            onFrequencyDetailsChange={details => {
+              setHabitData(prev => ({
+                ...prev,
+                frequencyDetails: {...prev.frequencyDetails, ...details},
+              }));
+            }}
+          />
+
+          <EvaluationTypeSelector
+            evaluationType={habitData.evaluationType}
+            evaluationDetails={habitData.evaluationDetails}
+            onTypeChange={type => {
+              setHabitData(prev => ({
+                ...prev,
+                evaluationType: type,
+              }));
+            }}
+            onDetailsChange={details => {
+              setHabitData(prev => ({
+                ...prev,
+                evaluationDetails: {
+                  ...prev.evaluationDetails,
+                  ...details,
+                },
+              }));
+            }}
+          />
+
+          <GoalSettings
+            goal={habitData.goal}
+            onGoalChange={goal =>
+              setHabitData(prev => ({
+                ...prev,
+                goal: {...prev.goal, ...goal},
+              }))
+            }
+            onDeadlinePicker={() => setShowEndPicker(true)}
+          />
+
+          <Reminders
+            reminders={habitData.reminders}
+            onAddReminder={() => {
+              setCurrentReminder(new Date());
+              setShowTimePicker(true);
+            }}
+            onRemoveReminder={removeReminder}
+          />
+
+          <DateRange
+            startDate={habitData.startDate}
+            endDate={habitData.endDate}
+            onStartDatePress={() => setShowStartPicker(true)}
+            onEndDatePress={() => setShowEndPicker(true)}
+          />
+        </ViewX>
+
+        {/* Pickers */}
+        {showStartPicker && (
+          <DateTimePicker
+            value={habitData.startDate}
+            mode="date"
+            onChange={(_, date) => {
+              setShowStartPicker(false);
+              if (date) {
+                setHabitData(prev => ({...prev, startDate: date}));
+              }
+            }}
+          />
+        )}
+        {showEndPicker && (
+          <DateTimePicker
+            value={habitData.endDate || new Date()}
+            mode="date"
+            onChange={(_, date) => {
+              setShowEndPicker(false);
+              if (date) {
+                setHabitData(prev => ({...prev, endDate: date}));
+              }
+            }}
+          />
+        )}
+        {showTimePicker && (
+          <DateTimePicker
+            value={currentReminder || new Date()}
+            mode="time"
+            onChange={(_, date) => {
+              setShowTimePicker(false);
+              if (date) {
+                addReminder(date);
+                setCurrentReminder(null);
+              }
+            }}
+          />
+        )}
+
+        {/* Color Picker Modal */}
+        {showColorPicker && (
+          <ColorPickerModal
+            color={habitData.color}
+            onColorChange={color => setHabitData(prev => ({...prev, color}))}
+            onClose={() => setShowColorPicker(false)}
+          />
+        )}
+      </ScrollView>
+    </Fragment>
+  );
+};
+
+export default CreateHabitScreen;
+
+================
+File: screens/Creation/data.ts
+================
+import {
+  Brain,
+  Calendar,
+  CalendarCheck,
+  Clock,
+  Dumbbell,
+  GraduationCap,
+  Heart,
+  Sun,
+  Target,
+} from 'lucide-react-native';
+
+export type Frequency = 'hourly' | 'daily' | 'weekly' | 'monthly';
+export type EvaluationType = 'boolean' | 'numeric' | 'timer' | 'checklist';
+
+export interface HabitData {
+  name: string;
+  description: string;
+  category: Category | null;
+  frequency: Frequency;
+  frequencyDetails: {
+    hourly: {interval: number};
+    daily: {timeOfDay: Date};
+    weekly: {days: string[]};
+    monthly: {dates: number[]};
+  };
+  evaluationType: EvaluationType;
+  evaluationDetails: {
+    numeric: {goal: string; unit: string};
+    timer: {goal: number; unit: 'minutes' | 'hours'};
+    checklist: {items: string[]};
+  };
+  reminders: Date[];
+  startDate: Date;
+  endDate: Date | null;
+  color: string;
+  selectedIcon: any; // IconType from lucide-react-native
+  goal: {
+    enabled: boolean;
+    target: string;
+    deadline: Date | null;
+  };
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  icon: any; // IconType from lucide-react-native
+}
+
+export const CATEGORIES: Category[] = [
+  {id: 1, name: 'Health', icon: Heart},
+  {id: 2, name: 'Fitness', icon: Dumbbell},
+  {id: 3, name: 'Learning', icon: GraduationCap},
+  {id: 4, name: 'Focus', icon: Brain},
+  {id: 5, name: 'Mindfulness', icon: Sun},
+];
+
+export const ALL_ICONS = [
+  Heart,
+  Dumbbell,
+  GraduationCap,
+  Brain,
+  Sun,
+  Clock,
+  Calendar,
+  Target,
+];
+
+export const FREQUENCIES = [
+  {id: 'hourly' as Frequency, label: 'Hourly', icon: Clock},
+  {id: 'daily' as Frequency, label: 'Daily', icon: Calendar},
+  {id: 'weekly' as Frequency, label: 'Weekly', icon: CalendarCheck},
+  {id: 'monthly' as Frequency, label: 'Monthly', icon: Calendar},
+];
+
+export const EVALUATION_TYPES = [
+  {
+    id: 'boolean' as EvaluationType,
+    label: 'Yes/No',
+    description: 'Simple completion check',
+  },
+  {
+    id: 'numeric' as EvaluationType,
+    label: 'Numeric',
+    description: 'Track quantities (e.g., steps, pages)',
+    hasGoal: true,
+  },
+  {
+    id: 'timer' as EvaluationType,
+    label: 'Timer',
+    description: 'Track duration',
+    hasGoal: true,
+  },
+  {
+    id: 'checklist' as EvaluationType,
+    label: 'Checklist',
+    description: 'Multiple sub-tasks',
+    hasSubtasks: true,
+  },
+];
+
+export const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+export const DEFAULT_HABIT_DATA: HabitData = {
+  name: '',
+  description: '',
+  category: null,
+  frequency: 'daily',
+  frequencyDetails: {
+    hourly: {interval: 1},
+    daily: {timeOfDay: new Date()},
+    weekly: {days: []},
+    monthly: {dates: []},
+  },
+  evaluationType: 'boolean',
+  evaluationDetails: {
+    numeric: {goal: '', unit: ''},
+    timer: {goal: 0, unit: 'minutes'},
+    checklist: {items: []},
+  },
+  reminders: [],
+  startDate: new Date(),
+  endDate: null,
+  color: '#34C759',
+  selectedIcon: Heart,
+  goal: {
+    enabled: false,
+    target: '',
+    deadline: null,
+  },
+};
+
+================
+File: screens/Creation/Goal.tsx
+================
+import {Calendar} from 'lucide-react-native';
+import React from 'react';
+import {TextInput} from 'react-native';
+import {Switch} from 'react-native-switch';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {themes} from '~styles/theme';
+
+// Types
+interface Goal {
+  enabled: boolean;
+  target: string;
+  deadline: Date | null;
+}
+
+interface GoalSettingsProps {
+  goal: Goal;
+  onGoalChange: (goal: Partial<Goal>) => void;
+  onDeadlinePicker: () => void;
+}
+
+// Input component with consistent styling
+const GoalInput: React.FC<{
+  value: string;
+  onChangeText: (text: string) => void;
+}> = ({value, onChangeText}) => (
+  <ViewX variant="secondary" borderRadius={8} padding={12} flex={1}>
+    <TextInput
+      value={value}
+      onChangeText={onChangeText}
+      placeholder="Enter your goal target"
+      placeholderTextColor="#8E8E93"
+      style={{
+        color: '#FFFFFF',
+        fontSize: 15,
+      }}
+    />
+  </ViewX>
+);
+
+// Date button component
+const DateButton: React.FC<{
+  deadline: Date | null;
+  onPress: () => void;
+}> = ({deadline, onPress}) => (
+  <TouchableX
+    borderRadius={8}
+    padding={12}
+    flexDirection="row"
+    gap={8}
+    alignItems="center"
+    justifyContent="center"
+    onPress={onPress}>
+    <Calendar size={20} />
+    <TextX fontSize="md">
+      {deadline ? deadline.toLocaleDateString() : 'Set deadline'}
+    </TextX>
+  </TouchableX>
+);
+
+export const GoalSettings: React.FC<GoalSettingsProps> = ({
+  goal,
+  onGoalChange,
+  onDeadlinePicker,
+}) => {
+  return (
+    <ViewX gap={16} marginVertical={16}>
+      <ViewX
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center">
+        <TextX fontSize="lg" fontWeight="semibold">
+          Goal
+        </TextX>
+        <Switch
+          value={goal.enabled}
+          onValueChange={enabled => onGoalChange({enabled})}
+          circleSize={24}
+          innerCircleStyle={{height: 15, width: 15}}
+          barHeight={32}
+          circleBorderWidth={0}
+          backgroundActive={themes.dark.background.accent}
+          backgroundInactive="#3A3A3C"
+          circleActiveColor="#FFFFFF"
+          circleInActiveColor="#FFFFFF"
+          changeValueImmediately
+          renderActiveText={false}
+          renderInActiveText={false}
+          switchWidthMultiplier={2}
+        />
+      </ViewX>
+
+      {goal.enabled && (
+        <ViewX gap={8}>
+          <ViewX flexDirection="row" gap={8} alignItems="center">
+            <GoalInput
+              value={goal.target}
+              onChangeText={target => onGoalChange({target})}
+            />
+          </ViewX>
+
+          <DateButton deadline={goal.deadline} onPress={onDeadlinePicker} />
+        </ViewX>
+      )}
+    </ViewX>
+  );
+};
+
+export type {Goal};
+
+================
+File: screens/Creation/Reminders.tsx
+================
+import {Bell, Plus, Trash2} from 'lucide-react-native';
+import React from 'react';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {themes} from '~styles/theme';
+
+const COLORS = {
+  background: themes.dark.background.primary,
+  surface: '#2C2C2E',
+  primary: '#34C759',
+  text: '#FFFFFF',
+  textSecondary: '#8E8E93',
+  danger: '#FF3B30',
+};
+
+interface RemindersProps {
+  reminders: Date[];
+  onAddReminder: () => void;
+  onRemoveReminder: (index: number) => void;
+}
+
+export const Reminders: React.FC<RemindersProps> = ({
+  reminders,
+  onAddReminder,
+  onRemoveReminder,
+}) => {
+  return (
+    <ViewX marginBottom={24}>
+      <ViewX
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        marginBottom={8}>
+        <TextX
+          fontSize="lg"
+          fontWeight="semibold"
+          color="primary"
+          marginBottom={8}>
+          Reminders
+        </TextX>
+        <TouchableX
+          flexDirection="row"
+          alignItems="center"
+          gap={8}
+          padding={8}
+          onPress={onAddReminder}>
+          <Plus size={20} color={COLORS.primary} />
+          <TextX fontSize="md" fontWeight="medium" color="accent">
+            Add Reminder
+          </TextX>
+        </TouchableX>
+      </ViewX>
+
+      {reminders.length > 0 && (
+        <ViewX gap={8} marginTop={8}>
+          {reminders.map((reminder, index) => (
+            <ViewX
+              key={index}
+              flexDirection="row"
+              justifyContent="space-between"
+              alignItems="center"
+              backgroundColor={COLORS.surface}
+              padding={12}
+              borderRadius={8}>
+              <ViewX flexDirection="row" alignItems="center" gap={8}>
+                <Bell size={20} color={COLORS.text} />
+                <TextX fontSize="md" color="primary">
+                  {reminder.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </TextX>
+              </ViewX>
+              <TouchableX padding={4} onPress={() => onRemoveReminder(index)}>
+                <Trash2 size={20} color={COLORS.danger} />
+              </TouchableX>
+            </ViewX>
+          ))}
+        </ViewX>
+      )}
+    </ViewX>
+  );
+};
+
+================
+File: screens/Creation/styles.ts
+================
+import {StyleSheet} from 'react-native';
+import {themes} from '~styles/theme';
+
+export const COLORS = {
+  background: themes.dark.background.primary,
+  surface: '#2C2C2E',
+  primary: '#34C759',
+  text: '#FFFFFF',
+  textSecondary: '#8E8E93',
+  danger: '#FF3B30',
+};
+
+export const baseStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.background,
+  },
+  inputGroup: {
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 17,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 8,
+  },
+  sublabel: {
+    fontSize: 15,
+    color: COLORS.textSecondary,
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 8,
+    padding: 12,
+    color: COLORS.text,
+    fontSize: 15,
+  },
+  button: {
+    backgroundColor: COLORS.surface,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonSelected: {
+    backgroundColor: COLORS.primary,
+  },
+  buttonText: {
+    color: COLORS.textSecondary,
+    fontSize: 15,
+  },
+  buttonTextSelected: {
+    color: COLORS.text,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 8,
+  },
+  addButtonText: {
+    color: COLORS.primary,
+    fontSize: 15,
+    fontWeight: '500',
+  },
+});
+
+================
+File: screens/Explore/Explore.tsx
+================
+import {TextX, ViewX} from '~components/common';
+
+const Explore = () => {
+  return (
+    <ViewX
+      variant="primary"
+      flex={1}
+      alignItems="center"
+      justifyContent="center">
+      <TextX>Explore</TextX>
+    </ViewX>
+  );
+};
+
+export default Explore;
+
+================
+File: screens/Home/Home.tsx
+================
+import {Plus} from 'lucide-react-native';
+import {NavigationContext} from 'navigation-react';
+import {useContext, useState} from 'react';
+import {ScrollView} from 'react-native';
+import {TouchableX, ViewX} from '~components/common';
+import {CalendarStrip} from '~components/common/CalenderStrip';
+import GreetingHeader from '~components/specific/home/Greeting';
+import HabitCard from '~components/specific/home/Habit';
+import TimeFilter from '~components/specific/home/TimFilter';
+import {habitData} from '~data/habits';
+
+import {styleUtils, themes} from '~styles/theme';
+import {h, w} from '~utils/screenUtil';
+
+const Home = () => {
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const startDate = new Date(2025, 0, 1); // Jan 1, 2024
+  const endDate = new Date(2025, 1, 8); // Dec 31, 2024
+  const {stateNavigator} = useContext(NavigationContext);
+
+  const [selectedTime, setSelectedTime] = useState<any>('all');
+  const [habits, setHabits] = useState(habitData);
+
+  const filteredHabits = habits.filter(
+    habit => selectedTime === 'all' || habit.timePeriod === selectedTime,
+  );
+
+  return (
+    <ViewX variant="nav" flex={1}>
+      <GreetingHeader
+        username="Ashish"
+        avatar="https://scontent.fblr20-3.fna.fbcdn.net/v/t39.30808-6/465060097_27423369417308920_7431623941390111522_n.jpg?_nc_cat=101&ccb=1-7&_nc_sid=127cfc&_nc_ohc=4Eg-13Pt4rIQ7kNvgFXRQe6&_nc_zt=23&_nc_ht=scontent.fblr20-3.fna&_nc_gid=AHN09A_YGpMOyzUiUEtmbUZ&oh=00_AYApkwAunJronsyYoln5bKE1Hvc-pG33DlD3nUAq4JF61A&oe=67A28901"
+        streakCount={5}
+        hasUnreadNotifications={true}
+        onPressNotification={() => {
+          // Show notifications screen/modal
+        }}
+        onPressStreak={() => {
+          // Show streak details/achievements
+        }}
+      />
+      <ViewX
+        // variant="nav"
+        backgroundColor="#16171B"
+        width={w(100)}
+        position="absolute"
+        bottom={0}
+        zIndex={100}
+        paddingVertical={styleUtils.spacing['2xs']}>
+        <ViewX
+          overflow="hidden"
+          justifyContent="center"
+          alignItems="flex-start">
+          <CalendarStrip
+            selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
+            startDate={startDate}
+            endDate={endDate}
+          />
+        </ViewX>
+      </ViewX>
+      <TouchableX
+        position="absolute"
+        justifyContent="center"
+        alignItems="center"
+        bottom={h(10)}
+        right={w(2)}
+        zIndex={100}
+        onPress={() => {
+          stateNavigator.navigate('create');
+        }}
+        height={56}
+        width={56}
+        backgroundColor={themes.dark.background.accent}
+        borderRadius={styleUtils.borderRadius.lg}>
+        <Plus size={24} color="#FFF" />
+      </TouchableX>
+
+      <ViewX flex={1} paddingTop={12}>
+        <ViewX paddingTop={12}>
+          <TimeFilter
+            selectedTime={selectedTime}
+            onSelectTime={setSelectedTime}
+          />
+        </ViewX>
+        <ScrollView
+          style={{flex: 1, marginTop: 12}}
+          contentContainerStyle={{paddingBottom: 120, paddingTop: 16}}>
+          {filteredHabits.map(habit => (
+            <HabitCard
+              period={habit.timePeriod}
+              isCompleted={false}
+              key={habit.id}
+              {...habit}
+              // onToggleComplete={date => handleToggleComplete(habit.title, date)}
+              onToggleComplete={() => {}}
+            />
+          ))}
+        </ScrollView>
+      </ViewX>
+    </ViewX>
+  );
+};
+
+export default Home;
+
+================
+File: screens/Onboarding/Welcome.tsx
+================
+import {LinearGradient} from 'expo-linear-gradient';
+import {NavigationContext} from 'navigation-react';
+import {useContext} from 'react';
+import {Dimensions, StyleSheet} from 'react-native';
+import {PressableX, TextX, TouchableX, ViewX} from '~components/common';
+import MasonryGrid from '~components/common/MasonaryGrid';
+import TestimonialCard from '~components/specific/onboarding/TestimonialCard';
+import {testimonials} from '~data/testimonials';
+import {styleUtils, themes} from '~styles/theme';
+import {vs, w} from '~utils/screenUtil';
+
+const {height} = Dimensions.get('window');
+
+const WelcomeScreen = () => {
+  const {stateNavigator} = useContext(NavigationContext);
+  const renderTestimonial = (item: any) => (
+    <TestimonialCard testimonial={item} />
+  );
+
+  return (
+    <ViewX flex={1} variant="primary">
+      <MasonryGrid
+        data={testimonials}
+        renderItem={renderTestimonial}
+        numColumns={2}
+        scrollDuration={55000}
+      />
+      <LinearGradient
+        colors={['transparent', 'rgba(20, 21, 23, 1)']}
+        locations={[0, 0.5]}
+        style={styles.overlay}>
+        <ViewX
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          marginVertical={styleUtils.spacing.lg}>
+          <TextX fontSize="5xl" fontWeight="title" letterSpacing={12}>
+            YATI
+          </TextX>
+          <TextX
+            textAlign="center"
+            fontSize="lg"
+            fontWeight="semibold"
+            color="secondary">
+            Strive, Track, Thrive – Your Journey to a Better You.
+          </TextX>
+        </ViewX>
+        <ViewX gap={styleUtils.spacing.lg}>
+          <PressableX
+            onPress={() => {
+              stateNavigator.navigate('tabs');
+            }}
+            justifyContent="center"
+            alignItems="center"
+            backgroundColor={themes.dark.background.accent}
+            borderRadius={styleUtils.borderRadius.md}
+            height={vs(60)}
+            width={w(90)}>
+            <TextX fontSize="xl" fontWeight="semibold">
+              Start Your Journey
+            </TextX>
+          </PressableX>
+          <TouchableX
+            justifyContent="center"
+            alignItems="center"
+            activeOpacity={0.8}>
+            <TextX
+              fontSize="md"
+              fontWeight="semibold"
+              color="secondary"
+              textDecorationLine="underline">
+              Continue as Guest
+            </TextX>
+          </TouchableX>
+        </ViewX>
+      </LinearGradient>
+    </ViewX>
+  );
+};
+
+const styles = StyleSheet.create({
+  overlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: height * 0.6,
+    justifyContent: 'flex-end',
+    paddingHorizontal: 20,
+    paddingBottom: vs(60),
+  },
+});
+
+export default WelcomeScreen;
+
+================
+File: screens/Profile/Profile.tsx
+================
+import {TextX, ViewX} from '~components/common';
+
+const Profile = () => {
+  return (
+    <ViewX
+      variant="primary"
+      flex={1}
+      alignItems="center"
+      justifyContent="center">
+      <TextX>Profile</TextX>
+    </ViewX>
+  );
+};
+
+export default Profile;
+
+================
+File: screens/Settings/Settings.tsx
+================
+import {
+  Award,
+  Bell,
+  Calendar,
+  ChevronRight,
+  Clock,
+  Database,
+  FileJson,
+  Gauge,
+  Globe,
+  HelpCircle,
+  Info,
+  MessageCircle,
+  Moon,
+  Palette,
+  Share2,
+  Shield,
+  Smartphone,
+  Target,
+  Trash2,
+} from 'lucide-react-native';
+import React from 'react';
+import {
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+
+interface SettingsSectionProps {
+  title: string;
+  children: React.ReactNode;
+  isLast?: boolean;
+}
+
+interface SettingsItemProps {
+  icon: React.ReactNode;
+  title: string;
+  value?: string;
+  isToggle?: boolean;
+  isEnabled?: boolean;
+  isLast?: boolean;
+  onPress?: () => void;
+  onToggle?: (value: boolean) => void;
+}
+
+const SettingsSection: React.FC<SettingsSectionProps> = ({
+  title,
+  children,
+  isLast,
+}) => (
+  <View style={[styles.section, !isLast && styles.sectionMargin]}>
+    <Text style={styles.sectionTitle}>{title}</Text>
+    <View style={styles.sectionContent}>{children}</View>
+  </View>
+);
+
+const SettingsItem: React.FC<SettingsItemProps> = ({
+  icon,
+  title,
+  value,
+  isToggle,
+  isEnabled,
+  isLast,
+  onPress,
+  onToggle,
+}) => (
+  <Pressable
+    style={({pressed}) => [
+      styles.settingsItem,
+      !isLast && styles.settingsItemBorder,
+      pressed && styles.settingsItemPressed,
+    ]}
+    onPress={onPress}>
+    <View style={styles.settingsItemLeft}>
+      <View style={styles.iconContainer}>{icon}</View>
+      <Text style={styles.settingsItemTitle}>{title}</Text>
+    </View>
+    <View style={styles.settingsItemRight}>
+      {isToggle ? (
+        <Switch
+          value={isEnabled}
+          onValueChange={onToggle}
+          trackColor={{false: '#3A3A3C', true: '#34C759'}}
+          thumbColor={isEnabled ? '#FFFFFF' : '#FFFFFF'}
+          ios_backgroundColor="#3A3A3C"
+        />
+      ) : (
+        <>
+          {value && <Text style={styles.settingsItemValue}>{value}</Text>}
+          <ChevronRight size={20} color="#8E8E93" />
+        </>
+      )}
+    </View>
+  </Pressable>
+);
+
+const SettingsScreen: React.FC = () => {
+  const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
+  const [darkModeEnabled, setDarkModeEnabled] = React.useState(true);
+  const [weekStartMonday, setWeekStartMonday] = React.useState(true);
+  const [analyticsEnabled, setAnalyticsEnabled] = React.useState(true);
+  const [backupEnabled, setBackupEnabled] = React.useState(true);
+  const [streakProtection, setStreakProtection] = React.useState(false);
+
+  const {top} = useSafeAreaInsets();
+
+  return (
+    <ScrollView
+      style={[styles.container, {paddingTop: top + 10}]}
+      contentContainerStyle={[
+        styles.contentContainer,
+        {paddingBottom: top + 16},
+      ]}>
+      {/* Habit Preferences */}
+      <SettingsSection title="Habit Preferences">
+        <SettingsItem
+          icon={<Target size={22} color="#FF6B6B" />}
+          title="Goal Settings"
+          value="Configure"
+          onPress={() => {}}
+        />
+        <SettingsItem
+          icon={<Calendar size={22} color="#5856D6" />}
+          title="Week Start Day"
+          value={weekStartMonday ? 'Monday' : 'Sunday'}
+          onPress={() => setWeekStartMonday(!weekStartMonday)}
+        />
+        <SettingsItem
+          icon={<Award size={22} color="#FFD60A" />}
+          title="Streak Protection"
+          isToggle
+          isEnabled={streakProtection}
+          onToggle={setStreakProtection}
+        />
+        <SettingsItem
+          icon={<Gauge size={22} color="#32D74B" />}
+          title="Progress Calculation"
+          value="Weekly Average"
+          isLast
+          onPress={() => {}}
+        />
+      </SettingsSection>
+
+      {/* Notifications & Reminders */}
+      <SettingsSection title="Notifications & Reminders">
+        <SettingsItem
+          icon={<Bell size={22} color="#FF6B6B" />}
+          title="Push Notifications"
+          isToggle
+          isEnabled={notificationsEnabled}
+          onToggle={setNotificationsEnabled}
+        />
+        <SettingsItem
+          icon={<Clock size={22} color="#FF9F0A" />}
+          title="Reminder Schedule"
+          value="Customize"
+          onPress={() => {}}
+        />
+        <SettingsItem
+          icon={<MessageCircle size={22} color="#64D2FF" />}
+          title="Motivation Messages"
+          value="Configure"
+          isLast
+          onPress={() => {}}
+        />
+      </SettingsSection>
+
+      {/* Appearance */}
+      <SettingsSection title="Appearance">
+        <SettingsItem
+          icon={<Moon size={22} color="#0A84FF" />}
+          title="Dark Mode"
+          isToggle
+          isEnabled={darkModeEnabled}
+          onToggle={setDarkModeEnabled}
+        />
+        <SettingsItem
+          icon={<Palette size={22} color="#32D74B" />}
+          title="Theme Colors"
+          value="Customize"
+          onPress={() => {}}
+        />
+        <SettingsItem
+          icon={<Smartphone size={22} color="#BF5AF2" />}
+          title="App Icon"
+          value={Platform.OS === 'ios' ? 'Change' : 'Default'}
+          isLast
+          onPress={() => {}}
+        />
+      </SettingsSection>
+
+      {/* Data & Privacy */}
+      <SettingsSection title="Data & Privacy">
+        <SettingsItem
+          icon={<Database size={22} color="#5856D6" />}
+          title="Backup & Sync"
+          isToggle
+          isEnabled={backupEnabled}
+          onToggle={setBackupEnabled}
+        />
+        <SettingsItem
+          icon={<FileJson size={22} color="#32D74B" />}
+          title="Export Data"
+          value="CSV/JSON"
+          onPress={() => {}}
+        />
+        <SettingsItem
+          icon={<Shield size={22} color="#FF375F" />}
+          title="Privacy Settings"
+          onPress={() => {}}
+        />
+        <SettingsItem
+          icon={<Trash2 size={22} color="#FF453A" />}
+          title="Clear All Data"
+          isLast
+          onPress={() => {}}
+        />
+      </SettingsSection>
+
+      {/* Account & Support */}
+      <SettingsSection title="Account & Support">
+        <SettingsItem
+          icon={<Share2 size={22} color="#5856D6" />}
+          title="Share App"
+          onPress={() => {}}
+        />
+        <SettingsItem
+          icon={<Globe size={22} color="#32D74B" />}
+          title="Language"
+          value="English"
+          onPress={() => {}}
+        />
+        <SettingsItem
+          icon={<HelpCircle size={22} color="#FF375F" />}
+          title="Help Center"
+          onPress={() => {}}
+        />
+        <SettingsItem
+          icon={<Info size={22} color="#64D2FF" />}
+          title="About"
+          value="Version 1.0.0"
+          isLast
+          onPress={() => {}}
+        />
+      </SettingsSection>
+
+      {/* Premium Features */}
+      <SettingsSection title="Premium" isLast>
+        <SettingsItem
+          icon={<Award size={22} color="#FFD700" />}
+          title="Upgrade to Pro"
+          value="Get More Features"
+          isLast
+          onPress={() => {}}
+        />
+      </SettingsSection>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#000000',
+  },
+  contentContainer: {
+    paddingTop: 20,
+    paddingBottom: Platform.select({ios: 40, android: 24}),
+  },
+  section: {
+    width: '100%',
+  },
+  sectionMargin: {
+    marginBottom: 32,
+  },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#8E8E93',
+    marginLeft: 16,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  sectionContent: {
+    backgroundColor: '#1C1C1E',
+    borderRadius: 12,
+    marginHorizontal: 16,
+    overflow: 'hidden',
+  },
+  settingsItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    height: 56, // Fixed height for all items
+    backgroundColor: '#1C1C1E',
+  },
+  settingsItemBorder: {
+    borderBottomWidth: Platform.select({ios: 0.5, android: 1}),
+    borderBottomColor: '#2C2C2E',
+  },
+  settingsItemPressed: {
+    backgroundColor: Platform.select({
+      ios: '#2C2C2E',
+      android: '#2C2C2E80', // Semi-transparent for ripple effect
+    }),
+  },
+  settingsItemLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    height: 56, // Match parent height
+    paddingVertical: 12,
+  },
+  iconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: '#2C2C2E',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  settingsItemTitle: {
+    fontSize: 17,
+    fontWeight: '400',
+    color: '#FFFFFF',
+    flex: 1,
+    letterSpacing: -0.4, // iOS-like letter spacing
+  },
+  settingsItemRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    height: 32,
+    minWidth: 54, // Minimum width for consistency
+    justifyContent: 'flex-end',
+    paddingLeft: 8,
+  },
+  settingsItemValue: {
+    fontSize: 17,
+    color: '#8E8E93',
+    marginRight: 4,
+    textAlign: 'right',
+  },
+});
+export default SettingsScreen;
+
+================
+File: styles/theme.tsx
+================
+import {
+  borderRadius,
+  borderWidths,
+  colors,
+  opacity,
+  spacing,
+  typography,
+} from './tokens';
+
+export const themes = {
+  dark: {
+    background: {
+      primary: colors.neutral.dark[900],
+      secondary: colors.neutral.dark[700],
+      tertiary: colors.neutral.dark[600],
+      nav: colors.neutral.dark[800],
+      accent: colors.brand.primary[500],
+      transparent: 'transparent',
+    },
+    text: {
+      primary: colors.text.dark.primary,
+      secondary: colors.text.dark.gray[500],
+      tertiary: colors.text.dark.gray[700],
+      accent: colors.brand.primary[400],
+    },
+    typography: typography,
+  },
+
+  light: {
+    background: {
+      primary: colors.neutral.light[50],
+      secondary: colors.neutral.light[400],
+      tertiary: colors.neutral.light[800],
+      nav: colors.neutral.light[800],
+      transparent: 'transparent',
+      accent: colors.brand.primary[500],
+    },
+    text: {
+      primary: colors.text.light.primary,
+      secondary: colors.text.light.gray[600],
+      tertiary: colors.text.light.gray[500],
+      accent: colors.brand.primary[500],
+    },
+    typography: typography,
+  },
+};
+
+export const styleUtils = {
+  opacity: opacity,
+  spacing: spacing,
+  borderWidths: borderWidths,
+  borderRadius: borderRadius,
+};
+
+================
+File: styles/tokens.ts
+================
+import type {Alignment} from '~types/common.types';
+import type {
+  BorderRadius,
+  BorderWidths,
+  IconSizes,
+  Opacity,
+  Spacing,
+} from '~types/style.types';
+import {font, ms, vs} from '~utils/screenUtil';
+
+const brand = {
+  primary: {
+    // '50': '#FFF0F2', // Soft stage light
+    // '100': '#FFE2E7', // Gentle spotlight
+    // '200': '#FFCCD5', // Soft curtain light
+    // '300': '#FF8FA3', // Drama accent
+    // '400': '#E84A6A', // Emotional accent
+    // '500': '#C8234A', // New primary crimson
+    // '600': '#A81D3D', // Theater curtain red
+    // '700': '#8A1731', // Deep dramatic red
+    // '800': '#6C1226', // Shadow red
+    // '900': '#4E0C1B', // Dark theater red
+    50: '#F0F2FF', // Softer light tint for better legibility on light backgrounds
+    100: '#DEE1FE', // Light tint with slightly more contrast
+    200: '#BFC4FC', // Balanced tint for subtle elements
+    300: '#9EA3FA', // Secondary elements with good contrast
+    400: '#7D82F8', // Brighter accents for visibility
+    500: '#5C63F6', // Main brand color, slightly more vivid
+    600: '#4A52D0', // Contrast variant for text on dark mode
+    700: '#383EAA', // Darker accent with legibility in focus
+    800: '#262A84', // Deep contrast without losing saturation
+    900: '#131549', // Retained deepest shade for dark contrasts
+  },
+};
+
+const neutral = {
+  light: {
+    50: '#FFFFFF', // Pure white
+    100: '#FCFCFD',
+    200: '#F8F9FB',
+    300: '#F3F4F8',
+    400: '#ECEDF3',
+    500: '#E5E7ED',
+    600: '#D8DBE5',
+    700: '#C1C4CF',
+    800: '#AEB1BD',
+    900: '#9B9EAC',
+  },
+  dark: {
+    // 50: '#B0B1B5', // Light blackish (soft, almost gray but still blackish)
+    // 100: '#8F9094', // Slightly darker, distinct from 50
+    // 200: '#6E6F73', // Medium blackish, clear step down
+    // 300: '#4D4E52', // Darker, leaning into black
+    // 400: '#3A3B3F', // Rich blackish, distinct from 300
+    // 500: '#28292D', // Muted dark (core blackish tone)
+    // 600: '#1F2024', // Elevated dark (deeper, more contrast)
+    // 700: '#16171B', // Paper dark (almost pure black)
+    // 800: '#0D0E12', // Background dark (deep black)
+    // 900: '#040506', // Deepest black (near black, maximum depth)
+    // Light shades (for text and accents)
+    50: '#FFFFFF', // Pure white (for high-contrast text)
+    100: '#F5F5F5', // Off-white (for subtle text)
+    200: '#E0E0E0', // Light gray (for borders or muted text)
+
+    // Mid-tones (for surfaces and cards)
+    300: '#9E9E9E', // Medium gray (for secondary text)
+    400: '#616161', // Dark gray (for muted accents)
+    500: '#424242', // Dark gray (for card backgrounds)
+    600: '#303030', // Darker gray (for elevated cards)
+    700: '#212121', // Very dark gray (for dark surfaces)
+
+    // Dark shades (for backgrounds and depth)
+    800: '#121212', // Near-black (for dark backgrounds)
+    900: '#000000', // Pure black (for deepest dark)
+  },
+};
+
+const semantic = {
+  success: {
+    50: '#E8FFF3',
+    100: '#D1FFE7',
+    200: '#A3FFCF',
+    300: '#75FFB7',
+    400: '#47FF9F',
+    500: '#22C55E', // Main success
+    600: '#1B9E4B',
+    700: '#147738',
+    800: '#0D5025',
+    900: '#062912',
+  },
+  error: {
+    50: '#FFF1F0',
+    100: '#FFE4E2',
+    200: '#FFC9C5',
+    300: '#FFADA8',
+    400: '#FF928B',
+    500: '#EF4444', // Main error
+    600: '#BF3636',
+    700: '#8F2828',
+    800: '#5F1B1B',
+    900: '#300D0D',
+  },
+  warning: {
+    50: '#FFF9E5',
+    100: '#FFF3CC',
+    200: '#FFE799',
+    300: '#FFDB66',
+    400: '#FFCF33',
+    500: '#F59E0B', // Main warning
+    600: '#C47E09',
+    700: '#935F07',
+    800: '#623F04',
+    900: '#312002',
+  },
+  info: {
+    50: '#EFF6FF',
+    100: '#DBEAFE',
+    200: '#BFDBFE',
+    300: '#93C5FD',
+    400: '#60A5FA',
+    500: '#4048B0', // Using primary as info
+    600: '#343B96',
+    700: '#2A2F7A',
+    800: '#1F235D',
+    900: '#151840',
+  },
+};
+
+const text = {
+  light: {
+    primary: '#000000',
+    gray: {
+      100: '#F8F9FA',
+      200: '#E9ECEF',
+      300: '#DEE2E6',
+      400: '#CED4DA',
+      500: '#ADB5BD',
+      600: '#6C757D',
+      700: '#495057',
+      800: '#343A40',
+      900: '#212529',
+    },
+  },
+  dark: {
+    primary: '#FFFFFF',
+    gray: {
+      100: '#E9ECEF',
+      200: '#DDE1E6',
+      300: '#CED4DA',
+      400: '#ADB5BD',
+      500: '#868E96',
+      600: '#666D75',
+      700: '#495057',
+      800: '#343A40',
+      900: '#212529',
+    },
+  },
+};
+
+export const typography = {
+  fontFamily: {
+    regular: 'Gilroy-Regular',
+    medium: 'Gilroy-Medium',
+    semibold: 'Gilroy-Semibold',
+    bold: 'Gilroy-Bold',
+    title: 'JosefinSans-Bold',
+  },
+  fontSizes: {
+    '3xs': font(8),
+    '2xs': font(10),
+    xs: font(12),
+    sm: font(14),
+    md: font(16),
+    lg: font(18),
+    xl: font(20),
+    '2xl': font(24),
+    '3xl': font(30),
+    '4xl': font(36),
+    '5xl': font(42),
+  },
+  lineHeights: {
+    '3xs': vs(12),
+    '2xs': vs(14),
+    xs: vs(16),
+    sm: vs(20),
+    md: vs(24),
+    lg: vs(28),
+    xl: vs(32),
+    '2xl': vs(36),
+    '3xl': vs(42),
+  },
+  letterSpacing: {
+    tight: -0.5,
+    normal: 0,
+    wide: 0.5,
+  },
+};
+
+export const spacing: Spacing = {
+  '0': ms(0),
+  '3xs': ms(2),
+  '2xs': ms(4),
+  xs: ms(8),
+  sm: ms(12),
+  md: ms(16),
+  lg: ms(20),
+  xl: ms(24),
+  '2xl': ms(32),
+  '3xl': ms(40),
+  '4xl': ms(48),
+  '5xl': ms(64),
+};
+
+export const borderRadius: BorderRadius = {
+  none: ms(0),
+  '3xs': ms(2),
+  '2xs': ms(4),
+  xs: ms(6),
+  sm: ms(8),
+  md: ms(10),
+  lg: ms(12),
+  xl: ms(16),
+  '2xl': ms(20),
+  '3xl': ms(24),
+  full: 9999,
+};
+
+export const opacity: Opacity = {
+  0: 0,
+  25: 0.25,
+  50: 0.5,
+  75: 0.75,
+  100: 1,
+};
+
+export const borderWidths: BorderWidths = {
+  none: 0,
+  thin: ms(1),
+  medium: ms(2),
+  thick: ms(4),
+};
+
+export const iconSizes: IconSizes = {
+  sm: ms(16),
+  md: ms(24),
+  lg: ms(32),
+  xl: ms(48),
+  xs: 0,
+};
+
+export const alignment: {[key in Alignment]: string} = {
+  center: 'center',
+  right: 'flex-end',
+  left: 'flex-start',
+};
+
+const colors = {brand, neutral, semantic, text};
+
+export {colors};
+
+================
+File: types/common.types.ts
+================
+import type {typography} from '~styles/tokens';
+
+export type Theme = 'dark' | 'light';
+export type FontWeight = keyof typeof typography.fontFamily;
+
+export type Size =
+  | '3xs'
+  | '2xs'
+  | 'xs'
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | '2xl'
+  | '3xl'
+  | '4xl'
+  | '5xl';
+
+export type FontSize =
+  | '3xs'
+  | '2xs'
+  | 'xs'
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | '2xl'
+  | '3xl'
+  | '4xl'
+  | '5xl';
+
+export type LineHeights =
+  | '3xs'
+  | '2xs'
+  | 'xs'
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | '2xl'
+  | '3xl';
+
+export type BorderRadiusSize =
+  | 'none'
+  | '3xs'
+  | '2xs'
+  | 'xs'
+  | 'sm'
+  | 'md'
+  | 'lg'
+  | 'xl'
+  | '2xl'
+  | '3xl'
+  | 'full';
+
+export type LineCount = 1 | 2 | 3 | 4;
+export type ArrangeMode = 'single' | 'multi';
+export type Orientation = 'vertical' | 'horizontal';
+export type Alignment = 'left' | 'right' | 'center';
+
+================
+File: types/style.types.ts
+================
+import {Size} from './common.types';
+
+export type Spacing = {
+  [key in Size | '0']: number;
+};
+
+export type BorderRadius = {
+  [key in Exclude<Size, '4xl' | '5xl'> | 'none' | 'full']: number;
+};
+
+export type Opacity = {
+  0: 0;
+  25: 0.25;
+  50: 0.5;
+  75: 0.75;
+  100: 1;
+};
+
+export type BorderWidths = {
+  [key: string]: number;
+};
+
+export type IconSizes = {
+  [key in Exclude<Size, '3xs' | '2xs' | '2xl' | '3xl' | '4xl' | '5xl'>]: number;
+};
+
+================
+File: utils/store/createStore.ts
+================
+/**
+ * @fileOverview Provides a custom hook for managing state with ChangeNotifier.
+ * @module createStore
+ * @author Ashish Kumar
+ */
+
+import {useEffect, useState} from 'react';
+import {isValidObject} from '~utils/common';
+import ChangeNotifier, {ListenerCallback} from './notifier';
+
+/**
+ * Checks if a value is a valid object or null.
+ * @param {unknown} value - The value to check.
+ * @returns {boolean} True if the value is a valid object or null, otherwise false.
+ */
+export const checkValidObject = (
+  value: unknown,
+): value is Record<string, unknown> | null =>
+  typeof value === 'object' &&
+  value !== null &&
+  !Array.isArray(value) &&
+  Object.getPrototypeOf(value) === Object.prototype;
+
+/**
+ * Compares two values for deep equality.
+ * @param {unknown} d1 - The first value to compare.
+ * @param {unknown} d2 - The second value to compare.
+ * @returns {boolean} True if the values are deeply equal, otherwise false.
+ */
+export const diffChecker = (d1: unknown, d2: unknown): boolean => {
+  // Handle null cases
+  if (d1 === null && d2 === null) {
+    return true;
+  }
+  if (d1 === null || d2 === null) {
+    return false;
+  }
+
+  // Handle type mismatches
+  if (typeof d1 !== typeof d2) {
+    return false;
+  }
+
+  // Handle primitive types
+  if (typeof d1 !== 'object') {
+    return d1 === d2;
+  }
+
+  // Handle arrays
+  if (Array.isArray(d1) && Array.isArray(d2)) {
+    if (d1.length !== d2.length) {
+      return false;
+    }
+    return d1.every((item, index) => diffChecker(item, d2[index]));
+  }
+
+  // Handle objects
+  if (checkValidObject(d1) && checkValidObject(d2)) {
+    const keys1 = Object.keys(d1);
+    const keys2 = Object.keys(d2);
+
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+
+    return keys1.every(key => {
+      if (!keys2.includes(key)) {
+        return false;
+      }
+      return diffChecker(d1[key], d2[key]);
+    });
+  }
+
+  return false;
+};
+
+/**
+ * Creates a custom hook and related functions for managing state with ChangeNotifier.
+ * @template T - The type of the state.
+ * @param {string} eventName - The name of the event associated with this state.
+ * @param {T} initState - The initial state.
+ * @param {string} - The slice identifier for the state.
+ * @returns {Object} An object containing the useStore hook and helper functions.
+ */
+const create = <T>(eventName: string, initState: T, sliceName?: string) => {
+  const slice = sliceName ? sliceName : `${eventName.toLowerCase()}_global`;
+  const notifier = ChangeNotifier.getInstance<T>();
+  const prevState = notifier.getState(eventName, slice);
+
+  /**
+   * Callback function to handle state changes.
+   * @type {ListenerCallback<T>}
+   */
+  const listenerCallback: ListenerCallback<T> = (
+    data,
+    actionSet,
+    prevState,
+    transient,
+  ) => {
+    const isDifferent = !diffChecker(data, prevState);
+    if (!transient && isDifferent) {
+      if (actionSet[slice]?.size) {
+        actionSet[slice].forEach(callback => {
+          if (callback) {
+            if (typeof data === 'object' && data !== null) {
+              // If data is an object, merge it with the previous state
+              callback((prev: T) => ({...prev, ...data} as T));
+            } else {
+              // If data is not an object, replace the entire state
+              callback(data);
+            }
+          }
+        });
+      }
+    } else if (!isDifferent) {
+      console.warn(
+        'State update dismissed: previous and current state are same.',
+      );
+    } else if (transient) {
+      console.log('Updated store transiently');
+    }
+  };
+
+  // Register the listener at the create level
+  notifier.listen(eventName, listenerCallback, prevState || initState, slice);
+
+  /**
+   * Retrieves the current state value, potentially wrapped in a Proxy for object states.
+   * @param {T} state - The current state.
+   * @returns {T} The current state value, possibly wrapped in a Proxy.
+   */
+  const getStateValue = (state: T): T => {
+    if (isValidObject(state)) {
+      // Create a Proxy for object states to ensure we always get the latest values
+      return new Proxy(state as Record<string, unknown>, {
+        get: (_target, prop: string) => {
+          const currentState = notifier.getState(eventName, slice) as T;
+          return (currentState as Record<string, unknown>)[prop];
+        },
+      }) as T;
+    }
+    return notifier.getState(eventName, slice) as T;
+  };
+
+  /**
+   * Custom hook for managing state.
+   * @returns {[T, (data: Partial<T>) => void]} A tuple containing the current state and a function to update it.
+   */
+  const useStore = (): [T, (data: Partial<T>) => void] => {
+    const [state, setState] = useState<T>(initState);
+
+    useEffect(() => {
+      // Register the action when the component mounts
+      notifier.registerAction(setState, slice);
+
+      // Cleanup function to unregister the action when the component unmounts
+      return () => {
+        notifier.unregisterAction(setState, slice);
+      };
+    }, []);
+
+    return [
+      getStateValue(state),
+      (data: Partial<T>) => {
+        notifier.notify(eventName, data, slice, false, 'create');
+      },
+    ];
+  };
+
+  return {
+    useStore,
+    set: (data: Partial<T>) => {
+      notifier.notify(eventName, data, slice, false, 'create_set');
+    },
+    setTransient: (data: Partial<T>) => {
+      notifier.notify(eventName, data, slice, true, 'create_transient');
+    },
+    getStoreSnapshot: () => notifier.getState(eventName, slice) as T,
+    subscribe: (cb: ListenerCallback<T>) => {
+      notifier.listen(eventName, cb, initState, slice);
+    },
+  };
+};
+
+/**
+ * Notifies a state change for a specific event and slice.
+ * @template T - The type of the state.
+ * @param {string} event - The name of the event.
+ * @param {Partial<T>} data - The new state data.
+ * @param {string} - The slice identifier.
+ * @param {boolean} [transient=false] - Whether the update is transient.
+ * @param {string} [caller='notifier_global'] - The caller identifier.
+ */
+const notify = <T>(
+  eventName: string,
+  data: Partial<T>,
+  sliceName?: string,
+  transient: boolean = false,
+  caller = 'notifier_global',
+) => {
+  const notifier = ChangeNotifier.getInstance<T>();
+  const slice = sliceName ? sliceName : `${eventName.toLowerCase()}_global`;
+  notifier.notify(eventName, data, slice, transient, caller);
+};
+
+export {create, notify};
+
+================
+File: utils/store/notifier.ts
+================
+import {diffChecker} from './createStore';
+
+/**
+ * Represents the ChangeNotifier module.
+ * @module ChangeNotifier
+ * @exports ChangeNotifier
+ * @author Ashish Kumar
+ */
+
+/**
+ * Represents the action set for managing state.
+ * @typedef {Object} ActionSet
+ * @property {Set<Function>} slice - The slice identifier.
+ */
+
+export type ActionSet = {[slice in string]: Set<Function>};
+
+/**
+ * Represents a callback function that listens to changes notified by the ChangeNotifier.
+ * @template T - The type of data being passed to the callback.
+ * @param {T} data - The data passed to the callback.
+ * @param {ActionSet} actionSet - The data passed to the callback.
+ * @param {T} prevState - The data passed to the callback.
+ * @returns {void}
+ */
+export type ListenerCallback<T> = (
+  data: T,
+  actionSet: ActionSet,
+  prevState: T,
+  transient?: boolean,
+) => void;
+
+/**
+ * Checks whether the provided value is a valid object.
+ * @param {*} value - The value to be checked.
+ * @returns {value is object | null} - True if the value is a valid object, otherwise false.
+ */
+export const checkValidObject = (value: any): value is object | null =>
+  typeof value === 'object' &&
+  value !== null &&
+  !Array.isArray(value) &&
+  value.constructor === Object;
+
+/**
+ * Checks whether the provided value is a valid function.
+ * @param {*} value - The value to be checked.
+ * @returns {boolean} - True if the value is a valid function, otherwise false.
+ */
+export const checkValidFunction = (value: any): boolean =>
+  value instanceof Function && typeof value === 'function';
+
+/**
+ * Represents a ChangeNotifier that facilitates event notification and subscription.
+ * @template T - The type of data associated with the event.
+ */
+class ChangeNotifier<T> {
+  private static instance: ChangeNotifier<any>;
+  private listeners: Record<string, Record<string, Set<ListenerCallback<T>>>> =
+    {};
+  private notifierState: Record<string, Record<string, T>> = {};
+  private actionSet: ActionSet = {} as any;
+
+  private constructor() {}
+
+  /**
+   * Gets the singleton instance of ChangeNotifier.
+   * @returns {ChangeNotifier<T>} - The singleton instance of ChangeNotifier.
+   */
+  public static getInstance<T>(): ChangeNotifier<T> {
+    if (!ChangeNotifier.instance) {
+      ChangeNotifier.instance = new ChangeNotifier();
+    }
+    return ChangeNotifier.instance;
+  }
+
+  /**
+   * Validates whether the event name is a non-empty string.
+   * @param {string} eventName - The name of the event.
+   * @returns {boolean} - True if the event name is valid, otherwise false.
+   */
+  private validateEvent(eventName: string): boolean {
+    return Boolean(eventName && typeof eventName === 'string');
+  }
+
+  /**
+   * Notifies all subscribed callbacks of a specific event slice with provided data.
+   * @param {string} eventName - The name of the event.
+   * @param {T} data - The data associated with the event slice.
+   * @param {string} sliceName - The name of the slice within the event.
+   * @param {string} caller - The identifier of the caller.
+   * @throws Will throw an error if the event name is invalid.
+   * @returns {void}
+   */
+  notify(
+    eventName: string,
+    data: Partial<T>,
+    sliceName: string,
+    transient: boolean = false,
+    caller: string = 'notifier_default',
+  ): void {
+    if (!this.validateEvent(eventName)) {
+      throw new Error(`Invalid event name: '${eventName}'`);
+    }
+
+    if (!this.listeners[eventName]) {
+      console.warn(
+        `No listeners for event: '${eventName}' called by '${caller}'.`,
+      );
+      return;
+    }
+
+    const sliceListeners = this.listeners[eventName][sliceName];
+
+    if (!sliceListeners) {
+      console.warn(
+        `No listeners found for slice: '${sliceName}' of event: '${eventName}' called by '${caller}'.`,
+      );
+      return;
+    }
+
+    const prevState = this.notifierState[eventName][sliceName];
+    const stateData = checkValidObject(data)
+      ? {...(prevState || {}), ...data}
+      : data;
+
+    if (!diffChecker(prevState, stateData)) {
+      this.notifierState[eventName][sliceName] = stateData as T;
+
+      sliceListeners.forEach(cb =>
+        cb(stateData as T, this.getActionSet(), prevState, transient),
+      );
+      // console.info(`Notify Called for: '${eventName}' by: '${caller}'.`);
+    } else {
+      // console.info('notify rejected as the previous state and current state are same.');
+    }
+  }
+
+  /**
+   * Subscribes a callback function to a specific event slice.
+   * @param {string} eventName - The name of the event.
+   * @param {ListenerCallback<T>} callback - The callback function to be invoked on event notification.
+   * @param {T} initialState - The initial state associated with the event slice.
+   * @param {string} sliceName - The name of the slice within the event.
+   * @throws Will throw an error if the event name or callback function is invalid.
+   * @returns {void}
+   */
+  listen(
+    eventName: string,
+    callback: ListenerCallback<T>,
+    initialState: T = {} as T,
+    sliceName: string,
+  ): void {
+    if (!this.validateEvent(eventName) || !checkValidFunction(callback)) {
+      throw new Error(`Invalid parameters for event: '${eventName}'`);
+    }
+
+    if (!this.listeners[eventName] || !this.notifierState[eventName]) {
+      this.listeners[eventName] = {};
+      this.notifierState[eventName] = {};
+    }
+
+    if (!this.listeners[eventName][sliceName]) {
+      this.listeners[eventName][sliceName] = new Set<ListenerCallback<T>>();
+      this.notifierState[eventName][sliceName] = initialState;
+    }
+
+    // if (this.listeners[eventName][sliceName].size === 0) {
+    this.listeners[eventName][sliceName].add(callback);
+    // }
+  }
+
+  /**
+   * Unsubscribes a callback function from a specific event slice.
+   * @param {string} eventName - The name of the event.
+   * @param {ListenerCallback<T>} callback - The callback function to be unsubscribed.
+   * @param {string} sliceName - The name of the slice within the event.
+   * @throws Will throw an error if no listeners are found for the specified event.
+   * @returns {void}
+   */
+  unsubscribe(
+    eventName: string,
+    callback: ListenerCallback<T>,
+    sliceName: string,
+  ): void {
+    if (!this.validateEvent(eventName) || !this.listeners[eventName]) {
+      throw new Error(
+        `No listeners found for event: '${eventName}' to unsubscribe.`,
+      );
+    }
+    const sliceListeners = this.listeners[eventName][sliceName];
+    if (!sliceListeners || !sliceListeners.delete(callback)) {
+      // console.warn(`Cannot unsubscribe to a non-existent listener '${eventName}'.`);
+    }
+  }
+
+  /**
+   * Retrieves the current state data of a specific event slice.
+   * @param {string} eventName - The name of the event.
+   * @param {string} sliceName - The name of the slice within the event.
+   * @returns {T | undefined} - The current state data of the event slice, or undefined if not found.
+   */
+  getState(eventName: string, sliceName: string): T | undefined {
+    return sliceName
+      ? this.notifierState[eventName]?.[sliceName]
+      : (this.notifierState[eventName] as T);
+  }
+
+  /**
+   * Registers an action callback for a specific slice.
+   * @param {Function} callback - The action callback to register.
+   * @param {string} slice - The slice identifier.
+   * @returns {void}
+   */
+
+  registerAction(callback: Function, slice: string): void {
+    if (!this.actionSet[slice]) {
+      this.actionSet[slice] = new Set();
+    }
+    this.actionSet[slice].add(callback);
+  }
+
+  unregisterAction(callback: Function, slice: string): void {
+    if (this.actionSet[slice]) {
+      this.actionSet[slice].delete(callback);
+      if (this.actionSet[slice].size === 0) {
+        delete this.actionSet[slice];
+      }
+    }
+  }
+
+  /**
+   * Gets the action set.
+   * @private
+   * @returns {ActionSet} - The action set.
+   */
+  private getActionSet(): ActionSet {
+    return this.actionSet;
+  }
+}
+
+export default ChangeNotifier;
+
+================
+File: utils/common.ts
+================
+export function hexToRGBA(hex: string, opacity: number): string {
+  // Ensure the opacity is within the range of 0 to 100
+  const suppliedOpacity = Math.max(0, Math.min(100, opacity));
+
+  // Convert the opacity to a value between 0 and 1
+  const alpha: number = suppliedOpacity / 100;
+
+  // Remove the '#' from the hex color if it exists
+  const separatedHex = hex.replace('#', '');
+
+  let r: number;
+  let g: number;
+  let b: number;
+  if (hex.length === 3) {
+    // Handle shorthand hex color (e.g., #abc)
+    r = Number.parseInt(separatedHex[0] + separatedHex[0], 16);
+    g = Number.parseInt(separatedHex[1] + separatedHex[1], 16);
+    b = Number.parseInt(separatedHex[2] + separatedHex[2], 16);
+  } else if (separatedHex.length === 6) {
+    // Handle full separatedHex color (e.g., #aabbcc)
+    r = Number.parseInt(separatedHex.substring(0, 2), 16);
+    g = Number.parseInt(separatedHex.substring(2, 4), 16);
+    b = Number.parseInt(separatedHex.substring(4, 6), 16);
+  } else {
+    throw new Error('Invalid hex color format. Use #abc or #aabbcc.');
+  }
+
+  // Return the color in RGBA format
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+export const isValidFunction = (fun: any) => typeof fun === 'function';
+export const isValidArray = (arr: any[]) =>
+  arr && Array.isArray(arr) && arr.length > 0;
+export const isValidObject = (obj: any): boolean =>
+  obj !== null && typeof obj === 'object' && !Array.isArray(obj);
+
+export const isEmptyObject = (obj: any): boolean =>
+  obj !== null &&
+  typeof obj === 'object' &&
+  !Array.isArray(obj) &&
+  Object.keys(obj).length > 0;
+
+================
+File: utils/screenutil.readme.md
+================
+# React Native Scaling Utility
+
+A comprehensive utility for handling responsive scaling in React Native applications. This utility provides various functions to ensure your UI components scale appropriately across different device sizes and pixel densities.
+
+## Quick Reference
+
+| Function | Purpose | When to Use |
+|----------|---------|-------------|
+| `s()` | Scales based on screen width and pixel density | Widths, horizontal padding/margins, icon sizes |
+| `vs()` | Scales based on screen height and pixel density | Heights, vertical padding/margins, spacings |
+| `ms()` | Moderately scales based on width (less dramatic) | Subtle horizontal scaling, maintaining proportions |
+| `mvs()` | Moderately scales based on height (less dramatic) | Subtle vertical scaling, maintaining proportions |
+| `font()` | Scales fonts considering accessibility settings | All text sizes |
+| `w()` | Calculates width as percentage of screen width | Responsive widths, full-width components |
+| `h()` | Calculates height as percentage of screen height | Responsive heights, full-height components |
+| `px()` | Converts fixed pixel values to responsive sizes | Translating exact design values to responsive sizes |
+
+## Installation
+
+```javascript
+import { s, vs, ms, mvs, font, w, h, px } from './metrics';
+```
+
+## Common UI Components
+
+### Buttons
+
+Buttons should scale appropriately while maintaining touch-friendly dimensions across devices.
+
+```javascript
+const buttonStyles = {
+  // Fixed width button
+  width: s(200),          
+  // OR percentage-based width
+  // width: w(80),        // 80% of screen width
+  
+  height: vs(48),         // Consistent height scaling
+  paddingHorizontal: s(16),
+  paddingVertical: vs(8),
+  borderRadius: s(8),
+  fontSize: font(16)      // Accessible font scaling
+}
+```
+
+### Images
+
+Images can be scaled using different approaches depending on your layout needs.
+
+```javascript
+// Square image (maintains aspect ratio)
+const squareImageStyles = {
+  width: s(120),
+  height: s(120),        // Use s() for both dimensions
+  borderRadius: s(8)
+}
+
+// Full-width image
+const fullWidthImageStyles = {
+  width: w(100),         // 100% of screen width
+  height: vs(200),       // Scaled height
+  borderRadius: s(8)
+}
+
+// Profile avatar
+const avatarStyles = {
+  width: s(48),
+  height: s(48),
+  borderRadius: s(24),   // For circular avatar
+}
+```
+
+### Cards/Tiles
+
+Cards and tiles often need to maintain consistent spacing and dimensions.
+
+```javascript
+const cardStyles = {
+  width: w(90),           // 90% of screen width
+  height: vs(160),        // Scaled height
+  padding: s(16),
+  marginVertical: vs(8),
+  marginHorizontal: s(12),
+  borderRadius: s(12)
+}
+
+// Grid tile
+const tileStyles = {
+  width: s(160),          // Fixed width
+  height: s(160),         // Square aspect ratio
+  margin: s(8),
+  borderRadius: s(8)
+}
+```
+
+### Lists & List Items
+
+List items should maintain consistent spacing and touch areas.
+
+```javascript
+const listItemStyles = {
+  width: w(100),          // Full width
+  height: vs(60),         // Consistent height
+  paddingHorizontal: s(16),
+  paddingVertical: vs(12)
+}
+
+const listSeparatorStyles = {
+  height: vs(1),          // Thin separator
+  marginLeft: s(16)
+}
+```
+
+### Forms & Input Fields
+
+Form elements should maintain usability across different screen sizes.
+
+```javascript
+const inputStyles = {
+  width: w(90),           // 90% of screen width
+  height: vs(48),         // Comfortable touch height
+  paddingHorizontal: s(12),
+  borderRadius: s(8),
+  fontSize: font(16)
+}
+
+const labelStyles = {
+  marginBottom: vs(8),
+  fontSize: font(14)
+}
+```
+
+## Best Practices
+
+1. **Horizontal Measurements**
+   - Use `s()` for fixed widths, horizontal padding, and margins
+   - Use `w()` for percentage-based widths
+   - Use `ms()` when you need more subtle scaling
+
+2. **Vertical Measurements**
+   - Use `vs()` for heights and vertical spacing
+   - Use `h()` for percentage-based heights
+   - Use `mvs()` for subtle vertical scaling
+
+3. **Text Sizing**
+   - Always use `font()` for text to respect accessibility settings
+   - Consider using smaller scaling factors for larger text
+
+4. **Component Spacing**
+   - Use `s()` for horizontal gaps between components
+   - Use `vs()` for vertical gaps between components
+
+5. **Touch Targets**
+   - Ensure touch targets are at least `vs(44)` height
+   - Use appropriate padding to create comfortable touch areas
+
+6. **Exact Specifications**
+   - Use `px()` when you need to match exact design specifications from your base device (iPhone 14)
+
+## Base Device Specifications
+
+The scaling calculations are based on the iPhone 14 as the reference device:
+- Base Width: 390
+- Base Height: 844
+- Base Pixel Ratio: 3
+
+## Tips for Different Screen Sizes
+
+- Test your layouts on both small and large devices
+- Use percentage-based widths (`w()`) for flexible layouts
+- Consider using `ms()` and `mvs()` for components that shouldn't scale as dramatically
+- Always ensure touch targets remain comfortable across device sizes
+- Remember that font scaling also respects the user's accessibility settings
+
+================
+File: utils/screenUtil.ts
+================
+import { Dimensions, PixelRatio } from 'react-native';
+
+/**
+ * React Native Scaling Utility
+ *
+ * This utility provides various functions for responsive scaling in React Native applications.
+ * Below is a quick reference table for all available scaling functions:
+ *
+ * | Function | Purpose                                          | When to Use                                    |
+ * |----------|--------------------------------------------------|----------------------------------------------------|
+ * | s()      | Scales based on screen width and pixel density   | Widths, horizontal padding/margins, icon sizes     |
+ * | vs()     | Scales based on screen height and pixel density  | Heights, vertical padding/margins, spacings        |
+ * | ms()     | Moderately scales based on width (less dramatic) | Subtle horizontal scaling, maintaining proportions |
+ * | mvs()    | Moderately scales based on height (less dramatic)| Subtle vertical scaling, maintaining proportions   |
+ * | font()   | Scales fonts considering accessibility settings  | All text sizes                                     |
+ * | w()      | Calculates width as percentage of screen width   | Responsive widths, full-width components           |
+ * | h()      | Calculates height as percentage of screen height | Responsive heights, full-height components         |
+ * | px()     | Converts fixed pixel values to responsive sizes  | Translating exact design values to responsive sizes|
+ */
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+// Base dimensions (iPhone 14 logical resolution)
+const BASE_WIDTH = 390;
+const BASE_HEIGHT = 844;
+
+// Base pixel ratio (iPhone 14)
+const BASE_PIXEL_RATIO = 3;
+
+const SCALE = SCREEN_WIDTH / BASE_WIDTH;
+const VERTICAL_SCALE = SCREEN_HEIGHT / BASE_HEIGHT;
+
+// Get the current device's pixel ratio
+const PIXEL_RATIO = PixelRatio.get();
+
+// Calculate a scale factor that takes into account both screen size and pixel density
+const DENSITY_SCALE = PIXEL_RATIO / BASE_PIXEL_RATIO;
+
+export const metrics = {
+  /**
+   * Scales a size horizontally considering both screen width and pixel density.
+   * @param {number} size - The size to scale.
+   * @returns {number} The scaled size.
+   *
+   * Use for:
+   * - Widths of components
+   * - Horizontal padding or margins
+   * - Icon sizes
+   * - Any horizontal measurement that should scale with screen width
+   */
+  s: (size: number) => Math.round(SCALE * size * DENSITY_SCALE),
+
+  /**
+   * Scales a size vertically considering both screen height and pixel density.
+   * @param {number} size - The size to scale.
+   * @returns {number} The scaled size.
+   *
+   * Use for:
+   * - Heights of components
+   * - Vertical padding or margins
+   * - Vertical spacing between components
+   * - Any vertical measurement that should scale with screen height
+   */
+  vs: (size: number) => Math.round(VERTICAL_SCALE * size * DENSITY_SCALE),
+
+  /**
+   * Applies a moderate horizontal scaling to a size, considering pixel density.
+   * @param {number} size - The size to scale.
+   * @param {number} [factor=0.5] - The factor to moderate the scaling (0-1).
+   * @returns {number} The moderately scaled size.
+   *
+   * Use for:
+   * - Sizes that should scale, but less dramatically than `s`
+   * - Horizontal measurements where you want to maintain closer to original size on larger screens
+   * - Padding or margins that need subtle scaling
+   */
+  ms: (size: number, factor: number = 0.5) => {
+    return Math.round((size + (SCALE - 1) * size * factor) * DENSITY_SCALE);
+  },
+
+  /**
+   * Applies a moderate vertical scaling to a size, considering pixel density.
+   * @param {number} size - The size to scale.
+   * @param {number} [factor=0.5] - The factor to moderate the scaling (0-1).
+   * @returns {number} The moderately scaled size.
+   *
+   * Use for:
+   * - Sizes that should scale vertically, but less dramatically than `vs`
+   * - Vertical measurements where you want to maintain closer to original size on taller screens
+   * - Vertical padding or margins that need subtle scaling
+   */
+  mvs: (size: number, factor: number = 0.5) => {
+    return Math.round((size + (VERTICAL_SCALE - 1) * size * factor) * DENSITY_SCALE);
+  },
+
+  /**
+   * Scales a font size based on the screen size, pixel density, and the device's font scale setting.
+   * @param {number} size - The font size to scale.
+   * @returns {number} The scaled font size.
+   *
+   * Use for:
+   * - All text sizes in your app
+   * - Ensures text respects both screen size and user's accessibility settings
+   */
+  font: (size: number) => {
+    const fontScale = PixelRatio.getFontScale();
+    return Math.round(SCALE * size * DENSITY_SCALE * fontScale);
+  },
+
+  /**
+   * Calculates a width based on a percentage of the screen width.
+   * @param {number} percentage - The percentage of the screen width (0-100).
+   * @returns {number} The calculated width in pixels.
+   *
+   * Use for:
+   * - Creating responsive layouts based on screen width percentages
+   * - Widths that should always be a certain percentage of the screen
+   * - Full-width components (use w(100))
+   */
+  w: (percentage: number) => {
+    return Math.round((percentage / 100) * SCREEN_WIDTH);
+  },
+
+  /**
+   * Calculates a height based on a percentage of the screen height.
+   * @param {number} percentage - The percentage of the screen height (0-100).
+   * @returns {number} The calculated height in pixels.
+   *
+   * Use for:
+   * - Creating responsive layouts based on screen height percentages
+   * - Heights that should always be a certain percentage of the screen
+   * - Full-height components (use h(100))
+   */
+  h: (percentage: number) => {
+    return Math.round((percentage / 100) * SCREEN_HEIGHT);
+  },
+
+  /**
+   * Converts a fixed pixel value to a responsive size relative to the base design, considering pixel density.
+   * @param {number} px - The pixel value based on the base design (e.g., 120 for a 120x120 view on iPhone 14).
+   * @returns {number} The calculated responsive size.
+   *
+   * Use for:
+   * - Translating exact pixel values from designs into responsive sizes
+   * - When you need a size to be exactly as specified in the design on the base device,
+   *   but scale appropriately on other devices
+   */
+  px: (px: number) => {
+    const ratio = px / BASE_WIDTH;
+    return Math.round(SCREEN_WIDTH * ratio * DENSITY_SCALE);
+  },
+};
+
+export const { s, vs, ms, mvs, font, w, h, px } = metrics;
+
+export default metrics;
+
+
+
+================================================================
+End of Codebase
+================================================================

@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import {CheckCircle2, Clock, Flame} from 'lucide-react-native';
 import React, {useCallback} from 'react';
 import {StyleSheet, View} from 'react-native';
@@ -14,7 +13,9 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {TextX, TouchableX, ViewX} from '~components/common';
-import {styleUtils, themes} from '~styles/theme';
+import {useTheme} from '~hooks/ThemeContext';
+import {styleUtils} from '~styles/theme';
+import {getThemeColor, withAlpha} from '~styles/themeUtils';
 
 interface HabitCardProps {
   title: string;
@@ -35,6 +36,9 @@ const HabitCard: React.FC<HabitCardProps> = ({
   streak = 0,
   onToggleComplete,
 }) => {
+  // Get current theme
+  const {theme} = useTheme();
+
   // Animation values
   const scale = useSharedValue(1);
   const checkScale = useSharedValue(isCompleted ? 1 : 0);
@@ -42,6 +46,12 @@ const HabitCard: React.FC<HabitCardProps> = ({
   const backgroundProgress = useSharedValue(isCompleted ? 100 : 0);
   const glowOpacity = useSharedValue(0);
   const streakBounce = useSharedValue(1);
+
+  // Get theme colors
+  const cardBackground = getThemeColor(theme, 'background', 'secondary');
+  const checkContainerBg = isCompleted
+    ? withAlpha(color, 0.1)
+    : getThemeColor(theme, 'background', 'input');
 
   const handlePress = useCallback(() => {
     const newState = !isCompleted;
@@ -132,20 +142,24 @@ const HabitCard: React.FC<HabitCardProps> = ({
   return (
     <TouchableX
       onPress={handlePress}
-      style={[styles.container, containerStyle]}
+      style={[
+        styles.container,
+        containerStyle,
+        {backgroundColor: cardBackground},
+      ]}
       borderRadius={styleUtils.borderRadius.lg}>
       <ViewX position="absolute" height="100%" width="100%">
         <Animated.View
           style={[
             styles.progressFill,
-            {backgroundColor: color + '10'},
+            {backgroundColor: withAlpha(color, 0.1)},
             backgroundStyle,
           ]}
         />
         <Animated.View
           style={[
             styles.glowEffect,
-            {backgroundColor: color + '30'},
+            {backgroundColor: withAlpha(color, 0.3)},
             glowStyle,
           ]}
         />
@@ -181,7 +195,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
               gap={styleUtils.spacing['2xs']}>
               <Clock
                 size={14}
-                color={themes.dark.text.secondary}
+                color={getThemeColor(theme, 'text', 'secondary')}
                 strokeWidth={2}
               />
               <TextX fontSize="sm" fontWeight="medium" color="secondary">
@@ -207,7 +221,7 @@ const HabitCard: React.FC<HabitCardProps> = ({
           style={[
             styles.checkContainer,
             {
-              backgroundColor: isCompleted ? color + '10' : '#343A40',
+              backgroundColor: checkContainerBg,
             },
           ]}>
           <Animated.View style={checkStyle}>
@@ -223,7 +237,6 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 16,
     marginVertical: 8,
-    backgroundColor: '#1A1A1A',
     overflow: 'hidden',
   },
   backgroundLayer: {

@@ -55,7 +55,7 @@ const BottomTabs = () => {
         bottomTabs={true}
         labelVisibilityMode="labeled"
         selectedTintColor={themes[theme].text.accent}
-        barTintColor={themes[theme].background.nav}>
+        barTintColor={'#16171B'}>
         {getTabsConfig(theme).map(tab => (
           <TabBarItem
             key={tab.id}

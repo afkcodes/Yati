@@ -1,28 +1,61 @@
 import {Calendar} from 'lucide-react-native';
 import React from 'react';
-import {
-  StyleSheet,
-  Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import {baseStyles, COLORS} from './styles';
+import {TextInput} from 'react-native';
+import {Switch} from 'react-native-switch';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import {themes} from '~styles/theme';
+
+// Types
+interface Goal {
+  enabled: boolean;
+  target: string;
+  deadline: Date | null;
+}
 
 interface GoalSettingsProps {
-  goal: {
-    enabled: boolean;
-    target: string;
-    deadline: Date | null;
-  };
-  onGoalChange: (goal: {
-    enabled?: boolean;
-    target?: string;
-    deadline?: Date | null;
-  }) => void;
+  goal: Goal;
+  onGoalChange: (goal: Partial<Goal>) => void;
   onDeadlinePicker: () => void;
 }
+
+// Input component with consistent styling
+const GoalInput: React.FC<{
+  value: string;
+  onChangeText: (text: string) => void;
+}> = ({value, onChangeText}) => (
+  <ViewX variant="secondary" borderRadius={8} padding={12} flex={1}>
+    <TextInput
+      value={value}
+      onChangeText={onChangeText}
+      placeholder="Enter your goal target"
+      placeholderTextColor="#8E8E93"
+      style={{
+        color: '#FFFFFF',
+        fontSize: 15,
+      }}
+    />
+  </ViewX>
+);
+
+// Date button component
+const DateButton: React.FC<{
+  deadline: Date | null;
+  onPress: () => void;
+}> = ({deadline, onPress}) => (
+  <TouchableX
+    borderRadius={8}
+    padding={12}
+    flexDirection="row"
+    gap={8}
+    alignItems="center"
+    justifyContent="center"
+    onPress={onPress}>
+    <Calendar size={20} />
+    <TextX fontSize="md">
+      {deadline ? deadline.toLocaleDateString() : 'Set deadline'}
+    </TextX>
+  </TouchableX>
+);
 
 export const GoalSettings: React.FC<GoalSettingsProps> = ({
   goal,
@@ -30,70 +63,46 @@ export const GoalSettings: React.FC<GoalSettingsProps> = ({
   onDeadlinePicker,
 }) => {
   return (
-    <View style={baseStyles.inputGroup}>
-      <View style={styles.goalHeader}>
-        <Text style={baseStyles.label}>Goal</Text>
+    <ViewX gap={16} marginVertical={16}>
+      <ViewX
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center">
+        <TextX fontSize="lg" fontWeight="semibold">
+          Goal
+        </TextX>
         <Switch
           value={goal.enabled}
           onValueChange={enabled => onGoalChange({enabled})}
-          trackColor={{false: COLORS.surface, true: COLORS.primary}}
-          thumbColor={COLORS.text}
+          circleSize={24}
+          innerCircleStyle={{height: 15, width: 15}}
+          barHeight={32}
+          circleBorderWidth={0}
+          backgroundActive={themes.dark.background.accent}
+          backgroundInactive="#3A3A3C"
+          circleActiveColor="#FFFFFF"
+          circleInActiveColor="#FFFFFF"
+          changeValueImmediately
+          renderActiveText={false}
+          renderInActiveText={false}
+          switchWidthMultiplier={2}
         />
-      </View>
+      </ViewX>
 
       {goal.enabled && (
-        <View style={styles.goalDetails}>
-          <View style={styles.goalInput}>
-            <TextInput
-              style={baseStyles.input}
+        <ViewX gap={8}>
+          <ViewX flexDirection="row" gap={8} alignItems="center">
+            <GoalInput
               value={goal.target}
               onChangeText={target => onGoalChange({target})}
-              placeholder="Enter your goal target"
-              placeholderTextColor={COLORS.textSecondary}
             />
-          </View>
-          <TouchableOpacity
-            style={styles.dateButton}
-            onPress={onDeadlinePicker}>
-            <Calendar size={20} color={COLORS.text} />
-            <Text style={styles.dateButtonText}>
-              {goal.deadline
-                ? goal.deadline.toLocaleDateString()
-                : 'Set deadline'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+          </ViewX>
+
+          <DateButton deadline={goal.deadline} onPress={onDeadlinePicker} />
+        </ViewX>
       )}
-    </View>
+    </ViewX>
   );
 };
 
-const styles = StyleSheet.create({
-  goalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  goalDetails: {
-    gap: 8,
-  },
-  goalInput: {
-    flexDirection: 'row',
-    gap: 8,
-    alignItems: 'center',
-  },
-  dateButton: {
-    backgroundColor: COLORS.surface,
-    padding: 12,
-    borderRadius: 8,
-    flexDirection: 'row',
-    gap: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  dateButtonText: {
-    color: COLORS.text,
-    fontSize: 15,
-  },
-});
+export type {Goal};

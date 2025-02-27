@@ -10,16 +10,6 @@ import {font, ms, vs} from '~utils/screenUtil';
 
 const brand = {
   primary: {
-    // '50': '#FFF0F2', // Soft stage light
-    // '100': '#FFE2E7', // Gentle spotlight
-    // '200': '#FFCCD5', // Soft curtain light
-    // '300': '#FF8FA3', // Drama accent
-    // '400': '#E84A6A', // Emotional accent
-    // '500': '#C8234A', // New primary crimson
-    // '600': '#A81D3D', // Theater curtain red
-    // '700': '#8A1731', // Deep dramatic red
-    // '800': '#6C1226', // Shadow red
-    // '900': '#4E0C1B', // Dark theater red
     50: '#F0F2FF', // Softer light tint for better legibility on light backgrounds
     100: '#DEE1FE', // Light tint with slightly more contrast
     200: '#BFC4FC', // Balanced tint for subtle elements
@@ -33,127 +23,58 @@ const brand = {
   },
 };
 
-const neutral = {
-  light: {
-    50: '#FFFFFF', // Pure white
-    100: '#FCFCFD',
-    200: '#F8F9FB',
-    300: '#F3F4F8',
-    400: '#ECEDF3',
-    500: '#E5E7ED',
-    600: '#D8DBE5',
-    700: '#C1C4CF',
-    800: '#AEB1BD',
-    900: '#9B9EAC',
+// Enhanced dark mode palette with more consistent levels
+const dark = {
+  // Background levels
+  background: {
+    // Main page background (blackest)
+    primary: '#000000',
+    // Card/container backgrounds
+    secondary: '#121212',
+    // Elevated/highlighted card backgrounds
+    elevated: '#1C1C1E',
+    // Input fields, selectable items
+    input: '#2C2C2E',
+    // Subtle highlights, selected items
+    highlight: '#3A3A3C',
   },
-  dark: {
-    // 50: '#B0B1B5', // Light blackish (soft, almost gray but still blackish)
-    // 100: '#8F9094', // Slightly darker, distinct from 50
-    // 200: '#6E6F73', // Medium blackish, clear step down
-    // 300: '#4D4E52', // Darker, leaning into black
-    // 400: '#3A3B3F', // Rich blackish, distinct from 300
-    // 500: '#28292D', // Muted dark (core blackish tone)
-    // 600: '#1F2024', // Elevated dark (deeper, more contrast)
-    // 700: '#16171B', // Paper dark (almost pure black)
-    // 800: '#0D0E12', // Background dark (deep black)
-    // 900: '#040506', // Deepest black (near black, maximum depth)
-    // Light shades (for text and accents)
-    50: '#FFFFFF', // Pure white (for high-contrast text)
-    100: '#F5F5F5', // Off-white (for subtle text)
-    200: '#E0E0E0', // Light gray (for borders or muted text)
-
-    // Mid-tones (for surfaces and cards)
-    300: '#9E9E9E', // Medium gray (for secondary text)
-    400: '#616161', // Dark gray (for muted accents)
-    500: '#424242', // Dark gray (for card backgrounds)
-    600: '#303030', // Darker gray (for elevated cards)
-    700: '#212121', // Very dark gray (for dark surfaces)
-
-    // Dark shades (for backgrounds and depth)
-    800: '#121212', // Near-black (for dark backgrounds)
-    900: '#000000', // Pure black (for deepest dark)
+  // Text and icon levels
+  text: {
+    // Primary text - high contrast
+    primary: '#FFFFFF',
+    // Secondary text - medium contrast
+    secondary: '#EBEBF5CC', // Equivalent to white at ~80% opacity
+    // Tertiary text - low contrast, for hints/placeholders
+    tertiary: '#EBEBF599', // Equivalent to white at ~60% opacity
+    // Disabled text - very low contrast
+    disabled: '#EBEBF566', // Equivalent to white at ~40% opacity
+  },
+  // Border and divider levels
+  border: {
+    // Prominent borders/dividers
+    primary: '#3A3A3C',
+    // Subtle borders/dividers
+    secondary: '#2C2C2E',
   },
 };
 
+// Semantic colors for consistent status indicators across the app
 const semantic = {
   success: {
-    50: '#E8FFF3',
-    100: '#D1FFE7',
-    200: '#A3FFCF',
-    300: '#75FFB7',
-    400: '#47FF9F',
-    500: '#22C55E', // Main success
-    600: '#1B9E4B',
-    700: '#147738',
-    800: '#0D5025',
-    900: '#062912',
+    base: '#34C759', // Green
+    light: '#34C75933', // Transparent version for backgrounds
   },
   error: {
-    50: '#FFF1F0',
-    100: '#FFE4E2',
-    200: '#FFC9C5',
-    300: '#FFADA8',
-    400: '#FF928B',
-    500: '#EF4444', // Main error
-    600: '#BF3636',
-    700: '#8F2828',
-    800: '#5F1B1B',
-    900: '#300D0D',
+    base: '#FF3B30', // Red
+    light: '#FF3B3033', // Transparent version for backgrounds
   },
   warning: {
-    50: '#FFF9E5',
-    100: '#FFF3CC',
-    200: '#FFE799',
-    300: '#FFDB66',
-    400: '#FFCF33',
-    500: '#F59E0B', // Main warning
-    600: '#C47E09',
-    700: '#935F07',
-    800: '#623F04',
-    900: '#312002',
+    base: '#FF9500', // Orange
+    light: '#FF950033', // Transparent version for backgrounds
   },
   info: {
-    50: '#EFF6FF',
-    100: '#DBEAFE',
-    200: '#BFDBFE',
-    300: '#93C5FD',
-    400: '#60A5FA',
-    500: '#4048B0', // Using primary as info
-    600: '#343B96',
-    700: '#2A2F7A',
-    800: '#1F235D',
-    900: '#151840',
-  },
-};
-
-const text = {
-  light: {
-    primary: '#000000',
-    gray: {
-      100: '#F8F9FA',
-      200: '#E9ECEF',
-      300: '#DEE2E6',
-      400: '#CED4DA',
-      500: '#ADB5BD',
-      600: '#6C757D',
-      700: '#495057',
-      800: '#343A40',
-      900: '#212529',
-    },
-  },
-  dark: {
-    primary: '#FFFFFF',
-    gray: {
-      100: '#E9ECEF',
-      200: '#DDE1E6',
-      300: '#CED4DA',
-      400: '#ADB5BD',
-      500: '#868E96',
-      600: '#666D75',
-      700: '#495057',
-      800: '#343A40',
-      900: '#212529',
-    },
+    base: '#0A84FF', // Blue
+    light: '#0A84FF33', // Transparent version for backgrounds
   },
 };
 
@@ -254,6 +175,9 @@ export const alignment: {[key in Alignment]: string} = {
   left: 'flex-start',
 };
 
-const colors = {brand, neutral, semantic, text};
-
-export {colors};
+// Export the colors object with all our color tokens
+export const colors = {
+  brand,
+  dark,
+  semantic,
+};

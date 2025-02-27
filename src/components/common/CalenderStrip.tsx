@@ -8,7 +8,8 @@ import {
 } from 'date-fns';
 import React, {useCallback, useMemo, useRef} from 'react';
 import {Dimensions, StyleSheet, View} from 'react-native';
-import {themes} from '~styles/theme';
+import {useTheme} from '~hooks/ThemeContext';
+import {getThemeColor} from '~styles/themeUtils';
 import {s} from '~utils/screenUtil';
 import TextX from './TextX';
 import TouchableX from './TouchableX';
@@ -33,9 +34,6 @@ const ITEM_WIDTH = 50;
 const ITEM_MARGIN = 4;
 const TOTAL_ITEM_WIDTH = ITEM_WIDTH + ITEM_MARGIN * 2;
 const SCREEN_WIDTH = Dimensions.get('window').width;
-// const VISIBLE_ITEMS = 7;
-// const TOTAL_LIST_WIDTH = VISIBLE_ITEMS * (ITEM_WIDTH + ITEM_MARGIN * 2);
-// const CENTER_PADDING = (SCREEN_WIDTH - TOTAL_LIST_WIDTH) / 2;
 
 const generateDateList = (start: Date, end: Date): DateItem[] => {
   const today = new Date();
@@ -61,15 +59,19 @@ export const CalendarStrip: React.FC<CalendarStripProps> = ({
   style,
 }) => {
   const listRef = useRef<any>(null);
+  const {theme} = useTheme();
   const dateList = useMemo(
     () => generateDateList(startDate, endDate),
     [startDate, endDate],
   );
 
-  // const todayIndex = useMemo(
-  //   () => Math.max(0, dateList.findIndex(item => item.isToday) - 3),
-  //   [dateList],
-  // );
+  // Get theme colors
+  const backgroundColor = getThemeColor(theme, 'background', 'primary');
+  const dateItemBg = getThemeColor(theme, 'background', 'secondary');
+  const todayBg = getThemeColor(theme, 'background', 'accent');
+  const disabledBg = getThemeColor(theme, 'background', 'highlight');
+  const accentColor = getThemeColor(theme, 'background', 'accent');
+  const disabledTextColor = getThemeColor(theme, 'text', 'disabled');
 
   const renderItem = useCallback(
     ({item}: {item: DateItem}) => {
@@ -80,15 +82,20 @@ export const CalendarStrip: React.FC<CalendarStripProps> = ({
           disabled={item.isDisabled}
           style={[
             styles.dateItem,
-            isSelected && styles.selectedItem,
-            item.isToday && styles.todayItem,
-            item.isDisabled && styles.disabledItem,
+            {backgroundColor: dateItemBg},
+            isSelected && {
+              backgroundColor: dateItemBg,
+              borderWidth: 1,
+              borderColor: accentColor,
+            },
+            item.isToday && {backgroundColor: todayBg},
+            item.isDisabled && {backgroundColor: disabledBg, opacity: 0.6},
           ]}>
           <TextX
             style={[
               styles.dayName,
               isSelected && styles.selectedText,
-              item.isDisabled && styles.disabledText,
+              item.isDisabled && {color: disabledTextColor},
             ]}>
             {item.dayName}
           </TextX>
@@ -96,18 +103,26 @@ export const CalendarStrip: React.FC<CalendarStripProps> = ({
             style={[
               styles.dayNumber,
               isSelected && styles.selectedText,
-              item.isDisabled && styles.disabledText,
+              item.isDisabled && {color: disabledTextColor},
             ]}>
             {item.dayNumber}
           </TextX>
         </TouchableX>
       );
     },
-    [selectedDate, onDateSelect],
+    [
+      selectedDate,
+      onDateSelect,
+      dateItemBg,
+      todayBg,
+      disabledBg,
+      accentColor,
+      disabledTextColor,
+    ],
   );
 
   return (
-    <View style={[styles.container, style]}>
+    <View style={[styles.container, {backgroundColor}, style]}>
       <LegendList
         ref={listRef}
         data={dateList}
@@ -137,34 +152,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginHorizontal: ITEM_MARGIN,
     borderRadius: 10,
-    backgroundColor: themes.dark.background.secondary,
-  },
-  selectedItem: {
-    backgroundColor: themes.dark.background.secondary,
-    borderWidth: 1,
-    borderColor: themes.dark.text.accent,
-  },
-  todayItem: {
-    backgroundColor: themes.dark.background.accent,
-    borderColor: themes.dark.background.accent,
-  },
-  disabledItem: {
-    backgroundColor: '#e0e0e0',
-    opacity: 0.6,
   },
   dayName: {
     fontSize: 14,
     marginBottom: 4,
-    color: '#fff',
   },
   dayNumber: {
     fontSize: 20,
     fontWeight: '600',
   },
-  selectedText: {
-    color: themes.dark.text.primary,
-  },
-  disabledText: {
-    color: '#999',
-  },
+  selectedText: {},
 });

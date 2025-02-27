@@ -1,19 +1,14 @@
+/* eslint-disable react-native/no-inline-styles */
 import {Bell} from 'lucide-react-native';
 import React from 'react';
-import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
+import {Image, StyleSheet, Text, View} from 'react-native';
+import {useAnimatedStyle, useSharedValue} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {TextX, TouchableX, ViewX} from '~components/common';
-import {styleUtils, themes} from '~styles/theme';
+import {useTheme} from '~hooks/ThemeContext';
+import {styleUtils} from '~styles/theme';
+import {getThemeColor} from '~styles/themeUtils';
 import {s} from '~utils/screenUtil';
-
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface GreetingHeaderProps {
   username: string;
@@ -27,70 +22,23 @@ interface GreetingHeaderProps {
 const GreetingHeader: React.FC<GreetingHeaderProps> = ({
   username,
   avatar,
-  streakCount = 0,
   hasUnreadNotifications = false,
   onPressNotification,
   onPressStreak,
 }) => {
-  const translateY = useSharedValue(20);
-  const opacity = useSharedValue(0);
+  const {theme} = useTheme();
   const bellScale = useSharedValue(1);
+  const {top} = useSafeAreaInsets();
 
-  const getTimeBasedContent = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) {
-      return {
-        greeting: 'Good morning',
-        message: '🌅 Ready to start your day?',
-      };
-    }
-    if (hour < 17) {
-      return {
-        greeting: 'Good afternoon',
-        message: '💪 Keep going strong!',
-      };
-    }
-    if (hour < 21) {
-      return {
-        greeting: 'Good evening',
-        message: '🎯 Finish your goals!',
-      };
-    }
-    return {
-      greeting: 'Good night',
-      message: '✨ Time to reflect',
-    };
-  };
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{translateY: translateY.value}],
-    opacity: opacity.value,
-  }));
+  // Get theme colors
+  const textColor = getThemeColor(theme, 'text', 'primary');
+  const textSecondaryColor = getThemeColor(theme, 'text', 'secondary');
+  const notificationDotColor = getThemeColor(theme, 'text', 'error');
+  const avatarFallbackBg = getThemeColor(theme, 'background', 'tertiary');
 
   const bellAnimatedStyle = useAnimatedStyle(() => ({
     transform: [{scale: bellScale.value}],
   }));
-
-  React.useEffect(() => {
-    translateY.value = withSpring(0, {
-      damping: 12,
-      stiffness: 100,
-    });
-    opacity.value = withSpring(1);
-  }, []);
-
-  React.useEffect(() => {
-    if (hasUnreadNotifications) {
-      bellScale.value = withSequence(
-        withTiming(1.2, {duration: 200}),
-        withSpring(1, {damping: 4}),
-      );
-    }
-  }, [hasUnreadNotifications]);
-
-  const {greeting} = getTimeBasedContent();
-
-  const {top} = useSafeAreaInsets();
 
   return (
     <ViewX
@@ -116,8 +64,15 @@ const GreetingHeader: React.FC<GreetingHeaderProps> = ({
             resizeMode="cover"
           />
         ) : (
-          <View style={[styles.avatar, styles.avatarFallback]}>
-            <Text style={styles.avatarText}>{username[0].toUpperCase()}</Text>
+          <View
+            style={[
+              styles.avatar,
+              styles.avatarFallback,
+              {backgroundColor: avatarFallbackBg},
+            ]}>
+            <Text style={[styles.avatarText, {color: textSecondaryColor}]}>
+              {username[0].toUpperCase()}
+            </Text>
           </View>
         )}
       </TouchableX>
@@ -136,8 +91,15 @@ const GreetingHeader: React.FC<GreetingHeaderProps> = ({
         width={s(48)}
         onPress={onPressNotification}
         style={[styles.notificationButton, bellAnimatedStyle]}>
-        <Bell size={24} color={themes.dark.text.primary} strokeWidth={2} />
-        {hasUnreadNotifications && <View style={styles.notificationDot} />}
+        <Bell size={24} color={textColor} strokeWidth={2} />
+        {hasUnreadNotifications && (
+          <View
+            style={[
+              styles.notificationDot,
+              {backgroundColor: notificationDotColor},
+            ]}
+          />
+        )}
       </TouchableX>
     </ViewX>
   );
@@ -166,20 +128,17 @@ const styles = StyleSheet.create({
     borderRadius: 24,
   },
   avatarFallback: {
-    backgroundColor: '#F3F4F6',
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#4B5563',
   },
   streakBadge: {
     position: 'absolute',
     bottom: -4,
     right: -4,
-    backgroundColor: '#FF4757',
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 10,
@@ -197,17 +156,14 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 14,
-    color: '#6B7280',
     fontWeight: '500',
   },
   username: {
     fontSize: 20,
-    color: '#1F2937',
     fontWeight: '700',
   },
   message: {
     fontSize: 13,
-    color: '#6B7280',
   },
   notificationButton: {
     padding: 8,
@@ -220,7 +176,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#FF4757',
     borderWidth: 1.5,
     borderColor: '#FFFFFF',
   },

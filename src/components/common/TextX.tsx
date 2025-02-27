@@ -2,13 +2,23 @@ import React, {useMemo} from 'react';
 import {type StyleProp, StyleSheet, Text, type TextStyle} from 'react-native';
 import {useTheme} from '~hooks/ThemeContext';
 import {themes} from '~styles/theme';
+import {getThemeColor} from '~styles/themeUtils';
 import type {FontSize, FontWeight} from '~types/common.types';
 
 interface TextXProps
   extends Omit<TextStyle, 'fontSize' | 'fontWeight' | 'color'> {
   children?: React.ReactNode;
   style?: StyleProp<TextStyle>;
-  color?: 'primary' | 'secondary' | 'tertiary' | 'accent';
+  color?:
+    | 'primary'
+    | 'secondary'
+    | 'tertiary'
+    | 'disabled'
+    | 'accent'
+    | 'success'
+    | 'error'
+    | 'warning'
+    | 'info';
   fontSize?: FontSize;
   fontWeight?: FontWeight;
 }
@@ -23,7 +33,9 @@ const TextX: React.FC<TextXProps> = ({
 }) => {
   const styleProps = JSON.stringify(rest);
   const {theme} = useTheme();
-  const textColor = themes[theme].text[color];
+
+  // Get the appropriate text color from theme
+  const textColor = getThemeColor(theme, 'text', color);
   const textSize = themes[theme].typography.fontSizes[fontSize];
   const fontFamilyWeight = themes[theme].typography.fontFamily[fontWeight];
 

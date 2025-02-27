@@ -28,3 +28,15 @@ export function hexToRGBA(hex: string, opacity: number): string {
   // Return the color in RGBA format
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+export const isValidFunction = (fun: any) => typeof fun === 'function';
+export const isValidArray = (arr: any[]) =>
+  arr && Array.isArray(arr) && arr.length > 0;
+export const isValidObject = (obj: any): boolean =>
+  obj !== null && typeof obj === 'object' && !Array.isArray(obj);
+
+export const isEmptyObject = (obj: any): boolean =>
+  obj !== null &&
+  typeof obj === 'object' &&
+  !Array.isArray(obj) &&
+  Object.keys(obj).length > 0;

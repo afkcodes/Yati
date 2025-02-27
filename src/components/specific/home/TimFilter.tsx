@@ -10,7 +10,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {TextX} from '~components/common';
-import {themes} from '~styles/theme';
+import {useTheme} from '~hooks/ThemeContext';
+import {getThemeColor} from '~styles/themeUtils';
 
 type TimePeriod = 'morning' | 'evening' | 'night' | 'all';
 
@@ -27,10 +28,16 @@ const TIME_OPTIONS = [
 ] as const;
 
 const TimeFilter = ({selectedTime, onSelectTime}: TimeFilterProps) => {
+  const {theme} = useTheme();
   const [positions, setPositions] = React.useState<{[key: string]: number}>({});
   const translateX = useSharedValue(0);
   const scale = useSharedValue(1);
   const [prevSelectedTime, setPrevSelectedTime] = React.useState(selectedTime);
+
+  // Get theme colors
+  const containerBg = getThemeColor(theme, 'background', 'secondary');
+  const selectedBg = getThemeColor(theme, 'background', 'accent');
+  const textSecondary = getThemeColor(theme, 'text', 'secondary');
 
   const onLayout = React.useCallback((event: any, id: string) => {
     const {x} = event.nativeEvent.layout;
@@ -79,9 +86,12 @@ const TimeFilter = ({selectedTime, onSelectTime}: TimeFilterProps) => {
 
   return (
     <View style={styles.container}>
-      <SquircleView style={styles.filterContainer}>
+      <SquircleView
+        style={[styles.filterContainer, {backgroundColor: containerBg}]}>
         <Animated.View style={[animatedStyle, styles.selectedBackground]}>
-          <SquircleView style={styles.selectedIndicator} />
+          <SquircleView
+            style={[styles.selectedIndicator, {backgroundColor: selectedBg}]}
+          />
         </Animated.View>
         {TIME_OPTIONS.map(({id, label, Icon}) => {
           const isSelected = selectedTime === id;
@@ -94,7 +104,11 @@ const TimeFilter = ({selectedTime, onSelectTime}: TimeFilterProps) => {
               <View style={styles.buttonContent}>
                 <Icon
                   size={16}
-                  color={isSelected ? themes.dark.text.primary : '#8E8E93'}
+                  color={
+                    isSelected
+                      ? getThemeColor(theme, 'text', 'primary')
+                      : textSecondary
+                  }
                   strokeWidth={2}
                 />
                 <TextX
@@ -118,7 +132,6 @@ const styles = StyleSheet.create({
   },
   filterContainer: {
     flexDirection: 'row',
-    backgroundColor: '#1A1A1A',
     borderRadius: 12,
     padding: 4,
     height: 56,
@@ -137,7 +150,6 @@ const styles = StyleSheet.create({
   },
   selectedIndicator: {
     flex: 1,
-    backgroundColor: themes.dark.background.accent,
     borderRadius: 12,
   },
   button: {

@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import {LegendList} from '@legendapp/list';
 import {
   addDays,
@@ -9,7 +10,7 @@ import {
 import React, {useCallback, useMemo, useRef} from 'react';
 import {Dimensions, StyleSheet, View} from 'react-native';
 import {useTheme} from '~hooks/ThemeContext';
-import {getThemeColor} from '~styles/themeUtils';
+import {getThemeColor} from '~styles/theme';
 import {s} from '~utils/screenUtil';
 import TextX from './TextX';
 import TouchableX from './TouchableX';

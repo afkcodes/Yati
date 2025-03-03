@@ -1,13 +1,12 @@
 /* eslint-disable react-native/no-inline-styles */
 import {Bell} from 'lucide-react-native';
 import React from 'react';
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image} from 'react-native';
 import {useAnimatedStyle, useSharedValue} from 'react-native-reanimated';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {TextX, TouchableX, ViewX} from '~components/common';
 import {useTheme} from '~hooks/ThemeContext';
-import {styleUtils} from '~styles/theme';
-import {getThemeColor} from '~styles/themeUtils';
+import {getThemeColor, styleUtils} from '~styles/theme';
 import {s} from '~utils/screenUtil';
 
 interface GreetingHeaderProps {
@@ -32,7 +31,6 @@ const GreetingHeader: React.FC<GreetingHeaderProps> = ({
 
   // Get theme colors
   const textColor = getThemeColor(theme, 'text', 'primary');
-  const textSecondaryColor = getThemeColor(theme, 'text', 'secondary');
   const notificationDotColor = getThemeColor(theme, 'text', 'error');
   const avatarFallbackBg = getThemeColor(theme, 'background', 'tertiary');
 
@@ -47,138 +45,76 @@ const GreetingHeader: React.FC<GreetingHeaderProps> = ({
       alignItems="center"
       paddingTop={top + 8}
       paddingHorizontal={styleUtils.spacing.sm}>
+      {/* Avatar */}
       <TouchableX
         onPress={onPressStreak}
-        style={styles.avatarContainer}
         alignSelf="flex-start"
         borderColor="white"
         height={s(48)}
         width={s(48)}
         borderRadius={styleUtils.borderRadius.full}
         overflow="hidden"
-        borderWidth={s(3)}>
+        borderWidth={s(2)}>
         {avatar ? (
           <Image
             source={{uri: avatar}}
-            style={{flex: 1, borderRadius: styleUtils.borderRadius.full}}
+            style={{
+              flex: 1,
+              width: '100%',
+              height: '100%',
+              borderRadius: styleUtils.borderRadius.full,
+            }}
             resizeMode="cover"
           />
         ) : (
-          <View
-            style={[
-              styles.avatar,
-              styles.avatarFallback,
-              {backgroundColor: avatarFallbackBg},
-            ]}>
-            <Text style={[styles.avatarText, {color: textSecondaryColor}]}>
+          <ViewX
+            width={s(48)}
+            height={s(48)}
+            backgroundColor={avatarFallbackBg}
+            justifyContent="center"
+            alignItems="center">
+            <TextX fontSize="lg" fontWeight="semibold" color="secondary">
               {username[0].toUpperCase()}
-            </Text>
-          </View>
+            </TextX>
+          </ViewX>
         )}
       </TouchableX>
 
+      {/* Greeting */}
       <ViewX justifyContent="center" flexDirection="row" alignItems="center">
-        <TextX fontSize="2xl" fontWeight="bold">
+        <TextX fontSize="2xl" fontWeight="bold" color="primary">
           Hey,{' '}
         </TextX>
-        <TextX fontSize="2xl" fontWeight="bold">
+        <TextX fontSize="2xl" fontWeight="bold" color="primary">
           {username}
         </TextX>
       </ViewX>
 
+      {/* Notification Bell */}
       <TouchableX
         height={s(48)}
         width={s(48)}
         onPress={onPressNotification}
-        style={[styles.notificationButton, bellAnimatedStyle]}>
+        justifyContent="center"
+        alignItems="center"
+        style={bellAnimatedStyle}>
         <Bell size={24} color={textColor} strokeWidth={2} />
         {hasUnreadNotifications && (
-          <View
-            style={[
-              styles.notificationDot,
-              {backgroundColor: notificationDotColor},
-            ]}
+          <ViewX
+            position="absolute"
+            top={s(8)}
+            right={s(8)}
+            width={s(8)}
+            height={s(8)}
+            borderRadius={s(4)}
+            borderWidth={1.5}
+            borderColor="#FFFFFF"
+            backgroundColor={notificationDotColor}
           />
         )}
       </TouchableX>
     </ViewX>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  leftContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: 12,
-  },
-  avatarContainer: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 24,
-  },
-  avatarFallback: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  streakBadge: {
-    position: 'absolute',
-    bottom: -4,
-    right: -4,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-  },
-  streakText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  textContainer: {
-    flex: 1,
-    gap: 2,
-  },
-  greeting: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  username: {
-    fontSize: 20,
-    fontWeight: '700',
-  },
-  message: {
-    fontSize: 13,
-  },
-  notificationButton: {
-    padding: 8,
-    borderRadius: 20,
-  },
-  notificationDot: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
-  },
-});
 
 export default React.memo(GreetingHeader);

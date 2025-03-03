@@ -1,8 +1,8 @@
 import {StateNavigator} from 'navigation';
-import HabitCreationScreen from '~screens/Creation/Creation';
+import CreateHabitScreen from '~screens/create/CreateHabit';
 import Home from '~screens/Home/Home';
 import Profile from '~screens/Profile/Profile';
-import Settings from '~screens/Settings/Settings';
+import SettingsScreen from '~screens/Settings/Settings';
 import {themes} from '~styles/theme';
 import {Theme} from '~types/common.types';
 
@@ -22,7 +22,7 @@ const getTabsConfig = (theme: Theme) => {
       navigatorState: 'homeNavigator',
       scenes: [
         {key: 'home', component: Home},
-        {key: 'create', component: HabitCreationScreen},
+        {key: 'create', component: CreateHabitScreen},
       ],
     },
     {
@@ -41,7 +41,7 @@ const getTabsConfig = (theme: Theme) => {
       fontSize: 14,
       fontFamily: themes[theme].typography.fontFamily.semibold,
       navigatorState: 'settingsNavigator',
-      scenes: [{key: 'settings', component: Settings}],
+      scenes: [{key: 'settings', component: SettingsScreen}],
     },
   ];
 };

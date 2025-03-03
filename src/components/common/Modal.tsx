@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
@@ -77,7 +78,7 @@ const AnimatedModal: React.FC<AnimatedModalProps> = ({handleModalChanges}) => {
         onChange={handleSheetChanges}
         animationConfigs={springAnimationConfig}
         handleIndicatorStyle={{
-          backgroundColor: themes.dark.background.tertiary,
+          backgroundColor: themes.dark.background.surface,
         }}
         backgroundStyle={{backgroundColor: '#1C1C1E'}}
         backdropComponent={renderBackdrop}

@@ -6,8 +6,21 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
-import {useTheme} from '~hooks/ThemeContext';
-import {getThemeColor} from '~styles/themeUtils';
+import {useTheme} from '~/hooks/ThemeContext';
+import {getThemeColor} from '~/styles/theme';
+
+type BackgroundVariant =
+  | 'base'
+  | 'surface'
+  | 'elevated'
+  | 'field'
+  | 'highlight'
+  | 'accent'
+  | 'transparent'
+  | 'success'
+  | 'error'
+  | 'warning'
+  | 'info';
 
 interface ViewXProps extends ViewStyle {
   children?: React.ReactNode;
@@ -15,15 +28,7 @@ interface ViewXProps extends ViewStyle {
   onLayout?: (event: LayoutChangeEvent) => void;
   testID?: string;
   accessibilityLabel?: string;
-  variant?:
-    | 'primary'
-    | 'secondary'
-    | 'tertiary'
-    | 'input'
-    | 'highlight'
-    | 'accent'
-    | 'transparent'
-    | 'nav';
+  variant?: BackgroundVariant;
 }
 
 const ViewX: React.FC<ViewXProps> = ({

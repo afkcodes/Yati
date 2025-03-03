@@ -6,13 +6,27 @@ import {
   type TouchableOpacityProps,
   type ViewStyle,
 } from 'react-native';
-import {useTheme} from '~hooks/ThemeContext';
-import {getThemeColor} from '~styles/themeUtils';
+import {useTheme} from '~/hooks/ThemeContext';
+import {getThemeColor} from '~/styles/theme';
+
+// Reuse the same background variant type for consistency
+type BackgroundVariant =
+  | 'base'
+  | 'surface'
+  | 'elevated'
+  | 'field'
+  | 'highlight'
+  | 'accent'
+  | 'transparent'
+  | 'success'
+  | 'error'
+  | 'warning'
+  | 'info';
 
 interface TouchableXProps extends TouchableOpacityProps, ViewStyle {
   children?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
-  variant?: 'primary' | 'secondary' | 'tertiary' | 'accent' | 'transparent';
+  variant?: BackgroundVariant;
 }
 
 const TouchableX: React.FC<TouchableXProps> = ({
@@ -71,5 +85,4 @@ const TouchableX: React.FC<TouchableXProps> = ({
 
 TouchableX.displayName = 'TouchableX';
 
-// Memoize the component to prevent unnecessary re-renders
 export default React.memo(TouchableX);

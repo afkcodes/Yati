@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {TextX} from '~components/common';
 import {useTheme} from '~hooks/ThemeContext';
-import {getThemeColor} from '~styles/themeUtils';
+import {getThemeColor} from '~styles/theme';
 
 type TimePeriod = 'morning' | 'evening' | 'night' | 'all';
 
@@ -136,11 +136,6 @@ const styles = StyleSheet.create({
     padding: 4,
     height: 56,
     position: 'relative',
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
   },
   selectedBackground: {
     position: 'absolute',

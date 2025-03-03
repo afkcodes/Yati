@@ -18,7 +18,7 @@ const WelcomeScreen = () => {
   );
 
   return (
-    <ViewX flex={1} variant="primary">
+    <ViewX flex={1} variant="base">
       <MasonryGrid
         data={testimonials}
         renderItem={renderTestimonial}

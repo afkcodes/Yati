@@ -7,72 +7,72 @@ import {
   typography,
 } from './tokens';
 
-// Define the dark theme color palette
-export const themes = {
+import {
+  BackgroundVariant,
+  BorderVariant,
+  ColorCategory,
+  TextVariant,
+  ThemeStructure,
+  ThemeVariant,
+} from '~types/theme.types';
+
+export const themes: ThemeStructure = {
   dark: {
     background: {
-      // Main backgrounds
-      primary: colors.dark.background.primary, // Main page background - darkest
-      secondary: colors.dark.background.secondary, // Card backgrounds
-      tertiary: colors.dark.background.elevated, // Elevated items
-      nav: colors.dark.background.primary, // Navigation background
-      accent: colors.brand.primary[500], // Primary accent color
-      transparent: 'transparent', // Transparent background
+      base: colors.dark.background.base,
+      surface: colors.dark.background.surface,
+      elevated: colors.dark.background.elevated,
+      field: colors.dark.background.field,
+      highlight: colors.dark.background.highlight,
+      accent: colors.brand.primary[500],
+      transparent: 'transparent',
 
-      // Input and interactive elements
-      input: colors.dark.background.input, // Input fields
-      highlight: colors.dark.background.highlight, // Selected items
-
-      // Status colors (with transparency for backgrounds)
-      success: colors.semantic.success.light,
-      error: colors.semantic.error.light,
-      warning: colors.semantic.warning.light,
-      info: colors.semantic.info.light,
+      success: colors.semantic.success.subtle,
+      error: colors.semantic.error.subtle,
+      warning: colors.semantic.warning.subtle,
+      info: colors.semantic.info.subtle,
     },
     text: {
-      primary: colors.dark.text.primary, // Primary text - high contrast
-      secondary: colors.dark.text.secondary, // Secondary text - medium contrast
-      tertiary: colors.dark.text.tertiary, // Tertiary text - low contrast
-      disabled: colors.dark.text.disabled, // Disabled text - very low contrast
-      accent: colors.brand.primary[400], // Accent text color
+      primary: colors.dark.text.primary,
+      secondary: colors.dark.text.secondary,
+      tertiary: colors.dark.text.tertiary,
+      disabled: colors.dark.text.disabled,
+      accent: colors.brand.primary[400],
 
-      // Semantic text colors
       success: colors.semantic.success.base,
       error: colors.semantic.error.base,
       warning: colors.semantic.warning.base,
       info: colors.semantic.info.base,
     },
     border: {
-      primary: colors.dark.border.primary, // Primary borders/dividers
-      secondary: colors.dark.border.secondary, // Subtle borders/dividers
-      accent: colors.brand.primary[500], // Accent borders
+      subtle: colors.dark.border.subtle,
+      muted: colors.dark.border.muted,
+      accent: colors.brand.primary[500],
+      transparent: 'transparent',
     },
     typography: typography,
   },
 
-  // Light theme (would need further refinement for a proper light mode)
   light: {
     background: {
-      primary: '#F2F2F7',
-      secondary: '#FFFFFF',
-      tertiary: '#F2F2F7',
-      nav: '#F2F2F7',
+      base: '#F8F8FC',
+      surface: '#FFFFFF',
+      elevated: '#F1F1F6',
+      field: '#EFEFF8',
+      highlight: '#E8E8F0',
       accent: colors.brand.primary[500],
       transparent: 'transparent',
 
-      input: '#EFEFF4',
-      highlight: '#E5E5EA',
-
-      success: colors.semantic.success.light,
-      error: colors.semantic.error.light,
-      warning: colors.semantic.warning.light,
-      info: colors.semantic.info.light,
+      success: colors.semantic.success.subtle,
+      error: colors.semantic.error.subtle,
+      warning: colors.semantic.warning.subtle,
+      info: colors.semantic.info.subtle,
     },
     text: {
-      primary: '#000000',
-      secondary: 'rgba(0, 0, 0, 0.8)',
-      tertiary: 'rgba(0, 0, 0, 0.6)',
-      disabled: 'rgba(0, 0, 0, 0.4)',
+      primary: '#18181B',
+      secondary: 'rgba(24, 24, 27, 0.7)',
+      tertiary: 'rgba(24, 24, 27, 0.5)',
+      disabled: 'rgba(24, 24, 27, 0.35)',
       accent: colors.brand.primary[600],
 
       success: colors.semantic.success.base,
@@ -81,27 +81,59 @@ export const themes = {
       info: colors.semantic.info.base,
     },
     border: {
-      primary: '#C6C6C8',
-      secondary: '#E5E5EA',
+      subtle: 'rgba(0, 0, 0, 0.08)',
+      muted: 'rgba(0, 0, 0, 0.04)',
       accent: colors.brand.primary[500],
+      transparent: 'transparent',
     },
     typography: typography,
   },
 };
 
-// Helper function to get color values from the theme
-export const getColor = (
-  theme: 'dark' | 'light',
-  category: 'background' | 'text' | 'border',
-  variant: string,
-): string => {
-  return themes[theme][category][variant];
+export function getThemeColor(
+  theme: ThemeVariant,
+  category: ColorCategory,
+  variant: BackgroundVariant | TextVariant | BorderVariant,
+): string {
+  if (category === 'background') {
+    return themes[theme].background[variant as BackgroundVariant];
+  } else if (category === 'text') {
+    return themes[theme].text[variant as TextVariant];
+  } else {
+    return themes[theme].border[variant as BorderVariant];
+  }
+}
+
+export function withAlpha(color: string, alpha: number): string {
+  // Handle rgba colors
+  if (color.startsWith('rgba')) {
+    return color.replace(/[\d.]+\)$/g, `${alpha})`);
+  }
+
+  // Handle hex colors
+  let hex = color.replace('#', '');
+  if (hex.length === 3) {
+    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+  }
+
+  const r = parseInt(hex.substring(0, 2), 16);
+  const g = parseInt(hex.substring(2, 4), 16);
+  const b = parseInt(hex.substring(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+export const styleUtils = {
+  opacity,
+  spacing,
+  borderWidths,
+  borderRadius,
 };
 
-// Centralized style utilities
-export const styleUtils = {
-  opacity: opacity,
-  spacing: spacing,
-  borderWidths: borderWidths,
-  borderRadius: borderRadius,
+export type {
+  BackgroundVariant,
+  BorderVariant,
+  ColorCategory,
+  TextVariant,
+  ThemeVariant,
 };

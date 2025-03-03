@@ -1,22 +1,15 @@
-/* eslint-disable react-native/no-inline-styles */
 import {SquircleView} from 'expo-squircle-view';
 import {DimensionValue} from 'react-native';
 import {useTheme} from '~hooks/ThemeContext';
-import {styleUtils} from '~styles/theme';
-import {getThemeColor} from '~styles/themeUtils';
+import {getThemeColor, styleUtils} from '~styles/theme';
 import {BorderRadiusSize, Size} from '~types/common.types';
+import {BackgroundVariant} from '~types/theme.types';
 
-interface SquircleViewContainer {
+interface SquircleViewContainerProps {
   children: React.ReactNode;
-  borderRadius: BorderRadiusSize;
+  borderRadius?: BorderRadiusSize;
   padding?: Size;
-  variant?:
-    | 'primary'
-    | 'secondary'
-    | 'tertiary'
-    | 'input'
-    | 'highlight'
-    | 'transparent';
+  variant?: BackgroundVariant;
   backgroundColor?: string;
   borderColor?: string;
   borderWidth?: number;
@@ -24,39 +17,35 @@ interface SquircleViewContainer {
   width?: DimensionValue;
 }
 
-const SquircleViewContainer: React.FC<SquircleViewContainer> = ({
+const SquircleViewContainer: React.FC<SquircleViewContainerProps> = ({
   children,
   padding,
   borderRadius = 'md',
   borderColor = 'transparent',
   borderWidth = 0,
-  variant = 'secondary',
+  variant = 'surface', // Changed default to match theme background variant
   backgroundColor,
   height = 'auto',
   width = 'auto',
 }) => {
+  const {theme} = useTheme();
   const spacing = padding ? styleUtils.spacing[padding] : 0;
   const radius = styleUtils.borderRadius[borderRadius];
-  const {theme} = useTheme();
 
-  // Map variant to the actual background color category
+  // Use background category for all variants except transparent
   const bgColorCategory =
     variant === 'transparent' ? 'transparent' : 'background';
+  const resolvedBackgroundColor = backgroundColor
+    ? backgroundColor
+    : getThemeColor(theme, bgColorCategory, variant);
 
   return (
     <SquircleView
       cornerSmoothing={100}
-      backgroundColor={
-        backgroundColor
-          ? backgroundColor
-          : variant === 'transparent'
-          ? 'transparent'
-          : getThemeColor(theme, bgColorCategory, variant)
-      }
+      backgroundColor={resolvedBackgroundColor}
       style={{
         padding: spacing,
-        borderColor:
-          borderColor === 'transparent' ? 'transparent' : borderColor,
+        borderColor: borderColor,
         borderWidth,
         height,
         width,

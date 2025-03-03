@@ -1,7 +1,5 @@
-//@ts-nocheck
 import {forwardRef, useState} from 'react';
 import {
-  Platform,
   StyleProp,
   StyleSheet,
   TextInput,
@@ -11,9 +9,8 @@ import {
 } from 'react-native';
 import {TextX, ViewX} from '~components/common';
 import {useTheme} from '~hooks/ThemeContext';
-import {styleUtils} from '~styles/theme';
+import {styleUtils, themes} from '~styles/theme';
 import type {FontSize, FontWeight} from '~types/common.types';
-import {getThemeColor} from '~utils/themeUtils';
 import SquircleViewContainer from '../../containers/SquircleViewContainer';
 
 interface InputProps extends Omit<TextInputProps, 'style'> {
@@ -53,16 +50,10 @@ export const Input = forwardRef<TextInput, InputProps>(
     // Display external error if provided, otherwise show internal validation error
     const error = externalError || internalError;
 
-    // Get theme colors
-    const inputBgColor = bgColor || getThemeColor(theme, 'background', 'input');
-    const placeholderColor = getThemeColor(theme, 'text', 'tertiary');
-    const textColor = getThemeColor(theme, 'text', 'primary');
-    const errorColor = getThemeColor(theme, 'text', 'error');
-
     // Get cursor/selection color based on validation state
     const caretColor = error
-      ? errorColor
-      : getThemeColor(theme, 'text', 'accent');
+      ? themes[theme].text.tertiary
+      : themes[theme].text.accent;
 
     const handleChangeText = (text: string) => {
       // Call the original onChangeText if provided
@@ -85,7 +76,7 @@ export const Input = forwardRef<TextInput, InputProps>(
             fontSize={fontSize}
             fontWeight={fontWeight}
             style={styles.label}
-            color={error ? 'error' : 'primary'}>
+            color={error ? 'accent' : 'primary'}>
             {label}
           </TextX>
         )}
@@ -93,17 +84,17 @@ export const Input = forwardRef<TextInput, InputProps>(
         <SquircleViewContainer
           padding="2xs"
           borderRadius="xs"
-          backgroundColor={inputBgColor}
-          variant="input">
+          backgroundColor={bgColor}
+          variant="surface">
           <TextInput
             ref={ref}
-            placeholderTextColor={placeholderColor}
+            placeholderTextColor={themes[theme].text.tertiary}
             selectionColor={caretColor}
             cursorColor={caretColor}
             style={[
               styles.input,
               {
-                color: textColor,
+                color: themes[theme].text.primary,
               },
               inputStyle,
             ]}
@@ -113,7 +104,7 @@ export const Input = forwardRef<TextInput, InputProps>(
         </SquircleViewContainer>
 
         {error && (
-          <TextX fontSize="xs" color="error" style={styles.error}>
+          <TextX fontSize="xs" color="accent" style={styles.error}>
             {error}
           </TextX>
         )}
@@ -132,16 +123,12 @@ const styles = StyleSheet.create({
   squircleContainer: {
     width: '100%',
     height: 150,
+    // borderWidth: 1,
   },
   input: {
     flex: 1,
     paddingHorizontal: styleUtils.spacing.sm,
     height: '100%',
-    ...Platform.select({
-      web: {
-        outlineStyle: 'none',
-      },
-    }),
   },
   error: {
     marginTop: styleUtils.spacing.xs,

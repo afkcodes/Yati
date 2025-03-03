@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import {
   Award,
   Bell,
@@ -10,344 +11,487 @@ import {
   Globe,
   HelpCircle,
   Info,
-  MessageCircle,
+  LogOut,
+  LucideIcon,
   Moon,
   Palette,
   Share2,
   Shield,
   Smartphone,
+  Sun,
   Target,
   Trash2,
+  User,
 } from 'lucide-react-native';
-import React from 'react';
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  View,
-} from 'react-native';
+import React, {useState} from 'react';
+import {Platform, ScrollView, StyleSheet, Switch} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {TextX, TouchableX, ViewX} from '~/components/common';
+import {useTheme} from '~/hooks/ThemeContext';
+import {getThemeColor, withAlpha} from '~/styles/theme';
+import {s, vs} from '~/utils/screenUtil';
 
-interface SettingsSectionProps {
-  title: string;
-  children: React.ReactNode;
-  isLast?: boolean;
-}
+const SettingsScreen = () => {
+  const {theme, setTheme} = useTheme();
+  const insets = useSafeAreaInsets();
 
-interface SettingsItemProps {
-  icon: React.ReactNode;
-  title: string;
-  value?: string;
-  isToggle?: boolean;
-  isEnabled?: boolean;
-  isLast?: boolean;
-  onPress?: () => void;
-  onToggle?: (value: boolean) => void;
-}
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [soundsEnabled, setSoundsEnabled] = useState(true);
+  const [autoBackupEnabled, setAutoBackupEnabled] = useState(true);
+  const [weekStartMonday, setWeekStartMonday] = useState(true);
+  const [streakProtection, setStreakProtection] = useState(false);
 
-const SettingsSection: React.FC<SettingsSectionProps> = ({
-  title,
-  children,
-  isLast,
-}) => (
-  <View style={[styles.section, !isLast && styles.sectionMargin]}>
-    <Text style={styles.sectionTitle}>{title}</Text>
-    <View style={styles.sectionContent}>{children}</View>
-  </View>
-);
+  const bgColor = getThemeColor(theme, 'background', 'base');
+  const surfaceColor = getThemeColor(theme, 'background', 'surface');
+  const accentColor = getThemeColor(theme, 'text', 'accent');
+  const textSecondary = getThemeColor(theme, 'text', 'secondary');
+  const borderColor = getThemeColor(theme, 'border', 'subtle');
+  const errorColor = getThemeColor(theme, 'text', 'error');
 
-const SettingsItem: React.FC<SettingsItemProps> = ({
-  icon,
-  title,
-  value,
-  isToggle,
-  isEnabled,
-  isLast,
-  onPress,
-  onToggle,
-}) => (
-  <Pressable
-    style={({pressed}) => [
-      styles.settingsItem,
-      !isLast && styles.settingsItemBorder,
-      pressed && styles.settingsItemPressed,
-    ]}
-    onPress={onPress}>
-    <View style={styles.settingsItemLeft}>
-      <View style={styles.iconContainer}>{icon}</View>
-      <Text style={styles.settingsItemTitle}>{title}</Text>
-    </View>
-    <View style={styles.settingsItemRight}>
-      {isToggle ? (
-        <Switch
-          value={isEnabled}
-          onValueChange={onToggle}
-          trackColor={{false: '#3A3A3C', true: '#34C759'}}
-          thumbColor={isEnabled ? '#FFFFFF' : '#FFFFFF'}
-          ios_backgroundColor="#3A3A3C"
+  const handleThemeToggle = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  const renderSectionHeader = (title: string): React.ReactElement => (
+    <ViewX
+      style={styles.sectionHeader}
+      paddingHorizontal={s(16)}
+      paddingVertical={vs(8)}
+      marginTop={vs(16)}
+      marginBottom={vs(8)}>
+      <TextX
+        fontSize="xs"
+        color="secondary"
+        fontWeight="semibold"
+        letterSpacing={1}
+        textTransform="uppercase">
+        {title}
+      </TextX>
+    </ViewX>
+  );
+
+  interface SettingItemProps {
+    icon: LucideIcon;
+    title: string;
+    subtitle?: string;
+    value?: string;
+    onPress: () => void;
+    rightElement?: React.ReactNode;
+    destructive?: boolean;
+    iconColor?: string;
+    isFirst?: boolean;
+    isLast?: boolean;
+  }
+
+  const renderSettingItem = ({
+    icon: Icon,
+    title,
+    subtitle,
+    value,
+    onPress,
+    rightElement,
+    destructive = false,
+    iconColor,
+    isFirst = false,
+    isLast = false,
+  }: SettingItemProps): React.ReactElement => (
+    <TouchableX
+      style={[
+        styles.settingItem,
+        isFirst && styles.settingItemFirst,
+        isLast && styles.settingItemLast,
+        {
+          backgroundColor: surfaceColor,
+          borderBottomColor: !isLast ? borderColor : 'transparent',
+          borderBottomWidth: !isLast ? StyleSheet.hairlineWidth : 0,
+        },
+      ]}
+      flexDirection="row"
+      alignItems="center"
+      paddingVertical={vs(12)}
+      paddingHorizontal={s(16)}
+      onPress={onPress}>
+      <ViewX
+        width={s(28)}
+        justifyContent="center"
+        alignItems="center"
+        marginRight={s(12)}>
+        <Icon
+          size={20}
+          color={destructive ? errorColor : iconColor || textSecondary}
+          strokeWidth={1.5}
         />
-      ) : (
-        <>
-          {value && <Text style={styles.settingsItemValue}>{value}</Text>}
-          <ChevronRight size={20} color="#8E8E93" />
-        </>
-      )}
-    </View>
-  </Pressable>
-);
+      </ViewX>
+      <ViewX flex={1}>
+        <TextX
+          fontSize="sm"
+          fontWeight="medium"
+          color={destructive ? 'error' : 'primary'}>
+          {title}
+        </TextX>
+        {subtitle && (
+          <TextX fontSize="xs" color="tertiary" marginTop={vs(2)}>
+            {subtitle}
+          </TextX>
+        )}
+      </ViewX>
+      {rightElement ||
+        (value && (
+          <ViewX
+            flexDirection="row"
+            alignItems="center"
+            justifyContent="flex-end"
+            minWidth={s(60)}>
+            <TextX fontSize="sm" color="tertiary">
+              {value}
+            </TextX>
+            <ChevronRight size={16} color={textSecondary} />
+          </ViewX>
+        ))}
+    </TouchableX>
+  );
 
-const SettingsScreen: React.FC = () => {
-  const [notificationsEnabled, setNotificationsEnabled] = React.useState(true);
-  const [darkModeEnabled, setDarkModeEnabled] = React.useState(true);
-  const [weekStartMonday, setWeekStartMonday] = React.useState(true);
-  const [analyticsEnabled, setAnalyticsEnabled] = React.useState(true);
-  const [backupEnabled, setBackupEnabled] = React.useState(true);
-  const [streakProtection, setStreakProtection] = React.useState(false);
+  interface ToggleSettingProps {
+    icon: LucideIcon;
+    title: string;
+    subtitle?: string;
+    value: boolean;
+    onValueChange: (value: boolean) => void;
+    iconColor?: string;
+    isFirst?: boolean;
+    isLast?: boolean;
+  }
 
-  const {top} = useSafeAreaInsets();
+  // Render a toggle setting
+  const renderToggleSetting = ({
+    icon,
+    title,
+    subtitle,
+    value,
+    onValueChange,
+    iconColor,
+    isFirst = false,
+    isLast = false,
+  }: ToggleSettingProps): React.ReactElement =>
+    renderSettingItem({
+      icon,
+      title,
+      subtitle,
+      iconColor,
+      isFirst,
+      isLast,
+      onPress: () => onValueChange(!value), // Toggle when pressing the item
+      rightElement: (
+        <Switch
+          value={value}
+          style={{height: vs(12)}}
+          onValueChange={onValueChange}
+          trackColor={{
+            false: withAlpha(textSecondary, 0.2),
+            true: withAlpha(accentColor, 0.8),
+          }}
+          thumbColor={Platform.OS === 'ios' ? undefined : '#FFFFFF'}
+          ios_backgroundColor={withAlpha(textSecondary, 0.2)}
+        />
+      ),
+    });
+
+  // Render a group of settings
+  const renderSettingGroup = (
+    items: React.ReactElement[],
+  ): React.ReactElement => (
+    <ViewX
+      marginHorizontal={s(16)}
+      borderRadius={12}
+      overflow="hidden"
+      marginBottom={vs(8)}
+      backgroundColor={surfaceColor}>
+      {items}
+    </ViewX>
+  );
 
   return (
-    <ScrollView
-      style={[styles.container, {paddingTop: top + 10}]}
-      contentContainerStyle={[
-        styles.contentContainer,
-        {paddingBottom: top + 16},
-      ]}>
-      {/* Habit Preferences */}
-      <SettingsSection title="Habit Preferences">
-        <SettingsItem
-          icon={<Target size={22} color="#FF6B6B" />}
-          title="Goal Settings"
-          value="Configure"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon={<Calendar size={22} color="#5856D6" />}
-          title="Week Start Day"
-          value={weekStartMonday ? 'Monday' : 'Sunday'}
-          onPress={() => setWeekStartMonday(!weekStartMonday)}
-        />
-        <SettingsItem
-          icon={<Award size={22} color="#FFD60A" />}
-          title="Streak Protection"
-          isToggle
-          isEnabled={streakProtection}
-          onToggle={setStreakProtection}
-        />
-        <SettingsItem
-          icon={<Gauge size={22} color="#32D74B" />}
-          title="Progress Calculation"
-          value="Weekly Average"
-          isLast
-          onPress={() => {}}
-        />
-      </SettingsSection>
+    <ViewX
+      flex={1}
+      backgroundColor={bgColor}
+      paddingTop={insets.top}
+      paddingBottom={insets.bottom}>
+      <ViewX
+        paddingHorizontal={s(16)}
+        paddingVertical={vs(12)}
+        borderBottomWidth={StyleSheet.hairlineWidth}
+        borderBottomColor="rgba(150, 150, 150, 0.2)">
+        <TextX fontSize="xl" fontWeight="semibold">
+          Settings
+        </TextX>
+      </ViewX>
 
-      {/* Notifications & Reminders */}
-      <SettingsSection title="Notifications & Reminders">
-        <SettingsItem
-          icon={<Bell size={22} color="#FF6B6B" />}
-          title="Push Notifications"
-          isToggle
-          isEnabled={notificationsEnabled}
-          onToggle={setNotificationsEnabled}
-        />
-        <SettingsItem
-          icon={<Clock size={22} color="#FF9F0A" />}
-          title="Reminder Schedule"
-          value="Customize"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon={<MessageCircle size={22} color="#64D2FF" />}
-          title="Motivation Messages"
-          value="Configure"
-          isLast
-          onPress={() => {}}
-        />
-      </SettingsSection>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}>
+        {/* Habit Preferences */}
+        {renderSectionHeader('Habit Preferences')}
+        {renderSettingGroup([
+          renderSettingItem({
+            icon: Target,
+            title: 'Goal Settings',
+            subtitle: 'Configure goal targets and reminders',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            iconColor: '#FF6B6B',
+            isFirst: true,
+          }),
 
-      {/* Appearance */}
-      <SettingsSection title="Appearance">
-        <SettingsItem
-          icon={<Moon size={22} color="#0A84FF" />}
-          title="Dark Mode"
-          isToggle
-          isEnabled={darkModeEnabled}
-          onToggle={setDarkModeEnabled}
-        />
-        <SettingsItem
-          icon={<Palette size={22} color="#32D74B" />}
-          title="Theme Colors"
-          value="Customize"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon={<Smartphone size={22} color="#BF5AF2" />}
-          title="App Icon"
-          value={Platform.OS === 'ios' ? 'Change' : 'Default'}
-          isLast
-          onPress={() => {}}
-        />
-      </SettingsSection>
+          renderSettingItem({
+            icon: Calendar,
+            title: 'Week Start Day',
+            subtitle: 'Choose first day of week',
+            value: weekStartMonday ? 'Monday' : 'Sunday',
+            onPress: () => setWeekStartMonday(!weekStartMonday),
+            iconColor: '#5856D6',
+          }),
 
-      {/* Data & Privacy */}
-      <SettingsSection title="Data & Privacy">
-        <SettingsItem
-          icon={<Database size={22} color="#5856D6" />}
-          title="Backup & Sync"
-          isToggle
-          isEnabled={backupEnabled}
-          onToggle={setBackupEnabled}
-        />
-        <SettingsItem
-          icon={<FileJson size={22} color="#32D74B" />}
-          title="Export Data"
-          value="CSV/JSON"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon={<Shield size={22} color="#FF375F" />}
-          title="Privacy Settings"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon={<Trash2 size={22} color="#FF453A" />}
-          title="Clear All Data"
-          isLast
-          onPress={() => {}}
-        />
-      </SettingsSection>
+          renderToggleSetting({
+            icon: Award,
+            title: 'Streak Protection',
+            subtitle: 'Prevent streak loss for occasional misses',
+            value: streakProtection,
+            onValueChange: setStreakProtection,
+            iconColor: '#FFD60A',
+          }),
 
-      {/* Account & Support */}
-      <SettingsSection title="Account & Support">
-        <SettingsItem
-          icon={<Share2 size={22} color="#5856D6" />}
-          title="Share App"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon={<Globe size={22} color="#32D74B" />}
-          title="Language"
-          value="English"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon={<HelpCircle size={22} color="#FF375F" />}
-          title="Help Center"
-          onPress={() => {}}
-        />
-        <SettingsItem
-          icon={<Info size={22} color="#64D2FF" />}
-          title="About"
-          value="Version 1.0.0"
-          isLast
-          onPress={() => {}}
-        />
-      </SettingsSection>
+          renderSettingItem({
+            icon: Gauge,
+            title: 'Progress Calculation',
+            subtitle: 'How progress is measured and displayed',
+            value: 'Weekly Average',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            iconColor: '#32D74B',
+            isLast: true,
+          }),
+        ])}
 
-      {/* Premium Features */}
-      <SettingsSection title="Premium" isLast>
-        <SettingsItem
-          icon={<Award size={22} color="#FFD700" />}
-          title="Upgrade to Pro"
-          value="Get More Features"
-          isLast
-          onPress={() => {}}
-        />
-      </SettingsSection>
-    </ScrollView>
+        {/* Notifications & Reminders */}
+        {renderSectionHeader('Notifications & Reminders')}
+        {renderSettingGroup([
+          renderToggleSetting({
+            icon: Bell,
+            title: 'Push Notifications',
+            subtitle: notificationsEnabled ? 'Enabled' : 'Disabled',
+            value: notificationsEnabled,
+            onValueChange: setNotificationsEnabled,
+            iconColor: '#FF6B6B',
+            isFirst: true,
+          }),
+
+          renderSettingItem({
+            icon: Clock,
+            title: 'Reminder Schedule',
+            subtitle: 'Set timing for habit reminders',
+            value: 'Customize',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            iconColor: '#FF9F0A',
+          }),
+
+          renderToggleSetting({
+            icon: Bell,
+            title: 'Sounds',
+            subtitle: 'Play sounds for achievements and reminders',
+            value: soundsEnabled,
+            onValueChange: setSoundsEnabled,
+            iconColor: '#64D2FF',
+            isLast: true,
+          }),
+        ])}
+
+        {/* Appearance */}
+        {renderSectionHeader('Appearance')}
+        {renderSettingGroup([
+          renderToggleSetting({
+            icon: theme === 'dark' ? Moon : Sun,
+            title: 'Dark Mode',
+            subtitle:
+              theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
+            value: theme === 'dark',
+            onValueChange: handleThemeToggle,
+            iconColor: theme === 'dark' ? '#8B5CF6' : '#F59E0B',
+            isFirst: true,
+          }),
+
+          renderSettingItem({
+            icon: Palette,
+            title: 'Theme Colors',
+            subtitle: 'Customize app appearance',
+            value: 'Customize',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            iconColor: '#32D74B',
+          }),
+
+          renderSettingItem({
+            icon: Smartphone,
+            title: 'App Icon',
+            subtitle: 'Change app icon style',
+            value: Platform.OS === 'ios' ? 'Change' : 'Default',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            iconColor: '#BF5AF2',
+            isLast: true,
+          }),
+        ])}
+
+        {/* Data & Privacy */}
+        {renderSectionHeader('Data & Privacy')}
+        {renderSettingGroup([
+          renderToggleSetting({
+            icon: Database,
+            title: 'Backup & Sync',
+            subtitle: 'Keep data safe across devices',
+            value: autoBackupEnabled,
+            onValueChange: setAutoBackupEnabled,
+            iconColor: '#5856D6',
+            isFirst: true,
+          }),
+
+          renderSettingItem({
+            icon: FileJson,
+            title: 'Export Data',
+            subtitle: 'Export your data for backup or analysis',
+            value: 'CSV/JSON',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            iconColor: '#32D74B',
+          }),
+
+          renderSettingItem({
+            icon: Shield,
+            title: 'Privacy Settings',
+            subtitle: 'Manage data sharing and privacy',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            iconColor: '#FF375F',
+          }),
+
+          renderSettingItem({
+            icon: Trash2,
+            title: 'Clear All Data',
+            subtitle: 'Permanently delete all app data',
+            onPress: () => {},
+            destructive: true,
+            iconColor: '#FF453A',
+            isLast: true,
+          }),
+        ])}
+
+        {/* Account & Support */}
+        {renderSectionHeader('Account & Support')}
+        {renderSettingGroup([
+          renderSettingItem({
+            icon: User,
+            title: 'Profile',
+            subtitle: 'Manage your account details',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            isFirst: true,
+          }),
+
+          renderSettingItem({
+            icon: Share2,
+            title: 'Share App',
+            subtitle: 'Tell friends about this app',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            iconColor: '#5856D6',
+          }),
+
+          renderSettingItem({
+            icon: Globe,
+            title: 'Language',
+            subtitle: 'Change app language',
+            value: 'English',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            iconColor: '#32D74B',
+          }),
+
+          renderSettingItem({
+            icon: HelpCircle,
+            title: 'Help Center',
+            subtitle: 'Get help with using the app',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            iconColor: '#FF375F',
+          }),
+
+          renderSettingItem({
+            icon: Info,
+            title: 'About',
+            subtitle: 'App information and credits',
+            value: 'Version 1.0.0',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            iconColor: '#64D2FF',
+            isLast: true,
+          }),
+        ])}
+
+        {/* Premium Features */}
+        {renderSectionHeader('Premium')}
+        {renderSettingGroup([
+          renderSettingItem({
+            icon: Award,
+            title: 'Upgrade to Pro',
+            subtitle: 'Get more features and customization',
+            value: 'Get More Features',
+            onPress: () => {},
+            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            iconColor: '#FFD700',
+            isFirst: true,
+            isLast: true,
+          }),
+        ])}
+
+        {/* Danger zone */}
+        {renderSectionHeader('Danger Zone')}
+        {renderSettingGroup([
+          renderSettingItem({
+            icon: LogOut,
+            title: 'Log Out',
+            subtitle: 'Sign out of your account',
+            onPress: () => {},
+            destructive: true,
+            isFirst: true,
+            isLast: true,
+          }),
+        ])}
+
+        {/* Version information */}
+        <ViewX paddingVertical={vs(20)} marginBottom={vs(20)}>
+          <TextX fontSize="xs" color="tertiary" textAlign="center">
+            Version 1.0.0 (Build 100)
+          </TextX>
+        </ViewX>
+      </ScrollView>
+    </ViewX>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     flex: 1,
-    backgroundColor: '#000000',
   },
-  contentContainer: {
-    paddingTop: 20,
-    paddingBottom: Platform.select({ios: 40, android: 24}),
+  sectionHeader: {},
+  settingItem: {},
+  settingItemFirst: {
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
   },
-  section: {
-    width: '100%',
-  },
-  sectionMargin: {
-    marginBottom: 32,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#8E8E93',
-    marginLeft: 16,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-  },
-  sectionContent: {
-    backgroundColor: '#1C1C1E',
-    borderRadius: 12,
-    marginHorizontal: 16,
-    overflow: 'hidden',
-  },
-  settingsItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    height: 56, // Fixed height for all items
-    backgroundColor: '#1C1C1E',
-  },
-  settingsItemBorder: {
-    borderBottomWidth: Platform.select({ios: 0.5, android: 1}),
-    borderBottomColor: '#2C2C2E',
-  },
-  settingsItemPressed: {
-    backgroundColor: Platform.select({
-      ios: '#2C2C2E',
-      android: '#2C2C2E80', // Semi-transparent for ripple effect
-    }),
-  },
-  settingsItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    height: 56, // Match parent height
-    paddingVertical: 12,
-  },
-  iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    backgroundColor: '#2C2C2E',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  settingsItemTitle: {
-    fontSize: 17,
-    fontWeight: '400',
-    color: '#FFFFFF',
-    flex: 1,
-    letterSpacing: -0.4, // iOS-like letter spacing
-  },
-  settingsItemRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    height: 32,
-    minWidth: 54, // Minimum width for consistency
-    justifyContent: 'flex-end',
-    paddingLeft: 8,
-  },
-  settingsItemValue: {
-    fontSize: 17,
-    color: '#8E8E93',
-    marginRight: 4,
-    textAlign: 'right',
+  settingItemLast: {
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
 });
+
 export default SettingsScreen;

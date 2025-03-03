@@ -1,14 +1,28 @@
 import React, {useMemo} from 'react';
-import {type StyleProp, StyleSheet, Text, type TextStyle} from 'react-native';
-import {useTheme} from '~hooks/ThemeContext';
-import {themes} from '~styles/theme';
-import type {FontSize, FontWeight} from '~types/common.types';
+import {StyleProp, StyleSheet, Text, TextProps, TextStyle} from 'react-native';
+import {useTheme} from '~/hooks/ThemeContext';
+import {getThemeColor, themes} from '~/styles/theme';
+import type {FontSize, FontWeight} from '~/types/common.types';
 
+// Define specific text color variants to avoid type errors
+type TextColorVariant =
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'disabled'
+  | 'accent'
+  | 'success'
+  | 'error'
+  | 'warning'
+  | 'info';
+
+// Create a type that combines TextStyle with TextProps, but omits the specific props we handle
 interface TextXProps
-  extends Omit<TextStyle, 'fontSize' | 'fontWeight' | 'color'> {
+  extends Omit<TextStyle, 'fontSize' | 'fontWeight' | 'color'>,
+    Omit<TextProps, 'style'> {
   children?: React.ReactNode;
   style?: StyleProp<TextStyle>;
-  color?: 'primary' | 'secondary' | 'tertiary' | 'accent';
+  color?: TextColorVariant;
   fontSize?: FontSize;
   fontWeight?: FontWeight;
 }
@@ -19,11 +33,18 @@ const TextX: React.FC<TextXProps> = ({
   color = 'primary',
   fontSize = 'md',
   fontWeight = 'regular',
+  numberOfLines,
+  ellipsizeMode,
+  selectable,
+  allowFontScaling,
+  maxFontSizeMultiplier,
   ...rest
 }) => {
   const styleProps = JSON.stringify(rest);
   const {theme} = useTheme();
-  const textColor = themes[theme].text[color];
+
+  // Get the appropriate text color from theme
+  const textColor = getThemeColor(theme, 'text', color);
   const textSize = themes[theme].typography.fontSizes[fontSize];
   const fontFamilyWeight = themes[theme].typography.fontFamily[fontWeight];
 
@@ -38,7 +59,20 @@ const TextX: React.FC<TextXProps> = ({
     });
   }, [styleProps, textColor, textSize, fontFamilyWeight]);
 
-  return <Text style={[styles.text, style]}>{children}</Text>;
+  // Extract proper TextProps
+  const textProps = {
+    numberOfLines,
+    ellipsizeMode,
+    selectable,
+    allowFontScaling,
+    maxFontSizeMultiplier,
+  };
+
+  return (
+    <Text style={[styles.text, style]} {...textProps}>
+      {children}
+    </Text>
+  );
 };
 
 TextX.displayName = 'TextX';

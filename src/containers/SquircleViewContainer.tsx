@@ -1,34 +1,54 @@
 import {SquircleView} from 'expo-squircle-view';
+import {DimensionValue} from 'react-native';
 import {useTheme} from '~hooks/ThemeContext';
-import {styleUtils, themes} from '~styles/theme';
+import {getThemeColor, styleUtils} from '~styles/theme';
 import {BorderRadiusSize, Size} from '~types/common.types';
+import {BackgroundVariant} from '~types/theme.types';
 
-interface SquircleViewContainer {
+interface SquircleViewContainerProps {
   children: React.ReactNode;
-  padding: Size;
-  borderRadius: BorderRadiusSize;
-  variant?: 'primary' | 'secondary' | 'tertiary' | 'transparent';
+  borderRadius?: BorderRadiusSize;
+  padding?: Size;
+  variant?: BackgroundVariant;
   backgroundColor?: string;
+  borderColor?: string;
+  borderWidth?: number;
+  height?: DimensionValue;
+  width?: DimensionValue;
 }
 
-const SquircleViewContainer: React.FC<SquircleViewContainer> = ({
+const SquircleViewContainer: React.FC<SquircleViewContainerProps> = ({
   children,
-  padding = 'sm',
+  padding,
   borderRadius = 'md',
-  variant = 'secondary',
+  borderColor = 'transparent',
+  borderWidth = 0,
+  variant = 'surface', // Changed default to match theme background variant
   backgroundColor,
+  height = 'auto',
+  width = 'auto',
 }) => {
-  const spacing = styleUtils.spacing[padding];
-  const radius = styleUtils.borderRadius[borderRadius];
   const {theme} = useTheme();
+  const spacing = padding ? styleUtils.spacing[padding] : 0;
+  const radius = styleUtils.borderRadius[borderRadius];
+
+  // Use background category for all variants except transparent
+  const bgColorCategory =
+    variant === 'transparent' ? 'transparent' : 'background';
+  const resolvedBackgroundColor = backgroundColor
+    ? backgroundColor
+    : getThemeColor(theme, bgColorCategory, variant);
+
   return (
     <SquircleView
       cornerSmoothing={100}
-      backgroundColor={
-        backgroundColor ? backgroundColor : themes[theme].background[variant]
-      }
+      backgroundColor={resolvedBackgroundColor}
       style={{
         padding: spacing,
+        borderColor: borderColor,
+        borderWidth,
+        height,
+        width,
       }}
       borderRadius={radius}>
       {children}

@@ -1,4 +1,6 @@
 import {LinearGradient} from 'expo-linear-gradient';
+import {NavigationContext} from 'navigation-react';
+import {useContext} from 'react';
 import {Dimensions, StyleSheet} from 'react-native';
 import {PressableX, TextX, TouchableX, ViewX} from '~components/common';
 import MasonryGrid from '~components/common/MasonaryGrid';
@@ -10,12 +12,13 @@ import {vs, w} from '~utils/screenUtil';
 const {height} = Dimensions.get('window');
 
 const WelcomeScreen = () => {
+  const {stateNavigator} = useContext(NavigationContext);
   const renderTestimonial = (item: any) => (
     <TestimonialCard testimonial={item} />
   );
 
   return (
-    <ViewX flex={1} variant="primary">
+    <ViewX flex={1} variant="base">
       <MasonryGrid
         data={testimonials}
         renderItem={renderTestimonial}
@@ -44,6 +47,9 @@ const WelcomeScreen = () => {
         </ViewX>
         <ViewX gap={styleUtils.spacing.lg}>
           <PressableX
+            onPress={() => {
+              stateNavigator.navigate('tabs');
+            }}
             justifyContent="center"
             alignItems="center"
             backgroundColor={themes.dark.background.accent}

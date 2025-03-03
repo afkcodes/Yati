@@ -1,8 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
 import type React from 'react';
-import {useEffect, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {Dimensions, StyleSheet, View, type ViewStyle} from 'react-native';
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedReaction,
   useAnimatedStyle,
@@ -35,15 +36,12 @@ const MasonryGrid: React.FC<MasonryGridProps> = ({
   const [columns, setColumns] = useState<any[][]>(
     Array.from({length: numColumns}, () => []),
   );
-  const [_, setColumnHeights] = useState<number[]>(
-    Array.from({length: numColumns}, () => 0),
-  );
   const [contentHeight, setContentHeight] = useState(0);
   const scrollY = useSharedValue(0);
   const isResetNeeded = useSharedValue(false);
 
-  // Distribute items into columns based on their heights
-  useEffect(() => {
+  // Memoize the distribution of items into columns
+  const distributeItems = useMemo(() => {
     const columnData: any[][] = Array.from({length: numColumns}, () => []);
     const heights: number[] = Array.from({length: numColumns}, () => 0);
 
@@ -55,24 +53,31 @@ const MasonryGrid: React.FC<MasonryGridProps> = ({
         uniqueKey: `${item.id}-${index}-${shortestColumnIndex}`,
       });
 
-      heights[shortestColumnIndex] += 100;
+      heights[shortestColumnIndex] += 100; // Adjust this height calculation as needed
     });
 
-    setColumns(columnData);
-    setColumnHeights(heights);
     setContentHeight(Math.max(...heights));
+    return columnData;
   }, [data, numColumns]);
+
+  useEffect(() => {
+    setColumns(distributeItems);
+  }, [distributeItems]);
 
   // Animate scrolling
   useEffect(() => {
     if (contentHeight > 0) {
+      // Reset animation
+      cancelAnimation(scrollY);
       scrollY.value = 0;
+
+      // Start animation
       scrollY.value = withRepeat(
         withTiming(-contentHeight / 3, {
           duration: scrollDuration,
           easing: Easing.linear,
         }),
-        -1,
+        -1, // Infinite loop
         false,
       );
     }
@@ -80,9 +85,7 @@ const MasonryGrid: React.FC<MasonryGridProps> = ({
 
   // Reset scroll position when it reaches the end
   useAnimatedReaction(
-    () => {
-      return scrollY.value < -contentHeight / 3;
-    },
+    () => scrollY.value < -contentHeight / 3,
     shouldReset => {
       if (shouldReset) {
         isResetNeeded.value = true;

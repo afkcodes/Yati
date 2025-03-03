@@ -1,25 +1,15 @@
-import type {Alignment} from '~types/common.types';
+import type {Alignment} from '~/types/common.types';
 import type {
   BorderRadius,
   BorderWidths,
   IconSizes,
   Opacity,
   Spacing,
-} from '~types/style.types';
-import {font, ms, vs} from '~utils/screenUtil';
+} from '~/types/style.types';
+import {font, ms, vs} from '~/utils/screenUtil';
 
 const brand = {
   primary: {
-    // '50': '#FFF0F2', // Soft stage light
-    // '100': '#FFE2E7', // Gentle spotlight
-    // '200': '#FFCCD5', // Soft curtain light
-    // '300': '#FF8FA3', // Drama accent
-    // '400': '#E84A6A', // Emotional accent
-    // '500': '#C8234A', // New primary crimson
-    // '600': '#A81D3D', // Theater curtain red
-    // '700': '#8A1731', // Deep dramatic red
-    // '800': '#6C1226', // Shadow red
-    // '900': '#4E0C1B', // Dark theater red
     50: '#F0F2FF', // Softer light tint for better legibility on light backgrounds
     100: '#DEE1FE', // Light tint with slightly more contrast
     200: '#BFC4FC', // Balanced tint for subtle elements
@@ -33,130 +23,50 @@ const brand = {
   },
 };
 
-const neutral = {
-  light: {
-    50: '#FFFFFF', // Pure white
-    100: '#FCFCFD',
-    200: '#F8F9FB',
-    300: '#F3F4F8',
-    400: '#ECEDF3',
-    500: '#E5E7ED',
-    600: '#D8DBE5',
-    700: '#C1C4CF',
-    800: '#AEB1BD',
-    900: '#9B9EAC',
+// Refined dark theme with more subtle, elegant contrast levels
+const dark = {
+  background: {
+    base: '#0D0D0F',
+    surface: '#18181B',
+    elevated: '#1F1F23',
+    field: '#27272A',
+    highlight: '#2E2E33',
   },
-  dark: {
-    // 50: '#B0B1B5', // Light blackish (soft, almost gray but still blackish)
-    // 100: '#8F9094', // Slightly darker, distinct from 50
-    // 200: '#6E6F73', // Medium blackish, clear step down
-    // 300: '#4D4E52', // Darker, leaning into black
-    // 400: '#3A3B3F', // Rich blackish, distinct from 300
-    // 500: '#28292D', // Muted dark (core blackish tone)
-    // 600: '#1F2024', // Elevated dark (deeper, more contrast)
-    // 700: '#16171B', // Paper dark (almost pure black)
-    // 800: '#0D0E12', // Background dark (deep black)
-    // 900: '#040506', // Deepest black (near black, maximum depth)
-    // Light shades (for text and accents)
-    50: '#FFFFFF', // Pure white (for high-contrast text)
-    100: '#F5F5F5', // Off-white (for subtle text)
-    200: '#E0E0E0', // Light gray (for borders or muted text)
 
-    // Mid-tones (for surfaces and cards)
-    300: '#9E9E9E', // Medium gray (for secondary text)
-    400: '#616161', // Dark gray (for muted accents)
-    500: '#424242', // Dark gray (for card backgrounds)
-    600: '#303030', // Darker gray (for elevated cards)
-    700: '#212121', // Very dark gray (for dark surfaces)
+  text: {
+    primary: '#F2F2F7',
+    secondary: 'rgba(242, 242, 247, 0.78)',
+    tertiary: 'rgba(242, 242, 247, 0.55)',
+    disabled: 'rgba(242, 242, 247, 0.35)',
+  },
 
-    // Dark shades (for backgrounds and depth)
-    800: '#121212', // Near-black (for dark backgrounds)
-    900: '#000000', // Pure black (for deepest dark)
+  border: {
+    subtle: 'rgba(255, 255, 255, 0.08)',
+
+    muted: 'rgba(255, 255, 255, 0.04)',
   },
 };
 
 const semantic = {
   success: {
-    50: '#E8FFF3',
-    100: '#D1FFE7',
-    200: '#A3FFCF',
-    300: '#75FFB7',
-    400: '#47FF9F',
-    500: '#22C55E', // Main success
-    600: '#1B9E4B',
-    700: '#147738',
-    800: '#0D5025',
-    900: '#062912',
+    base: '#10B981',
+    subtle: 'rgba(16, 185, 129, 0.12)',
   },
   error: {
-    50: '#FFF1F0',
-    100: '#FFE4E2',
-    200: '#FFC9C5',
-    300: '#FFADA8',
-    400: '#FF928B',
-    500: '#EF4444', // Main error
-    600: '#BF3636',
-    700: '#8F2828',
-    800: '#5F1B1B',
-    900: '#300D0D',
+    base: '#EF4444',
+    subtle: 'rgba(239, 68, 68, 0.12)',
   },
   warning: {
-    50: '#FFF9E5',
-    100: '#FFF3CC',
-    200: '#FFE799',
-    300: '#FFDB66',
-    400: '#FFCF33',
-    500: '#F59E0B', // Main warning
-    600: '#C47E09',
-    700: '#935F07',
-    800: '#623F04',
-    900: '#312002',
+    base: '#F59E0B',
+    subtle: 'rgba(245, 158, 11, 0.12)',
   },
   info: {
-    50: '#EFF6FF',
-    100: '#DBEAFE',
-    200: '#BFDBFE',
-    300: '#93C5FD',
-    400: '#60A5FA',
-    500: '#4048B0', // Using primary as info
-    600: '#343B96',
-    700: '#2A2F7A',
-    800: '#1F235D',
-    900: '#151840',
+    base: '#3B82F6',
+    subtle: 'rgba(59, 130, 246, 0.12)',
   },
 };
 
-const text = {
-  light: {
-    primary: '#000000',
-    gray: {
-      100: '#F8F9FA',
-      200: '#E9ECEF',
-      300: '#DEE2E6',
-      400: '#CED4DA',
-      500: '#ADB5BD',
-      600: '#6C757D',
-      700: '#495057',
-      800: '#343A40',
-      900: '#212529',
-    },
-  },
-  dark: {
-    primary: '#FFFFFF',
-    gray: {
-      100: '#E9ECEF',
-      200: '#DDE1E6',
-      300: '#CED4DA',
-      400: '#ADB5BD',
-      500: '#868E96',
-      600: '#666D75',
-      700: '#495057',
-      800: '#343A40',
-      900: '#212529',
-    },
-  },
-};
-
+// Typography scale
 export const typography = {
   fontFamily: {
     regular: 'Gilroy-Regular',
@@ -196,6 +106,7 @@ export const typography = {
   },
 };
 
+// Spacing scale
 export const spacing: Spacing = {
   '0': ms(0),
   '3xs': ms(2),
@@ -214,14 +125,14 @@ export const spacing: Spacing = {
 export const borderRadius: BorderRadius = {
   none: ms(0),
   '3xs': ms(2),
-  '2xs': ms(4),
-  xs: ms(6),
-  sm: ms(8),
-  md: ms(10),
-  lg: ms(12),
-  xl: ms(16),
-  '2xl': ms(20),
-  '3xl': ms(24),
+  '2xs': ms(3),
+  xs: ms(5),
+  sm: ms(7),
+  md: ms(9),
+  lg: ms(11),
+  xl: ms(14),
+  '2xl': ms(18),
+  '3xl': ms(22),
   full: 9999,
 };
 
@@ -235,17 +146,18 @@ export const opacity: Opacity = {
 
 export const borderWidths: BorderWidths = {
   none: 0,
+  hairline: ms(0.5),
   thin: ms(1),
-  medium: ms(2),
-  thick: ms(4),
+  medium: ms(1.5),
+  thick: ms(2),
 };
 
 export const iconSizes: IconSizes = {
   sm: ms(16),
-  md: ms(24),
-  lg: ms(32),
-  xl: ms(48),
-  xs: 0,
+  md: ms(20),
+  lg: ms(24),
+  xl: ms(32),
+  xs: ms(12),
 };
 
 export const alignment: {[key in Alignment]: string} = {
@@ -254,6 +166,8 @@ export const alignment: {[key in Alignment]: string} = {
   left: 'flex-start',
 };
 
-const colors = {brand, neutral, semantic, text};
-
-export {colors};
+export const colors = {
+  brand,
+  dark,
+  semantic,
+};

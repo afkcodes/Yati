@@ -6,8 +6,21 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
-import {useTheme} from '~hooks/ThemeContext';
-import {themes} from '~styles/theme';
+import {useTheme} from '~/hooks/ThemeContext';
+import {getThemeColor} from '~/styles/theme';
+
+type BackgroundVariant =
+  | 'base'
+  | 'surface'
+  | 'elevated'
+  | 'field'
+  | 'highlight'
+  | 'accent'
+  | 'transparent'
+  | 'success'
+  | 'error'
+  | 'warning'
+  | 'info';
 
 interface ViewXProps extends ViewStyle {
   children?: React.ReactNode;
@@ -15,7 +28,7 @@ interface ViewXProps extends ViewStyle {
   onLayout?: (event: LayoutChangeEvent) => void;
   testID?: string;
   accessibilityLabel?: string;
-  variant?: 'primary' | 'secondary' | 'tertiary' | 'accent' | 'transparent';
+  variant?: BackgroundVariant;
 }
 
 const ViewX: React.FC<ViewXProps> = ({
@@ -29,7 +42,12 @@ const ViewX: React.FC<ViewXProps> = ({
 }) => {
   const styleProps = JSON.stringify(rest);
   const {theme} = useTheme();
-  const bgColor = themes[theme].background[variant];
+
+  // Get the background color based on variant
+  const bgColor =
+    variant === 'transparent'
+      ? 'transparent'
+      : getThemeColor(theme, 'background', variant);
 
   const styles = useMemo(() => {
     return StyleSheet.create({

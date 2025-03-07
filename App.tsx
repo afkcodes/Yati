@@ -59,7 +59,7 @@ const renderScene = SceneMap({
 const TabViewExample = () => {
   const [index, setIndex] = React.useState(0);
   const bgColor = getThemeColor('dark', 'background', 'surface');
-  const accent = getThemeColor('dark', 'background', 'accent');
+  const accent = getThemeColor('dark', 'text', 'accent');
 
   const [routes] = React.useState([
     {

@@ -69,11 +69,18 @@ const semantic = {
 // Typography scale
 export const typography = {
   fontFamily: {
-    regular: 'Gilroy-Regular',
-    medium: 'Gilroy-Medium',
-    semibold: 'Gilroy-Semibold',
-    bold: 'Gilroy-Bold',
-    title: 'JosefinSans-Bold',
+    regular: 'Gilroy',
+    medium: 'Gilroy',
+    semibold: 'Gilroy',
+    bold: 'Gilroy',
+    title: 'JosefinSans',
+  },
+  fontWeight: {
+    regular: '400',
+    medium: '500',
+    semibold: '600',
+    bold: '700',
+    title: '700',
   },
   fontSizes: {
     '3xs': font(8),

@@ -46,7 +46,8 @@ const TextX: React.FC<TextXProps> = ({
   // Get the appropriate text color from theme
   const textColor = getThemeColor(theme, 'text', color);
   const textSize = themes[theme].typography.fontSizes[fontSize];
-  const fontFamilyWeight = themes[theme].typography.fontFamily[fontWeight];
+  const fontFamily = themes[theme].typography.fontFamily[fontWeight];
+  const fontW = themes[theme].typography.fontWeight[fontWeight];
 
   const styles = useMemo(() => {
     return StyleSheet.create({
@@ -54,10 +55,11 @@ const TextX: React.FC<TextXProps> = ({
         ...JSON.parse(styleProps),
         color: textColor,
         fontSize: textSize,
-        fontFamily: fontFamilyWeight,
+        fontFamily: fontFamily,
+        fontWeight: fontW,
       },
     });
-  }, [styleProps, textColor, textSize, fontFamilyWeight]);
+  }, [styleProps, textColor, textSize, fontFamily, fontW]);
 
   // Extract proper TextProps
   const textProps = {

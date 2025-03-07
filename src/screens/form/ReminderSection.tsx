@@ -1,21 +1,28 @@
+// screens/form/ReminderSection.tsx
 import DateTimePicker from '@react-native-community/datetimepicker';
-import {Bell, Plus, X} from 'lucide-react-native';
-import {useState} from 'react';
+import {AlertCircle, Bell, Clock, Plus, X} from 'lucide-react-native';
+import React, {useEffect, useState} from 'react';
 import {Platform} from 'react-native';
 import {TextX, TouchableX, ViewX} from '~/components/common';
 import {useTheme} from '~/hooks/ThemeContext';
-import {getThemeColor, withAlpha} from '~/styles/theme';
+import {getThemeColor, styleUtils, withAlpha} from '~/styles/theme';
+import {formatTime12Hour} from '~/utils/date/dateUtils';
 import {s, vs} from '~utils/screenUtil';
+import {SectionLabel} from './BasicInfo';
 
 interface RemindersSectionProps {
   reminders: Date[];
+  timeOfDay: Date | null;
   onUpdateReminders: (reminders: Date[]) => void;
+  error?: string;
 }
 
-const RemindersSection = ({
+const RemindersSection: React.FC<RemindersSectionProps> = ({
   reminders,
+  timeOfDay,
   onUpdateReminders,
-}: RemindersSectionProps) => {
+  error,
+}) => {
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const {theme} = useTheme();
 
@@ -26,25 +33,25 @@ const RemindersSection = ({
   const accentColor = getThemeColor(theme, 'text', 'accent');
   const errorColor = getThemeColor(theme, 'text', 'error');
 
-  const handleAddReminder = (event: any, date: any) => {
+  // Add the frequency time as a default reminder if no reminders exist
+  useEffect(() => {
+    if (timeOfDay && reminders.length === 0) {
+      onUpdateReminders([new Date(timeOfDay)]);
+    }
+  }, [timeOfDay, reminders.length, onUpdateReminders]);
+
+  const handleAddReminder = (event: any, date?: Date) => {
     setTimePickerVisible(Platform.OS === 'ios');
     if (date) {
-      // Only add time part, ignore date part
-      const timeOnly = new Date();
-      timeOnly.setHours(date.getHours());
-      timeOnly.setMinutes(date.getMinutes());
-      timeOnly.setSeconds(0);
-      timeOnly.setMilliseconds(0);
-
-      // Check if this time already exists
+      // Only add the time if it doesn't already exist
       const exists = reminders.some(
         existing =>
-          existing.getHours() === timeOnly.getHours() &&
-          existing.getMinutes() === timeOnly.getMinutes(),
+          existing.getHours() === date.getHours() &&
+          existing.getMinutes() === date.getMinutes(),
       );
 
       if (!exists) {
-        onUpdateReminders([...reminders, timeOnly]);
+        onUpdateReminders([...reminders, date]);
       }
     }
   };
@@ -53,14 +60,6 @@ const RemindersSection = ({
     const newReminders = [...reminders];
     newReminders.splice(index, 1);
     onUpdateReminders(newReminders);
-  };
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true,
-    });
   };
 
   const sortReminders = (a: Date, b: Date) => {
@@ -76,7 +75,7 @@ const RemindersSection = ({
         justifyContent="space-between"
         alignItems="center"
         marginBottom={vs(8)}>
-        <SectionLabel title="Reminders" />
+        <SectionLabel title="Reminders" isRequired />
 
         <TouchableX
           flexDirection="row"
@@ -93,6 +92,22 @@ const RemindersSection = ({
           </TextX>
         </TouchableX>
       </ViewX>
+
+      {error && (
+        <ViewX
+          flexDirection="row"
+          alignItems="center"
+          backgroundColor={withAlpha(errorColor, 0.1)}
+          paddingHorizontal={s(8)}
+          paddingVertical={vs(4)}
+          borderRadius={8}
+          marginBottom={vs(8)}>
+          <AlertCircle size={14} color={errorColor} />
+          <TextX fontSize="xs" color="error" marginLeft={s(6)}>
+            {error}
+          </TextX>
+        </ViewX>
+      )}
 
       {reminders.length > 0 ? (
         <ViewX gap={vs(8)}>
@@ -111,7 +126,7 @@ const RemindersSection = ({
               <ViewX flexDirection="row" alignItems="center">
                 <Bell size={14} color={textSecondary} strokeWidth={1.5} />
                 <TextX fontSize="xs" color="secondary" marginLeft={s(8)}>
-                  {formatTime(reminder)}
+                  {formatTime12Hour(reminder)}
                 </TextX>
               </ViewX>
 
@@ -126,18 +141,46 @@ const RemindersSection = ({
       ) : (
         <ViewX
           borderRadius={8}
-          padding={vs(16)}
+          padding={vs(14)}
           flexDirection="row"
           alignItems="center"
           justifyContent="center"
-          backgroundColor={withAlpha(fieldColor, 0.4)}>
+          backgroundColor={withAlpha(fieldColor, 0.4)}
+          borderWidth={1}
+          borderColor={withAlpha(error ? errorColor : borderColor, 0.5)}
+          borderStyle="dashed">
           <Bell size={16} color={textTertiary} strokeWidth={1.5} />
           <TextX fontSize="xs" color="tertiary" marginLeft={s(8)}>
-            No reminders set
+            No reminders set. Add at least one reminder to get notified.
           </TextX>
         </ViewX>
       )}
 
+      {timeOfDay && reminders.length === 0 && (
+        <TouchableX
+          flexDirection="row"
+          alignItems="center"
+          padding={styleUtils.spacing.sm}
+          marginTop={styleUtils.spacing.sm}
+          borderRadius={styleUtils.borderRadius.sm}
+          backgroundColor={withAlpha(accentColor, 0.1)}
+          borderColor={withAlpha(accentColor, 0.3)}
+          borderWidth={1}
+          onPress={() => onUpdateReminders([new Date(timeOfDay)])}>
+          <Clock size={16} color={accentColor} strokeWidth={1.5} />
+          <ViewX marginLeft={styleUtils.spacing.sm} flex={1}>
+            <TextX fontSize="sm" color="accent" fontWeight="medium">
+              Use habit time as reminder
+            </TextX>
+            <TextX fontSize="xs" color="secondary">
+              {formatTime12Hour(timeOfDay)}
+            </TextX>
+          </ViewX>
+          <Plus size={16} color={accentColor} strokeWidth={1.5} />
+        </TouchableX>
+      )}
+
+      {/* Time Picker for adding reminders */}
       {timePickerVisible && (
         <DateTimePicker
           value={new Date()}
@@ -150,15 +193,5 @@ const RemindersSection = ({
     </ViewX>
   );
 };
-
-const SectionLabel = ({title}: {title: string}) => (
-  <TextX
-    fontSize="sm"
-    fontWeight="medium"
-    color="secondary"
-    marginBottom={vs(8)}>
-    {title}
-  </TextX>
-);
 
 export default RemindersSection;

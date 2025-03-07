@@ -23,7 +23,7 @@ import {
   Trash2,
   User,
 } from 'lucide-react-native';
-import React, {useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import {Platform, ScrollView, StyleSheet, Switch} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {TextX, TouchableX, ViewX} from '~/components/common';
@@ -31,194 +31,225 @@ import {useTheme} from '~/hooks/ThemeContext';
 import {getThemeColor, withAlpha} from '~/styles/theme';
 import {s, vs} from '~/utils/screenUtil';
 
-const SettingsScreen = () => {
+// Interface for setting item props
+interface SettingItemProps {
+  icon: LucideIcon;
+  title: string;
+  subtitle?: string;
+  value?: string;
+  onPress: () => void;
+  rightElement?: React.ReactNode;
+  destructive?: boolean;
+  iconColor?: string;
+  isFirst?: boolean;
+  isLast?: boolean;
+}
+
+// Interface for toggle setting props
+interface ToggleSettingProps {
+  icon: LucideIcon;
+  title: string;
+  subtitle?: string;
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+  iconColor?: string;
+  isFirst?: boolean;
+  isLast?: boolean;
+}
+
+const SettingsScreen: React.FC = () => {
   const {theme, setTheme} = useTheme();
   const insets = useSafeAreaInsets();
 
+  // State for toggle settings
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [soundsEnabled, setSoundsEnabled] = useState(true);
   const [autoBackupEnabled, setAutoBackupEnabled] = useState(true);
   const [weekStartMonday, setWeekStartMonday] = useState(true);
   const [streakProtection, setStreakProtection] = useState(false);
 
-  const bgColor = getThemeColor(theme, 'background', 'base');
-  const surfaceColor = getThemeColor(theme, 'background', 'surface');
-  const accentColor = getThemeColor(theme, 'text', 'accent');
-  const textSecondary = getThemeColor(theme, 'text', 'secondary');
-  const borderColor = getThemeColor(theme, 'border', 'subtle');
-  const errorColor = getThemeColor(theme, 'text', 'error');
-
-  const handleThemeToggle = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-  };
-
-  const renderSectionHeader = (title: string): React.ReactElement => (
-    <ViewX
-      style={styles.sectionHeader}
-      paddingHorizontal={s(16)}
-      paddingVertical={vs(8)}
-      marginTop={vs(16)}
-      marginBottom={vs(8)}>
-      <TextX
-        fontSize="xs"
-        color="secondary"
-        fontWeight="semibold"
-        letterSpacing={1}
-        textTransform="uppercase">
-        {title}
-      </TextX>
-    </ViewX>
+  // Memoize theme colors to prevent recalculation on every render
+  const colors = useMemo(
+    () => ({
+      bgColor: getThemeColor(theme, 'background', 'base'),
+      surfaceColor: getThemeColor(theme, 'background', 'surface'),
+      accentColor: getThemeColor(theme, 'text', 'accent'),
+      textSecondary: getThemeColor(theme, 'text', 'secondary'),
+      borderColor: getThemeColor(theme, 'border', 'subtle'),
+      errorColor: getThemeColor(theme, 'text', 'error'),
+    }),
+    [theme],
   );
 
-  interface SettingItemProps {
-    icon: LucideIcon;
-    title: string;
-    subtitle?: string;
-    value?: string;
-    onPress: () => void;
-    rightElement?: React.ReactNode;
-    destructive?: boolean;
-    iconColor?: string;
-    isFirst?: boolean;
-    isLast?: boolean;
-  }
+  // Handle theme toggle
+  const handleThemeToggle = useCallback(() => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  }, [theme, setTheme]);
 
-  const renderSettingItem = ({
-    icon: Icon,
-    title,
-    subtitle,
-    value,
-    onPress,
-    rightElement,
-    destructive = false,
-    iconColor,
-    isFirst = false,
-    isLast = false,
-  }: SettingItemProps): React.ReactElement => (
-    <TouchableX
-      style={[
-        styles.settingItem,
-        isFirst && styles.settingItemFirst,
-        isLast && styles.settingItemLast,
-        {
-          backgroundColor: surfaceColor,
-          borderBottomColor: !isLast ? borderColor : 'transparent',
-          borderBottomWidth: !isLast ? StyleSheet.hairlineWidth : 0,
-        },
-      ]}
-      flexDirection="row"
-      alignItems="center"
-      paddingVertical={vs(12)}
-      paddingHorizontal={s(16)}
-      onPress={onPress}>
+  // Render section header - memoized to prevent recreating on every render
+  const renderSectionHeader = useCallback(
+    (title: string): React.ReactElement => (
       <ViewX
-        width={s(28)}
-        justifyContent="center"
-        alignItems="center"
-        marginRight={s(12)}>
-        <Icon
-          size={20}
-          color={destructive ? errorColor : iconColor || textSecondary}
-          strokeWidth={1.5}
-        />
-      </ViewX>
-      <ViewX flex={1}>
+        paddingHorizontal={s(16)}
+        paddingVertical={vs(8)}
+        marginTop={vs(16)}
+        marginBottom={vs(8)}>
         <TextX
-          fontSize="sm"
-          fontWeight="medium"
-          color={destructive ? 'error' : 'primary'}>
+          fontSize="xs"
+          color="secondary"
+          fontWeight="semibold"
+          letterSpacing={1}
+          textTransform="uppercase">
           {title}
         </TextX>
-        {subtitle && (
-          <TextX fontSize="xs" color="tertiary" marginTop={vs(2)}>
-            {subtitle}
-          </TextX>
-        )}
       </ViewX>
-      {rightElement ||
-        (value && (
-          <ViewX
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="flex-end"
-            minWidth={s(60)}>
-            <TextX fontSize="sm" color="tertiary">
-              {value}
-            </TextX>
-            <ChevronRight size={16} color={textSecondary} />
-          </ViewX>
-        ))}
-    </TouchableX>
+    ),
+    [],
   );
 
-  interface ToggleSettingProps {
-    icon: LucideIcon;
-    title: string;
-    subtitle?: string;
-    value: boolean;
-    onValueChange: (value: boolean) => void;
-    iconColor?: string;
-    isFirst?: boolean;
-    isLast?: boolean;
-  }
+  // Render setting item
+  const renderSettingItem = useCallback(
+    ({
+      icon: Icon,
+      title,
+      subtitle,
+      value,
+      onPress,
+      rightElement,
+      destructive = false,
+      iconColor,
+      isFirst = false,
+      isLast = false,
+    }: SettingItemProps): React.ReactElement => (
+      <TouchableX
+        flexDirection="row"
+        alignItems="center"
+        paddingVertical={vs(12)}
+        paddingHorizontal={s(16)}
+        onPress={onPress}
+        style={[
+          isFirst && styles.settingItemFirst,
+          isLast && styles.settingItemLast,
+          {
+            backgroundColor: colors.surfaceColor,
+            borderBottomColor: !isLast ? colors.borderColor : 'transparent',
+            borderBottomWidth: !isLast ? StyleSheet.hairlineWidth : 0,
+          },
+        ]}>
+        <ViewX
+          width={s(28)}
+          justifyContent="center"
+          alignItems="center"
+          marginRight={s(12)}>
+          <Icon
+            size={20}
+            color={
+              destructive
+                ? colors.errorColor
+                : iconColor || colors.textSecondary
+            }
+            strokeWidth={1.5}
+          />
+        </ViewX>
+        <ViewX flex={1}>
+          <TextX
+            fontSize="sm"
+            fontWeight="medium"
+            color={destructive ? 'error' : 'primary'}>
+            {title}
+          </TextX>
+          {subtitle && (
+            <TextX fontSize="xs" color="tertiary" marginTop={vs(2)}>
+              {subtitle}
+            </TextX>
+          )}
+        </ViewX>
+        {rightElement ||
+          (value && (
+            <ViewX
+              flexDirection="row"
+              alignItems="center"
+              justifyContent="flex-end"
+              minWidth={s(60)}>
+              <TextX fontSize="sm" color="tertiary">
+                {value}
+              </TextX>
+              <ChevronRight size={16} color={colors.textSecondary} />
+            </ViewX>
+          ))}
+      </TouchableX>
+    ),
+    [colors],
+  );
 
-  // Render a toggle setting
-  const renderToggleSetting = ({
-    icon,
-    title,
-    subtitle,
-    value,
-    onValueChange,
-    iconColor,
-    isFirst = false,
-    isLast = false,
-  }: ToggleSettingProps): React.ReactElement =>
-    renderSettingItem({
+  // Render toggle setting
+  const renderToggleSetting = useCallback(
+    ({
       icon,
       title,
       subtitle,
+      value,
+      onValueChange,
       iconColor,
-      isFirst,
-      isLast,
-      onPress: () => onValueChange(!value), // Toggle when pressing the item
-      rightElement: (
-        <Switch
-          value={value}
-          style={{height: vs(12)}}
-          onValueChange={onValueChange}
-          trackColor={{
-            false: withAlpha(textSecondary, 0.2),
-            true: withAlpha(accentColor, 0.8),
-          }}
-          thumbColor={Platform.OS === 'ios' ? undefined : '#FFFFFF'}
-          ios_backgroundColor={withAlpha(textSecondary, 0.2)}
-        />
-      ),
-    });
-
-  // Render a group of settings
-  const renderSettingGroup = (
-    items: React.ReactElement[],
-  ): React.ReactElement => (
-    <ViewX
-      marginHorizontal={s(16)}
-      borderRadius={12}
-      overflow="hidden"
-      marginBottom={vs(8)}
-      backgroundColor={surfaceColor}>
-      {items}
-    </ViewX>
+      isFirst = false,
+      isLast = false,
+    }: ToggleSettingProps): React.ReactElement =>
+      renderSettingItem({
+        icon,
+        title,
+        subtitle,
+        iconColor,
+        isFirst,
+        isLast,
+        onPress: () => onValueChange(!value), // Toggle when pressing the item
+        rightElement: (
+          <Switch
+            value={value}
+            style={{height: vs(12)}}
+            onValueChange={onValueChange}
+            trackColor={{
+              false: withAlpha(colors.textSecondary, 0.2),
+              true: withAlpha(colors.accentColor, 0.8),
+            }}
+            thumbColor={Platform.OS === 'ios' ? undefined : '#FFFFFF'}
+            ios_backgroundColor={withAlpha(colors.textSecondary, 0.2)}
+          />
+        ),
+      }),
+    [renderSettingItem, colors],
   );
 
-  return (
-    <ViewX
-      flex={1}
-      backgroundColor={bgColor}
-      paddingTop={insets.top}
-      paddingBottom={insets.bottom}>
+  // Render a group of settings
+  const renderSettingGroup = useCallback(
+    (items: React.ReactElement[]): React.ReactElement => (
       <ViewX
+        marginHorizontal={s(16)}
+        borderRadius={12}
+        overflow="hidden"
+        marginBottom={vs(8)}
+        backgroundColor={colors.surfaceColor}>
+        {items.map((item, index) => (
+          <React.Fragment key={`setting-item-${index}`}>{item}</React.Fragment>
+        ))}
+      </ViewX>
+    ),
+    [colors.surfaceColor],
+  );
+
+  // Handle placeholder onPress events
+  const handlePress = useCallback(() => {
+    // This would be replaced with actual navigation or action logic
+    console.log('Setting item pressed');
+  }, []);
+
+  return (
+    <ViewX flex={1} backgroundColor={colors.bgColor}>
+      <ViewX
+        paddingTop={insets.top}
         paddingHorizontal={s(16)}
         paddingVertical={vs(12)}
+        zIndex={10}
+        variant="base"
         borderBottomWidth={StyleSheet.hairlineWidth}
         borderBottomColor="rgba(150, 150, 150, 0.2)">
         <TextX fontSize="xl" fontWeight="semibold">
@@ -228,7 +259,11 @@ const SettingsScreen = () => {
 
       <ScrollView
         style={styles.scrollView}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[
+          styles.scrollContent,
+          {paddingBottom: insets.bottom},
+        ]}>
         {/* Habit Preferences */}
         {renderSectionHeader('Habit Preferences')}
         {renderSettingGroup([
@@ -236,8 +271,10 @@ const SettingsScreen = () => {
             icon: Target,
             title: 'Goal Settings',
             subtitle: 'Configure goal targets and reminders',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             iconColor: '#FF6B6B',
             isFirst: true,
           }),
@@ -265,8 +302,10 @@ const SettingsScreen = () => {
             title: 'Progress Calculation',
             subtitle: 'How progress is measured and displayed',
             value: 'Weekly Average',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             iconColor: '#32D74B',
             isLast: true,
           }),
@@ -290,8 +329,10 @@ const SettingsScreen = () => {
             title: 'Reminder Schedule',
             subtitle: 'Set timing for habit reminders',
             value: 'Customize',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             iconColor: '#FF9F0A',
           }),
 
@@ -325,8 +366,10 @@ const SettingsScreen = () => {
             title: 'Theme Colors',
             subtitle: 'Customize app appearance',
             value: 'Customize',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             iconColor: '#32D74B',
           }),
 
@@ -335,8 +378,10 @@ const SettingsScreen = () => {
             title: 'App Icon',
             subtitle: 'Change app icon style',
             value: Platform.OS === 'ios' ? 'Change' : 'Default',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             iconColor: '#BF5AF2',
             isLast: true,
           }),
@@ -360,8 +405,10 @@ const SettingsScreen = () => {
             title: 'Export Data',
             subtitle: 'Export your data for backup or analysis',
             value: 'CSV/JSON',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             iconColor: '#32D74B',
           }),
 
@@ -369,8 +416,10 @@ const SettingsScreen = () => {
             icon: Shield,
             title: 'Privacy Settings',
             subtitle: 'Manage data sharing and privacy',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             iconColor: '#FF375F',
           }),
 
@@ -378,7 +427,7 @@ const SettingsScreen = () => {
             icon: Trash2,
             title: 'Clear All Data',
             subtitle: 'Permanently delete all app data',
-            onPress: () => {},
+            onPress: handlePress,
             destructive: true,
             iconColor: '#FF453A',
             isLast: true,
@@ -392,8 +441,10 @@ const SettingsScreen = () => {
             icon: User,
             title: 'Profile',
             subtitle: 'Manage your account details',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             isFirst: true,
           }),
 
@@ -401,8 +452,10 @@ const SettingsScreen = () => {
             icon: Share2,
             title: 'Share App',
             subtitle: 'Tell friends about this app',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             iconColor: '#5856D6',
           }),
 
@@ -411,8 +464,10 @@ const SettingsScreen = () => {
             title: 'Language',
             subtitle: 'Change app language',
             value: 'English',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             iconColor: '#32D74B',
           }),
 
@@ -420,8 +475,10 @@ const SettingsScreen = () => {
             icon: HelpCircle,
             title: 'Help Center',
             subtitle: 'Get help with using the app',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             iconColor: '#FF375F',
           }),
 
@@ -430,8 +487,10 @@ const SettingsScreen = () => {
             title: 'About',
             subtitle: 'App information and credits',
             value: 'Version 1.0.0',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             iconColor: '#64D2FF',
             isLast: true,
           }),
@@ -445,8 +504,10 @@ const SettingsScreen = () => {
             title: 'Upgrade to Pro',
             subtitle: 'Get more features and customization',
             value: 'Get More Features',
-            onPress: () => {},
-            rightElement: <ChevronRight size={16} color={textSecondary} />,
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
             iconColor: '#FFD700',
             isFirst: true,
             isLast: true,
@@ -460,7 +521,7 @@ const SettingsScreen = () => {
             icon: LogOut,
             title: 'Log Out',
             subtitle: 'Sign out of your account',
-            onPress: () => {},
+            onPress: handlePress,
             destructive: true,
             isFirst: true,
             isLast: true,
@@ -482,8 +543,9 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  sectionHeader: {},
-  settingItem: {},
+  scrollContent: {
+    paddingBottom: vs(20),
+  },
   settingItemFirst: {
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,

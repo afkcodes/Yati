@@ -1,7 +1,8 @@
+// screens/form/FrequencySection.tsx
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {Calendar, Check, ChevronRight, Clock} from 'lucide-react-native';
-import {useState} from 'react';
-import {Modal, ScrollView, StyleSheet} from 'react-native';
+import React, {useState} from 'react';
+import {Modal, Platform, ScrollView, StyleSheet} from 'react-native';
 import {TextX, TouchableX, ViewX} from '~/components/common';
 import {useTheme} from '~/hooks/ThemeContext';
 import {getThemeColor, styleUtils, withAlpha} from '~/styles/theme';
@@ -25,11 +26,6 @@ const WEEKDAYS = [
   {id: 'sun', label: 'Sun'},
 ];
 
-// Function to get the number of days in a month
-const getDaysInMonth = (year: number, month: number): number => {
-  return new Date(year, month + 1, 0).getDate();
-};
-
 // Function to generate a proper calendar grid
 const generateCalendarGrid = (year: number, month: number) => {
   // Create 6 rows of 7 columns (all null initially)
@@ -38,7 +34,7 @@ const generateCalendarGrid = (year: number, month: number) => {
     .map(() => Array(7).fill(null));
 
   // Get number of days in the month
-  const daysInMonth = getDaysInMonth(year, month);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   // Get the day of week of the first day (0 = Sunday, 1 = Monday, etc.)
   const firstDayOfWeek = new Date(year, month, 1).getDay();
@@ -80,12 +76,14 @@ export interface FrequencyData {
 interface FrequencySectionProps {
   frequency: FrequencyData;
   onUpdateFrequency: (frequency: FrequencyData) => void;
+  error?: string;
 }
 
-const FrequencySection = ({
+const FrequencySection: React.FC<FrequencySectionProps> = ({
   frequency,
   onUpdateFrequency,
-}: FrequencySectionProps) => {
+  error,
+}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -102,6 +100,7 @@ const FrequencySection = ({
   const accentColor = getThemeColor(theme, 'text', 'accent');
   const textPlaceholder = getThemeColor(theme, 'text', 'tertiary');
   const textSecondary = getThemeColor(theme, 'text', 'secondary');
+  const errorColor = getThemeColor(theme, 'text', 'error');
 
   const handleSelectFrequencyType = (type: FrequencyType) => {
     let newFrequency = {
@@ -138,16 +137,8 @@ const FrequencySection = ({
     onUpdateFrequency({...frequency, value: newValue});
   };
 
-  // const handleIntervalChange = (text: string) => {
-  //   const interval = parseInt(text, 10) || 1;
-  //   onUpdateFrequency({
-  //     ...frequency,
-  //     interval: Math.max(1, interval),
-  //   });
-  // };
-
-  const handleSetTime = (event: any, date: Date | undefined) => {
-    setTimePickerVisible(false);
+  const handleSetTime = (event: any, date?: Date) => {
+    setTimePickerVisible(Platform.OS === 'ios');
     if (date) {
       onUpdateFrequency({...frequency, timeOfDay: date});
     }
@@ -205,10 +196,29 @@ const FrequencySection = ({
     });
   };
 
+  const handleUpdateInterval = (increment: boolean) => {
+    const currentInterval = frequency.interval || 1;
+    const newInterval = increment
+      ? currentInterval + 1
+      : Math.max(1, currentInterval - 1);
+    onUpdateFrequency({
+      ...frequency,
+      interval: newInterval,
+    });
+  };
+
   return (
     <ScrollView>
       <ViewX marginBottom={styleUtils.spacing.xl}>
         <SectionLabel title="Frequency" />
+        {error && (
+          <TextX
+            fontSize="xs"
+            color="error"
+            marginBottom={styleUtils.spacing.xs}>
+            {error}
+          </TextX>
+        )}
 
         <TouchableX
           height={44}
@@ -219,7 +229,7 @@ const FrequencySection = ({
           alignItems="center"
           justifyContent="space-between"
           backgroundColor={fieldColor}
-          borderColor={borderColor}
+          borderColor={error ? errorColor : borderColor}
           onPress={() => setModalVisible(true)}
           accessibilityLabel="Select frequency"
           accessibilityHint="Choose how often you want to complete this habit"
@@ -236,7 +246,7 @@ const FrequencySection = ({
           <ChevronRight size={16} color={textPlaceholder} strokeWidth={1.5} />
         </TouchableX>
 
-        {/* Hourly Interval Input - Redesigned */}
+        {/* Hourly Interval Input */}
         {frequency.type === 'hourly' && (
           <ViewX
             backgroundColor={withAlpha(fieldColor, 0.3)}
@@ -261,15 +271,8 @@ const FrequencySection = ({
                 justifyContent="center"
                 alignItems="center"
                 backgroundColor={withAlpha(fieldColor, 0.7)}
-                onPress={() => {
-                  const currentInterval = frequency.interval || 1;
-                  if (currentInterval > 1) {
-                    onUpdateFrequency({
-                      ...frequency,
-                      interval: currentInterval - 1,
-                    });
-                  }
-                }}
+                onPress={() => handleUpdateInterval(false)}
+                disabled={(frequency.interval || 1) <= 1}
                 accessibilityLabel="Decrease interval">
                 <TextX fontSize="xl" fontWeight="semibold" color="tertiary">
                   -
@@ -301,13 +304,7 @@ const FrequencySection = ({
                 justifyContent="center"
                 alignItems="center"
                 backgroundColor={withAlpha(fieldColor, 0.7)}
-                onPress={() => {
-                  const currentInterval = frequency.interval || 1;
-                  onUpdateFrequency({
-                    ...frequency,
-                    interval: currentInterval + 1,
-                  });
-                }}
+                onPress={() => handleUpdateInterval(true)}
                 accessibilityLabel="Increase interval">
                 <TextX fontSize="xl" fontWeight="semibold" color="tertiary">
                   +
@@ -522,14 +519,24 @@ const FrequencySection = ({
               flexDirection="row"
               alignItems="center"
               paddingHorizontal={styleUtils.spacing.sm}
-              paddingVertical={6}
-              borderRadius={16}
-              backgroundColor={withAlpha(surfaceColor, 0)}
+              paddingVertical={styleUtils.spacing.xs}
+              borderRadius={styleUtils.borderRadius.sm}
+              backgroundColor={withAlpha(fieldColor, 0.7)}
+              borderWidth={1}
+              borderColor={borderColor}
               onPress={() => setTimePickerVisible(true)}
               accessibilityLabel="Select time"
               accessibilityHint="Choose time of day for this habit">
-              <Clock size={12} color={textPlaceholder} strokeWidth={1.5} />
-              <TextX fontSize="xs" color="tertiary" marginLeft={4}>
+              <Clock
+                size={14}
+                color={frequency.timeOfDay ? accentColor : textPlaceholder}
+                strokeWidth={1.5}
+              />
+              <TextX
+                fontSize="xs"
+                color={frequency.timeOfDay ? 'primary' : 'tertiary'}
+                fontWeight={frequency.timeOfDay ? 'medium' : 'regular'}
+                marginLeft={styleUtils.spacing.xs}>
                 {getTimeDisplay()}
               </TextX>
             </TouchableX>

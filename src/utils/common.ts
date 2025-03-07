@@ -40,3 +40,7 @@ export const isEmptyObject = (obj: any): boolean =>
   typeof obj === 'object' &&
   !Array.isArray(obj) &&
   Object.keys(obj).length > 0;
+
+export function wait(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

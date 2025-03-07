@@ -1,11 +1,13 @@
+// components/habit/form/GoalSection.tsx
 import DateTimePicker from '@react-native-community/datetimepicker';
-import {Calendar, X as Close} from 'lucide-react-native';
+import {Calendar, Trophy} from 'lucide-react-native';
 import React, {useState} from 'react';
 import {Platform} from 'react-native';
 import {TextX, TouchableX, ViewX} from '~/components/common';
 import {useTheme} from '~/hooks/ThemeContext';
 import {getThemeColor, styleUtils, withAlpha} from '~/styles/theme';
-import {vs} from '~utils/screenUtil';
+import {formatDateFriendly} from '~/utils/date/dateUtils';
+import {SectionLabel} from './BasicInfo';
 
 // Goal structure
 interface GoalData {
@@ -17,11 +19,13 @@ interface GoalData {
 interface GoalSectionProps {
   goal: GoalData;
   onUpdateGoal: (goal: Partial<GoalData>) => void;
+  error?: string;
 }
 
-export const GoalSection: React.FC<GoalSectionProps> = ({
+const GoalSection: React.FC<GoalSectionProps> = ({
   goal,
   onUpdateGoal,
+  error,
 }) => {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const {theme} = useTheme();
@@ -31,6 +35,7 @@ export const GoalSection: React.FC<GoalSectionProps> = ({
   const textSecondary = getThemeColor(theme, 'text', 'secondary');
   const textTertiary = getThemeColor(theme, 'text', 'tertiary');
   const accentColor = getThemeColor(theme, 'text', 'accent');
+  const errorColor = getThemeColor(theme, 'text', 'error');
 
   const handleToggleEnabled = () => {
     onUpdateGoal({
@@ -53,31 +58,11 @@ export const GoalSection: React.FC<GoalSectionProps> = ({
     }
   };
 
-  const formatDate = (date: Date | null) => {
-    if (!date) {
-      return 'Select a deadline';
+  const getDeadlineText = () => {
+    if (!goal.deadline) {
+      return 'Set a deadline';
     }
-
-    // Get today and tomorrow for comparison
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    // Check if the date is today or tomorrow
-    if (date.getTime() === today.getTime()) {
-      return 'Today';
-    } else if (date.getTime() === tomorrow.getTime()) {
-      return 'Tomorrow';
-    }
-
-    // Otherwise format as month + day
-    return date.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: today.getFullYear() !== date.getFullYear() ? 'numeric' : undefined,
-    });
+    return formatDateFriendly(goal.deadline);
   };
 
   return (
@@ -88,9 +73,7 @@ export const GoalSection: React.FC<GoalSectionProps> = ({
         alignItems="center"
         marginBottom={goal.enabled ? styleUtils.spacing.sm : 0}>
         <ViewX flexDirection="row" alignItems="center">
-          <TextX fontSize="sm" fontWeight="semibold" color="secondary">
-            Goal
-          </TextX>
+          <SectionLabel title="Goal" />
         </ViewX>
 
         <TouchableX
@@ -118,12 +101,20 @@ export const GoalSection: React.FC<GoalSectionProps> = ({
         </TouchableX>
       </ViewX>
 
+      {error && (
+        <TextX fontSize="xs" color="error" marginBottom={styleUtils.spacing.xs}>
+          {error}
+        </TextX>
+      )}
+
       {/* Goal content - shown only when enabled */}
       {goal.enabled && (
         <ViewX
           backgroundColor={withAlpha(fieldColor, 0.3)}
           borderRadius={styleUtils.borderRadius.md}
-          padding={styleUtils.spacing.sm}>
+          padding={styleUtils.spacing.sm}
+          borderWidth={error ? 2 : 1}
+          borderColor={error ? errorColor : 'transparent'}>
           {/* Target selector */}
           <ViewX marginBottom={styleUtils.spacing.sm}>
             <TextX
@@ -134,7 +125,12 @@ export const GoalSection: React.FC<GoalSectionProps> = ({
               Target Completions
             </TextX>
 
-            <ViewX flexDirection="row" alignItems="center">
+            <ViewX
+              flexDirection="row"
+              alignItems="center"
+              backgroundColor={withAlpha(fieldColor, 0.5)}
+              borderRadius={styleUtils.borderRadius.sm}
+              padding={styleUtils.spacing.xs}>
               <TouchableX
                 width={36}
                 height={36}
@@ -144,8 +140,8 @@ export const GoalSection: React.FC<GoalSectionProps> = ({
                 backgroundColor={withAlpha(fieldColor, 0.7)}
                 onPress={() => handleUpdateTarget(false)}
                 accessibilityLabel="Decrease target"
-                disabled={goal.target <= 0}
-                opacity={goal.target <= 0 ? 0.5 : 1}>
+                disabled={goal.target <= 1}
+                opacity={goal.target <= 1 ? 0.5 : 1}>
                 <TextX fontSize="xl" fontWeight="semibold" color="tertiary">
                   -
                 </TextX>
@@ -212,23 +208,21 @@ export const GoalSection: React.FC<GoalSectionProps> = ({
                   fontSize="md"
                   color={goal.deadline ? 'primary' : 'tertiary'}
                   marginLeft={styleUtils.spacing.xs}>
-                  {formatDate(goal.deadline)}
+                  {getDeadlineText()}
                 </TextX>
               </ViewX>
 
               {goal.deadline && (
                 <TouchableX
-                  height={vs(20)}
-                  width={vs(20)}
-                  alignItems="center"
-                  justifyContent="center"
-                  paddingHorizontal={styleUtils.spacing.xs}
+                  padding={styleUtils.spacing.xs}
                   onPress={e => {
                     e.stopPropagation();
                     onUpdateGoal({deadline: null});
                   }}
                   accessibilityLabel="Clear deadline">
-                  <X size={16} color={textTertiary} strokeWidth={1.5} />
+                  <TextX fontSize="lg" fontWeight="bold" color="tertiary">
+                    ×
+                  </TextX>
                 </TouchableX>
               )}
             </TouchableX>
@@ -240,11 +234,17 @@ export const GoalSection: React.FC<GoalSectionProps> = ({
               marginTop={styleUtils.spacing.sm}
               borderTopWidth={1}
               borderTopColor={withAlpha(borderColor, 0.3)}
-              paddingTop={styleUtils.spacing.sm}>
-              <TextX fontSize="xs" color="tertiary">
-                {`Complete this habit ${goal.target} times by ${formatDate(
-                  goal.deadline,
-                )}.`}
+              paddingTop={styleUtils.spacing.sm}
+              flexDirection="row"
+              alignItems="center">
+              <Trophy size={14} color={accentColor} strokeWidth={1.5} />
+              <TextX
+                fontSize="xs"
+                color="secondary"
+                marginLeft={styleUtils.spacing.xs}>
+                {`Complete this habit ${
+                  goal.target
+                } times by ${formatDateFriendly(goal.deadline)}.`}
               </TextX>
             </ViewX>
           )}
@@ -264,16 +264,5 @@ export const GoalSection: React.FC<GoalSectionProps> = ({
     </ViewX>
   );
 };
-
-// Add missing X icon component for the clear button
-const X = ({
-  size,
-  color,
-  strokeWidth,
-}: {
-  size: number;
-  color: string;
-  strokeWidth: number;
-}) => <Close size={size} color={color} strokeWidth={strokeWidth} />;
 
 export default GoalSection;

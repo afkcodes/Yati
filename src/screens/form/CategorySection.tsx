@@ -1,90 +1,31 @@
-/* eslint-disable react-native/no-inline-styles */
-import {
-  Book,
-  Brain,
-  Briefcase,
-  Check,
-  Coffee,
-  Dumbbell,
-  Heart,
-  Moon,
-  Target,
-} from 'lucide-react-native';
-import {useState} from 'react';
+// components/habit/form/CategorySection.tsx
+import * as Icons from 'lucide-react-native';
+import {Check, ChevronRight} from 'lucide-react-native';
+import React, {useState} from 'react';
 import {FlatList, Modal, StyleSheet} from 'react-native';
 import {TextX, TouchableX, ViewX} from '~/components/common';
 import {useTheme} from '~/hooks/ThemeContext';
 import {getThemeColor, styleUtils, withAlpha} from '~/styles/theme';
-
-// Category definitions
-const CATEGORIES = [
-  {
-    id: 'mindfulness',
-    name: 'Mindfulness',
-    icon: Brain,
-    color: '#8B5CF6',
-    description: 'Meditation, awareness, calm',
-  },
-  {
-    id: 'learning',
-    name: 'Learning',
-    icon: Book,
-    color: '#3B82F6',
-    description: 'Education, skills, knowledge',
-  },
-  {
-    id: 'fitness',
-    name: 'Fitness',
-    icon: Dumbbell,
-    color: '#10B981',
-    description: 'Exercise, strength, movement',
-  },
-  {
-    id: 'health',
-    name: 'Health',
-    icon: Heart,
-    color: '#EF4444',
-    description: 'Wellness, nutrition, self-care',
-  },
-  {
-    id: 'sleep',
-    name: 'Sleep',
-    icon: Moon,
-    color: '#6366F1',
-    description: 'Rest, recovery, schedule',
-  },
-  {
-    id: 'productivity',
-    name: 'Productivity',
-    icon: Coffee,
-    color: '#F59E0B',
-    description: 'Focus, efficiency, organization',
-  },
-  {
-    id: 'goals',
-    name: 'Goals',
-    icon: Target,
-    color: '#EC4899',
-    description: 'Achievements, targets, progress',
-  },
-  {
-    id: 'career',
-    name: 'Career',
-    icon: Briefcase,
-    color: '#14B8A6',
-    description: 'Work, professional growth',
-  },
-];
+import {HabitCategory} from '~/types/habit.types';
+import {HABIT_CATEGORIES} from '~/utils/constants/habitConstants';
+import {SectionLabel} from './BasicInfo';
 
 interface CategorySectionProps {
   selectedCategoryId: string;
-  onSelectCategory: (categoryId: string) => void;
+  onSelectCategory: (categoryId: HabitCategory) => void;
+  error?: string;
 }
 
-const CategorySection = ({
+// Helper to dynamically get the icon component
+const getIconComponent = (iconName: string) => {
+  return (Icons as any)[iconName] || Icons.HelpCircle;
+};
+
+const CategorySection: React.FC<CategorySectionProps> = ({
   selectedCategoryId,
   onSelectCategory,
-}: CategorySectionProps) => {
+  error,
+}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const {theme} = useTheme();
 
@@ -92,62 +33,70 @@ const CategorySection = ({
   const surfaceColor = getThemeColor(theme, 'background', 'surface');
   const fieldColor = getThemeColor(theme, 'background', 'field');
   const borderColor = getThemeColor(theme, 'border', 'subtle');
+  const errorColor = getThemeColor(theme, 'text', 'error');
+  const textPlaceholder = getThemeColor(theme, 'text', 'tertiary');
 
-  const selectedCategory = CATEGORIES.find(c => c.id === selectedCategoryId);
+  const selectedCategory = HABIT_CATEGORIES.find(
+    c => c.id === selectedCategoryId,
+  );
 
-  const handleSelect = (categoryId: string) => {
+  const handleSelect = (categoryId: HabitCategory) => {
     onSelectCategory(categoryId);
     setModalVisible(false);
   };
 
   return (
     <ViewX marginBottom={styleUtils.spacing.xl}>
-      <TextX
-        fontSize="sm"
-        fontWeight="medium"
-        color="secondary"
-        marginBottom={styleUtils.spacing.xs}
-        accessibilityRole="header">
-        Category
-      </TextX>
+      <SectionLabel title="Category" />
 
       <TouchableX
         height={44}
         borderRadius={styleUtils.borderRadius.xs}
-        borderWidth={1}
+        borderWidth={error ? 2 : 1}
         paddingHorizontal={styleUtils.spacing.sm}
-        justifyContent="center"
+        justifyContent="space-between"
+        flexDirection="row"
+        alignItems="center"
         backgroundColor={fieldColor}
-        borderColor={borderColor}
+        borderColor={error ? errorColor : borderColor}
         onPress={() => setModalVisible(true)}
         accessibilityLabel="Select category"
         accessibilityHint="Choose a category for your habit">
-        {selectedCategory ? (
-          <ViewX flexDirection="row" alignItems="center">
-            <ViewX
-              width={28}
-              height={28}
-              borderRadius={6}
-              justifyContent="center"
-              alignItems="center"
-              marginRight={8}
-              backgroundColor={withAlpha(selectedCategory.color, 0.1)}>
-              <selectedCategory.icon
-                size={16}
-                color={selectedCategory.color}
-                strokeWidth={1.5}
-              />
-            </ViewX>
-            <TextX fontSize="sm" color="primary">
-              {selectedCategory.name}
+        <ViewX flexDirection="row" alignItems="center">
+          {selectedCategory ? (
+            <>
+              <ViewX
+                width={28}
+                height={28}
+                borderRadius={6}
+                justifyContent="center"
+                alignItems="center"
+                marginRight={8}
+                backgroundColor={withAlpha(selectedCategory.color, 0.1)}>
+                {React.createElement(getIconComponent(selectedCategory.icon), {
+                  size: 16,
+                  color: selectedCategory.color,
+                  strokeWidth: 1.5,
+                })}
+              </ViewX>
+              <TextX fontSize="sm" color="primary">
+                {selectedCategory.name}
+              </TextX>
+            </>
+          ) : (
+            <TextX fontSize="sm" color="tertiary">
+              Select a category
             </TextX>
-          </ViewX>
-        ) : (
-          <TextX fontSize="sm" color="tertiary">
-            Select a category
-          </TextX>
-        )}
+          )}
+        </ViewX>
+        <ChevronRight size={16} color={textPlaceholder} strokeWidth={1.5} />
       </TouchableX>
+
+      {error && (
+        <TextX fontSize="xs" color="error" marginTop={styleUtils.spacing.xs}>
+          {error}
+        </TextX>
+      )}
 
       {/* Category selection modal */}
       <Modal
@@ -187,7 +136,7 @@ const CategorySection = ({
               </TouchableX>
             </ViewX>
 
-            {/* Categories by group */}
+            {/* Categories list */}
             <ViewX paddingTop={styleUtils.spacing.xs}>
               <TextX
                 fontSize="xs"
@@ -202,7 +151,7 @@ const CategorySection = ({
             </ViewX>
 
             <FlatList
-              data={CATEGORIES}
+              data={HABIT_CATEGORIES}
               keyExtractor={item => item.id}
               renderItem={({item}) => (
                 <TouchableX
@@ -231,11 +180,11 @@ const CategorySection = ({
                       alignItems="center"
                       marginRight={styleUtils.spacing.sm}
                       backgroundColor={withAlpha(item.color, 0.1)}>
-                      <item.icon
-                        size={20}
-                        color={item.color}
-                        strokeWidth={1.5}
-                      />
+                      {React.createElement(getIconComponent(item.icon), {
+                        size: 20,
+                        color: item.color,
+                        strokeWidth: 1.5,
+                      })}
                     </ViewX>
                     <ViewX flex={1}>
                       <TextX fontSize="md" color="primary" marginBottom={2}>

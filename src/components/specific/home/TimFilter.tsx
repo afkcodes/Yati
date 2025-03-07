@@ -1,6 +1,6 @@
 import {SquircleView} from 'expo-squircle-view';
 import {Clock, Moon, Sun, Sunset} from 'lucide-react-native';
-import React from 'react';
+import React, {useCallback, useEffect, useRef} from 'react';
 import {AccessibilityInfo, Pressable, StyleSheet, View} from 'react-native';
 import {trigger} from 'react-native-haptic-feedback';
 import Animated, {
@@ -32,14 +32,16 @@ const TimeFilter = ({selectedTime, onSelectTime}: TimeFilterProps) => {
   const [positions, setPositions] = React.useState<{[key: string]: number}>({});
   const translateX = useSharedValue(0);
   const scale = useSharedValue(1);
-  const [prevSelectedTime, setPrevSelectedTime] = React.useState(selectedTime);
+  const initialized = useRef(false);
+  const isFirstRender = useRef(true);
 
-  // Get theme colors
-  const containerBg = getThemeColor(theme, 'background', 'secondary');
+  const tabWidth = 100 / TIME_OPTIONS.length;
+
+  const containerBg = getThemeColor(theme, 'background', 'surface');
   const selectedBg = getThemeColor(theme, 'background', 'accent');
   const textSecondary = getThemeColor(theme, 'text', 'secondary');
 
-  const onLayout = React.useCallback((event: any, id: string) => {
+  const onLayout = useCallback((event: any, id: string) => {
     const {x} = event.nativeEvent.layout;
     setPositions(prev => ({
       ...prev,
@@ -47,30 +49,39 @@ const TimeFilter = ({selectedTime, onSelectTime}: TimeFilterProps) => {
     }));
   }, []);
 
-  React.useEffect(() => {
-    if (
-      positions[selectedTime] !== undefined &&
-      prevSelectedTime !== selectedTime
-    ) {
-      translateX.value = withSpring(positions[selectedTime], {
-        damping: 50,
-        stiffness: 200,
-      });
-      scale.value = withTiming(1.1, {duration: 150});
-      setTimeout(() => (scale.value = withTiming(1, {duration: 150})), 150);
-      setPrevSelectedTime(selectedTime);
-    } else if (positions[selectedTime] !== undefined && !prevSelectedTime) {
-      // Initial position without animation
-      translateX.value = positions[selectedTime];
-      setPrevSelectedTime(selectedTime);
+  useEffect(() => {
+    const allPositionsReady = TIME_OPTIONS.every(
+      option => positions[option.id] !== undefined,
+    );
+
+    if (allPositionsReady && !initialized.current) {
+      translateX.value = positions[selectedTime] || 0;
+      initialized.current = true;
     }
-  }, [selectedTime, positions, translateX, scale, prevSelectedTime]);
+  }, [positions, selectedTime, translateX]);
+
+  useEffect(() => {
+    if (initialized.current && positions[selectedTime] !== undefined) {
+      if (isFirstRender.current) {
+        translateX.value = positions[selectedTime];
+        isFirstRender.current = false;
+      } else {
+        translateX.value = withSpring(positions[selectedTime], {
+          damping: 50,
+          stiffness: 200,
+        });
+
+        scale.value = withTiming(1.1, {duration: 150});
+        setTimeout(() => (scale.value = withTiming(1, {duration: 150})), 150);
+      }
+    }
+  }, [selectedTime, positions, translateX, scale]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{translateX: translateX.value}, {scale: scale.value}],
   }));
 
-  const handlePress = React.useCallback(
+  const handlePress = useCallback(
     (id: TimePeriod) => {
       onSelectTime(id);
       trigger('selection', {
@@ -88,7 +99,12 @@ const TimeFilter = ({selectedTime, onSelectTime}: TimeFilterProps) => {
     <View style={styles.container}>
       <SquircleView
         style={[styles.filterContainer, {backgroundColor: containerBg}]}>
-        <Animated.View style={[animatedStyle, styles.selectedBackground]}>
+        <Animated.View
+          style={[
+            animatedStyle,
+            styles.selectedBackground,
+            {width: `${tabWidth}%`},
+          ]}>
           <SquircleView
             style={[styles.selectedIndicator, {backgroundColor: selectedBg}]}
           />
@@ -141,7 +157,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     bottom: 4,
-    width: '25%',
+    // Width is now set dynamically in the component
   },
   selectedIndicator: {
     flex: 1,

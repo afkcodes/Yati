@@ -1,0 +1,333 @@
+import {format, startOfDay, subDays} from 'date-fns';
+import {v4 as uuidv4} from 'uuid';
+import {
+  ChecklistItem,
+  Habit,
+  HabitCategory,
+  TimePeriod,
+} from '~/types/habit.types';
+
+// Category definitions with icons, colors, and descriptions
+export const HABIT_CATEGORIES = [
+  {
+    id: 'mindfulness' as HabitCategory,
+    name: 'Mindfulness',
+    icon: 'Brain',
+    color: '#8B5CF6',
+    description: 'Meditation, awareness, calm',
+  },
+  {
+    id: 'learning' as HabitCategory,
+    name: 'Learning',
+    icon: 'Book',
+    color: '#3B82F6',
+    description: 'Education, skills, knowledge',
+  },
+  {
+    id: 'fitness' as HabitCategory,
+    name: 'Fitness',
+    icon: 'Dumbbell',
+    color: '#10B981',
+    description: 'Exercise, strength, movement',
+  },
+  {
+    id: 'health' as HabitCategory,
+    name: 'Health',
+    icon: 'Heart',
+    color: '#EF4444',
+    description: 'Wellness, nutrition, self-care',
+  },
+  {
+    id: 'sleep' as HabitCategory,
+    name: 'Sleep',
+    icon: 'Moon',
+    color: '#6366F1',
+    description: 'Rest, recovery, schedule',
+  },
+  {
+    id: 'productivity' as HabitCategory,
+    name: 'Productivity',
+    icon: 'Coffee',
+    color: '#F59E0B',
+    description: 'Focus, efficiency, organization',
+  },
+  {
+    id: 'goals' as HabitCategory,
+    name: 'Goals',
+    icon: 'Target',
+    color: '#EC4899',
+    description: 'Achievements, targets, progress',
+  },
+  {
+    id: 'career' as HabitCategory,
+    name: 'Career',
+    icon: 'Briefcase',
+    color: '#14B8A6',
+    description: 'Work, professional growth',
+  },
+];
+
+export const COLOR_PALETTE = [
+  '#1E40AF', // Vivid Royal Blue (Productivity) - Sharp, electric, and focused
+  '#2ECC71', // Bright Emerald Green (Health) - Lively and invigorating
+  '#9B59B6', // Radiant Amethyst (Mindfulness) - Bold yet calming
+  '#F1C40F', // Electric Gold (Fitness) - High-energy and striking
+  '#FF6B6B', // Vivid Coral (Self-care) - Warm, punchy, and welcoming
+  '#FFB107', // Bright Amber (Morning) - Bold and wake-up worthy
+  '#6B7280', // Slate Gray (Neutral) - Strong but understated
+  '#E91E63', // Hot Pink (Urgent tasks) - Eye-catching and intense
+  '#00CED1', // Turquoise Blast (Hydration) - Cool, crisp, and refreshing
+  '#D4A017', // Golden Sand (Routines) - Warm, grounded pop
+  '#7D3C98', // Deep Violet (Learning) - Rich and inspiring
+  '#27AE60', // Lime Forest (Nature) - Zesty and earthy
+  '#E67E22', // Fiery Orange (Nutrition) - Bold and appetizing
+  '#8E44AD', // Vibrant Plum (Evening) - Deep, cozy, and captivating
+  '#FF5733', // Tangerine Glow (Social) - Fun and outgoing
+  '#16A085', // Teal Surge (Long-term goals) - Steady, powerful, and unique
+];
+
+// Days of the week for frequency selection
+export const WEEKDAYS = [
+  {id: 'mon', label: 'Mon'},
+  {id: 'tue', label: 'Tue'},
+  {id: 'wed', label: 'Wed'},
+  {id: 'thu', label: 'Thu'},
+  {id: 'fri', label: 'Fri'},
+  {id: 'sat', label: 'Sat'},
+  {id: 'sun', label: 'Sun'},
+];
+
+// Frequency type options
+export const FREQUENCY_TYPES = [
+  {id: 'hourly', label: 'Hourly', icon: 'Clock'},
+  {id: 'daily', label: 'Daily', icon: 'Calendar'},
+  {id: 'weekly', label: 'Weekly', icon: 'Calendar'},
+  {id: 'monthly', label: 'Monthly', icon: 'Calendar'},
+];
+
+// Evaluation type options
+export const EVALUATION_TYPES = [
+  {
+    id: 'boolean',
+    label: 'Yes/No',
+    icon: 'CheckCircle2',
+    description: 'Simple completion check',
+  },
+  {
+    id: 'numeric',
+    label: 'Numeric',
+    icon: 'Hash',
+    description: 'Track quantities (e.g., steps, glasses of water)',
+  },
+  {
+    id: 'timer',
+    label: 'Timer',
+    icon: 'Timer',
+    description: 'Track time spent (e.g., minutes reading)',
+  },
+  {
+    id: 'checklist',
+    label: 'Checklist',
+    icon: 'ListChecks',
+    description: 'Multiple tasks to complete',
+  },
+];
+
+// Common units for numeric tracking
+export const COMMON_UNITS = [
+  {id: 'steps', label: 'Steps'},
+  {id: 'glasses', label: 'Glasses'},
+  {id: 'pages', label: 'Pages'},
+  {id: 'calories', label: 'Calories'},
+  {id: 'kilometers', label: 'Kilometers'},
+  {id: 'miles', label: 'Miles'},
+  {id: 'minutes', label: 'Minutes'},
+  {id: 'times', label: 'Times'},
+  {id: 'custom', label: 'Custom...'},
+];
+
+// Units for timer
+export const TIME_UNITS = [
+  {id: 'minutes', label: 'Minutes'},
+  {id: 'hours', label: 'Hours'},
+];
+
+// Generate sample habits for testing and demonstration
+export const generateSampleHabits = (): Habit[] => {
+  const now = new Date();
+  const today = startOfDay(now).toISOString();
+  const oneWeekAgo = startOfDay(subDays(now, 7)).toISOString();
+
+  // Create a few sample checklist items
+  const meditationItems: ChecklistItem[] = [
+    {id: uuidv4(), text: 'Find a quiet place', completed: false},
+    {id: uuidv4(), text: 'Sit comfortably', completed: false},
+    {id: uuidv4(), text: 'Focus on breathing', completed: false},
+    {id: uuidv4(), text: 'Practice for at least 5 minutes', completed: false},
+  ];
+
+  const workoutItems: ChecklistItem[] = [
+    {id: uuidv4(), text: 'Warm up for 5 minutes', completed: false},
+    {id: uuidv4(), text: 'Stretch', completed: false},
+    {id: uuidv4(), text: 'Complete main exercise routine', completed: false},
+    {id: uuidv4(), text: 'Cool down', completed: false},
+    {id: uuidv4(), text: 'Stay hydrated', completed: false},
+  ];
+
+  // Generate sample progress data for past days
+  const generateSampleProgress = (daysBack: number, completionRate: number) => {
+    const progress: {[date: string]: any} = {};
+
+    for (let i = 0; i < daysBack; i++) {
+      const date = subDays(now, i);
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const isCompleted = Math.random() < completionRate;
+
+      progress[dateStr] = {
+        date: dateStr,
+        isCompleted,
+      };
+    }
+
+    return progress;
+  };
+
+  // Sample habits array
+  return [
+    // Boolean habit example (Morning Meditation)
+    {
+      id: uuidv4(),
+      title: 'Morning Meditation',
+      description: '10 minutes mindful meditation',
+      color: '#A67DB8',
+      category: 'mindfulness',
+      timePeriod: 'morning',
+      createdAt: oneWeekAgo,
+      lastUpdatedAt: today,
+
+      frequency: {
+        type: 'daily',
+        value: [],
+        timeOfDay: new Date(now.setHours(8, 0, 0, 0)),
+      },
+      evaluation: {
+        type: 'boolean',
+        target: 1,
+        unit: '',
+      },
+
+      streak: 3,
+      longestStreak: 3,
+      progress: generateSampleProgress(7, 0.7),
+    },
+
+    // Numeric habit example (Drink Water)
+    {
+      id: uuidv4(),
+      title: 'Drink Water',
+      description: 'Stay hydrated throughout the day',
+      color: '#50A5B1',
+      category: 'health',
+      timePeriod: 'all' as TimePeriod,
+      createdAt: oneWeekAgo,
+      lastUpdatedAt: today,
+
+      frequency: {
+        type: 'daily',
+        value: [],
+        timeOfDay: null,
+      },
+      evaluation: {
+        type: 'numeric',
+        target: 8,
+        unit: 'glasses',
+      },
+
+      streak: 5,
+      longestStreak: 5,
+      progress: generateSampleProgress(7, 0.8),
+    },
+
+    // Timer habit example (Reading)
+    {
+      id: uuidv4(),
+      title: 'Read Books',
+      description: 'Read for personal development',
+      color: '#8473B4',
+      category: 'learning',
+      timePeriod: 'night',
+      createdAt: oneWeekAgo,
+      lastUpdatedAt: today,
+
+      frequency: {
+        type: 'daily',
+        value: [],
+        timeOfDay: new Date(now.setHours(21, 0, 0, 0)),
+      },
+      evaluation: {
+        type: 'timer',
+        target: 30,
+        unit: 'minutes',
+      },
+
+      streak: 4,
+      longestStreak: 4,
+      progress: generateSampleProgress(7, 0.6),
+    },
+
+    // Weekly habit example (Workout)
+    {
+      id: uuidv4(),
+      title: 'Exercise',
+      description: 'Full body workout',
+      color: '#10B981',
+      category: 'fitness',
+      timePeriod: 'evening',
+      createdAt: oneWeekAgo,
+      lastUpdatedAt: today,
+
+      frequency: {
+        type: 'weekly',
+        value: ['mon', 'wed', 'fri'],
+        timeOfDay: new Date(now.setHours(18, 0, 0, 0)),
+      },
+      evaluation: {
+        type: 'checklist',
+        target: 4,
+        unit: '',
+        checklistItems: workoutItems,
+      },
+
+      streak: 2,
+      longestStreak: 2,
+      progress: generateSampleProgress(7, 0.5),
+    },
+
+    // Monthly habit example (Budget Review)
+    {
+      id: uuidv4(),
+      title: 'Budget Review',
+      description: 'Review monthly expenses and savings',
+      color: '#E9B44C',
+      category: 'productivity',
+      timePeriod: 'evening',
+      createdAt: oneWeekAgo,
+      lastUpdatedAt: today,
+
+      frequency: {
+        type: 'monthly',
+        value: ['1', '15'], // 1st and 15th of each month
+        timeOfDay: new Date(now.setHours(20, 0, 0, 0)),
+      },
+      evaluation: {
+        type: 'boolean',
+        target: 1,
+        unit: '',
+      },
+
+      streak: 1,
+      longestStreak: 1,
+      progress: {},
+    },
+  ];
+};

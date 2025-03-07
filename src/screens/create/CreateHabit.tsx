@@ -1,255 +1,130 @@
-/* eslint-disable react-native/no-inline-styles */
-import {Check, ChevronLeft} from 'lucide-react-native';
-import React, {useState} from 'react';
-import {KeyboardAvoidingView, Platform, ScrollView} from 'react-native';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {TextX, TouchableX, ViewX} from '~/components/common';
+import {NavigationContext} from 'navigation-react';
+import React, {useContext, useState} from 'react';
+import {Alert} from 'react-native';
+import {ViewX} from '~/components/common';
 import {useTheme} from '~/hooks/ThemeContext';
-import {getThemeColor, styleUtils} from '~/styles/theme';
-import BasicInfoSection from './BasicInfo';
-import CategorySection from './Category';
-import EvaluationSection from './Evaluation';
-import FrequencySection, {FrequencyData} from './Frequency';
-import GoalSection from './Goal';
-import RemindersSection from './Reminder';
+import HabitForm from '~/screens/form/HabitForm';
+import {habitActions} from '~/state/habit.store';
+import {HabitFormData} from '~/types/habit.types';
+import {
+  createNotificationChannels,
+  requestNotificationPermissions,
+  scheduleHabitReminder,
+} from '~utils/reminders/reminderUtils';
 
-// Define the habit data type with proper typing
-interface HabitData {
-  title: string;
-  color: string;
-  categoryId: string;
-  frequency: {
-    type: 'hourly' | 'daily' | 'weekly' | 'monthly';
-    value: string[];
-    timeOfDay: Date | null;
-    interval?: number; // For hourly frequency
-  };
-  evaluation: {
-    type: string;
-    target: number;
-    unit: string;
-  };
-  reminders: Date[];
-  goal: {
-    enabled: boolean;
-    target: number;
-    deadline: Date | null;
-  };
-  startDate: Date;
-  endDate: Date | null;
-  description: string;
-}
-
-// Initial habit data with defaults
-const initialHabitData: HabitData = {
-  title: '',
-  color: '#8B5CF6', // Default color (purple)
-  categoryId: '',
-  frequency: {
-    type: 'daily',
-    value: [],
-    timeOfDay: null,
-  },
-  evaluation: {
-    type: 'boolean',
-    target: 0,
-    unit: '',
-  },
-  reminders: [],
-  goal: {
-    enabled: false,
-    target: 0,
-    deadline: null,
-  },
-  startDate: new Date(),
-  endDate: null,
-  description: '',
-};
-
-interface CreateHabitScreenProps {
-  navigation?: {
-    goBack: () => void;
-  };
-  // These props are only used for testing/development and aren't required
-  frequency?: FrequencyData;
-  onUpdateFrequency?: (frequency: FrequencyData) => void;
-}
-
-const CreateHabitScreen: React.FC<CreateHabitScreenProps> = ({
-  navigation,
-  // If these props are passed, use them (for testing/development)
-  frequency: externalFrequency,
-  onUpdateFrequency: externalUpdateFrequency,
-}) => {
-  // Initialize with external frequency data if provided
-  const [habitData, setHabitData] = useState<HabitData>({
-    ...initialHabitData,
-    frequency: externalFrequency || initialHabitData.frequency,
-  });
-
+/**
+ * Screen component for creating a new habit
+ * Uses the HabitForm component and connects it to the habit store
+ */
+const CreateHabitScreen: React.FC = () => {
+  const {stateNavigator} = useContext(NavigationContext);
   const {theme} = useTheme();
-  const insets = useSafeAreaInsets();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Get theme colors
-  const bgColor = getThemeColor(theme, 'background', 'base');
-  const accentColor = getThemeColor(theme, 'background', 'accent');
-  const borderColor = getThemeColor(theme, 'border', 'subtle');
-  const textColor = getThemeColor(theme, 'text', 'primary');
+  const handleSubmit = async (formData: HabitFormData) => {
+    try {
+      setIsSubmitting(true);
 
-  // Updates for specific sections
-  const updateBasicInfo = (
-    data: Partial<Pick<HabitData, 'title' | 'color' | 'description'>>,
-  ) => {
-    setHabitData(prev => ({...prev, ...data}));
-  };
+      // Add habit to the store
+      const newHabit = habitActions.addHabit(formData);
+      console.log('Created habit:', newHabit);
 
-  const updateCategory = (categoryId: string) => {
-    setHabitData(prev => ({...prev, categoryId}));
-  };
+      // Request permissions if not already granted
+      const permissionGranted = await requestNotificationPermissions();
 
-  const updateFrequency = (frequency: FrequencyData) => {
-    // If external update function is provided, call it
-    if (externalUpdateFrequency) {
-      externalUpdateFrequency(frequency);
+      if (permissionGranted) {
+        // Create channels if not already created
+        await createNotificationChannels();
+
+        // Schedule reminders
+        if (formData.reminders && formData.reminders.length > 0) {
+          console.log(
+            'Scheduling reminders for new habit:',
+            formData.reminders.length,
+          );
+
+          for (const reminderTime of formData.reminders) {
+            try {
+              // Make sure reminderTime is a valid Date object
+              const reminderDate =
+                reminderTime instanceof Date
+                  ? reminderTime
+                  : new Date(reminderTime);
+
+              // Schedule the reminder
+              const result = await scheduleHabitReminder(
+                newHabit,
+                reminderDate,
+              );
+              console.log(
+                `Reminder scheduled for ${reminderDate.toLocaleTimeString()}: ${
+                  result ? 'Success' : 'Failed'
+                }`,
+              );
+            } catch (reminderError) {
+              console.error('Error scheduling reminder:', reminderError);
+            }
+          }
+        } else {
+          console.log('No reminders to schedule');
+        }
+      } else {
+        console.log('Notification permissions not granted');
+        // Optionally show an alert to inform the user about missing permissions
+        Alert.alert(
+          'Notification Permission',
+          'Please enable notifications in your device settings to receive reminders for your habits.',
+          [{text: 'OK'}],
+        );
+      }
+
+      // Show success message
+      Alert.alert(
+        'Habit Created',
+        `"${newHabit.title}" has been successfully created.`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              // Force an update to the store before navigation
+              habitActions.forceUpdate();
+
+              // Navigate back to home screen
+              if (stateNavigator) {
+                stateNavigator.navigateBack(1);
+              }
+            },
+          },
+        ],
+      );
+    } catch (error) {
+      // Handle any errors
+      console.error('Failed to create habit:', error);
+      Alert.alert('Error', 'Failed to create habit. Please try again.', [
+        {text: 'OK'},
+      ]);
+    } finally {
+      setIsSubmitting(false);
     }
-    // Update local state
-    setHabitData(prev => ({...prev, frequency}));
   };
 
-  const updateEvaluation = (evaluation: HabitData['evaluation']) => {
-    setHabitData(prev => ({...prev, evaluation}));
-  };
-
-  const updateGoal = (goal: Partial<HabitData['goal']>) => {
-    setHabitData(prev => ({...prev, goal: {...prev.goal, ...goal}}));
-  };
-
-  const updateReminders = (reminders: Date[]) => {
-    setHabitData(prev => ({...prev, reminders}));
-  };
-
-  const handleSave = () => {
-    // Validate data
-    if (!habitData.title) {
-      // Show error toast or validation
-      console.warn('Title is required');
-      return;
-    }
-
-    // Save habit
-    console.log('Saving habit:', habitData);
-
-    // Navigate back
-    navigation?.goBack();
+  // Handle cancellation
+  const handleCancel = () => {
+    stateNavigator?.navigateBack(1);
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{flex: 1}}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ViewX flex={1} backgroundColor={bgColor}>
-        {/* Header */}
-        <ViewX
-          flexDirection="row"
-          alignItems="center"
-          justifyContent="space-between"
-          paddingHorizontal={styleUtils.spacing.md}
-          paddingVertical={styleUtils.spacing.sm}
-          paddingTop={insets.top + styleUtils.spacing.sm}
-          borderBottomWidth={1}
-          borderBottomColor={borderColor}>
-          <TouchableX
-            padding={styleUtils.spacing.xs}
-            borderRadius={styleUtils.borderRadius.xl}
-            onPress={() => navigation?.goBack()}
-            accessibilityLabel="Go back"
-            accessibilityRole="button">
-            <ChevronLeft size={22} color={textColor} />
-          </TouchableX>
-
-          <TextX fontSize="lg" fontWeight="semibold" color="primary">
-            Create Habit
-          </TextX>
-
-          {/* Empty view for spacing */}
-          <ViewX style={{width: 40}} />
-        </ViewX>
-
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{paddingBottom: 24}}>
-          <ViewX padding={styleUtils.spacing.md}>
-            {/* Basic Information */}
-            <BasicInfoSection
-              title={habitData.title}
-              color={habitData.color}
-              description={habitData.description || ''}
-              onUpdate={updateBasicInfo}
-            />
-
-            {/* Category */}
-            <CategorySection
-              selectedCategoryId={habitData.categoryId}
-              onSelectCategory={updateCategory}
-            />
-
-            {/* Frequency */}
-            <FrequencySection
-              frequency={habitData.frequency}
-              onUpdateFrequency={updateFrequency}
-            />
-
-            {/* Evaluation */}
-            <EvaluationSection
-              evaluation={habitData.evaluation}
-              onUpdateEvaluation={updateEvaluation}
-            />
-
-            {/* Goal */}
-            <GoalSection goal={habitData.goal} onUpdateGoal={updateGoal} />
-
-            {/* Reminders */}
-            <RemindersSection
-              reminders={habitData.reminders}
-              onUpdateReminders={updateReminders}
-            />
-          </ViewX>
-        </ScrollView>
-
-        <ViewX
-          width="100%"
-          paddingHorizontal={styleUtils.spacing.md}
-          paddingTop={styleUtils.spacing.sm}
-          paddingBottom={
-            insets.bottom > 0 ? insets.bottom : styleUtils.spacing.md
-          }
-          borderTopWidth={1}
-          borderTopColor={borderColor}
-          backgroundColor={bgColor}>
-          <TouchableX
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="center"
-            paddingVertical={styleUtils.spacing.sm}
-            borderRadius={styleUtils.borderRadius.md}
-            width="100%"
-            backgroundColor={accentColor}
-            onPress={handleSave}
-            accessibilityLabel="Save habit"
-            accessibilityRole="button"
-            accessibilityHint="Double tap to save this habit">
-            <Check size={24} color="#FFFFFF" />
-            <TextX
-              fontSize="md"
-              fontWeight="semibold"
-              color="primary"
-              marginLeft={styleUtils.spacing.xs}>
-              Save Habit
-            </TextX>
-          </TouchableX>
-        </ViewX>
-      </ViewX>
-    </KeyboardAvoidingView>
+    <ViewX
+      flex={1}
+      backgroundColor={theme === 'dark' ? '#0D0D0F' : '#F8F8FC'}
+      zIndex={10}>
+      <HabitForm
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+        isLoading={isSubmitting}
+        title="Create Habit"
+      />
+    </ViewX>
   );
 };
 

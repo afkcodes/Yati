@@ -10,7 +10,7 @@ import {
 } from 'navigation-react-native';
 import {Fragment, useMemo, useRef} from 'react';
 import {useTheme} from '~hooks/ThemeContext';
-import {themes} from '../styles/theme';
+import {getThemeColor, themes} from '../styles/theme';
 import {getTabsConfig} from './navigator';
 
 const BottomTabs = () => {
@@ -46,16 +46,17 @@ const BottomTabs = () => {
     profileNavigator,
   });
 
+  const navColor = getThemeColor(theme, 'background', 'surface');
+
   return (
     <Fragment>
       <NavigationBar hidden={true} />
       <TabBar
         primary={true}
-        preventFouc={true}
         bottomTabs={true}
         labelVisibilityMode="labeled"
         selectedTintColor={themes[theme].text.accent}
-        barTintColor={'#16171B'}>
+        barTintColor={navColor}>
         {getTabsConfig(theme).map(tab => (
           <TabBarItem
             key={tab.id}

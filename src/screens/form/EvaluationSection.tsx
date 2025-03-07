@@ -1,5 +1,6 @@
-/* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable react-native/no-inline-styles */
+/* eslint-disable react/no-unstable-nested-components */
+// components/habit/form/EvaluationSection.tsx
 import {
   Check,
   CheckCircle2,
@@ -11,66 +12,21 @@ import {
   Timer,
   X,
 } from 'lucide-react-native';
-import {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {FlatList, Modal, StyleSheet, TextInput} from 'react-native';
 import {TextX, TouchableX, ViewX} from '~/components/common';
 import {useTheme} from '~/hooks/ThemeContext';
 import {getThemeColor, styleUtils, withAlpha} from '~/styles/theme';
-
-// Evaluation types
-const EVALUATION_TYPES = [
-  {
-    id: 'boolean',
-    label: 'Yes/No',
-    icon: CheckCircle2,
-    description: 'Simple completion check',
-  },
-  {
-    id: 'numeric',
-    label: 'Numeric',
-    icon: Hash,
-    description: 'Track quantities (e.g., steps, glasses of water)',
-  },
-  {
-    id: 'timer',
-    label: 'Timer',
-    icon: Timer,
-    description: 'Track time spent (e.g., minutes reading)',
-  },
-  {
-    id: 'checklist',
-    label: 'Checklist',
-    icon: ListChecks,
-    description: 'Multiple tasks to complete',
-  },
-];
-
-// Common units for numeric types
-const COMMON_UNITS = [
-  {id: 'steps', label: 'Steps'},
-  {id: 'glasses', label: 'Glasses'},
-  {id: 'pages', label: 'Pages'},
-  {id: 'calories', label: 'Calories'},
-  {id: 'kilometers', label: 'Kilometers'},
-  {id: 'miles', label: 'Miles'},
-  {id: 'minutes', label: 'Minutes'},
-  {id: 'times', label: 'Times'},
-  {id: 'custom', label: 'Custom...'},
-];
-
-// Units for timer
-const TIME_UNITS = [
-  {id: 'minutes', label: 'Minutes'},
-  {id: 'hours', label: 'Hours'},
-];
-
-interface ChecklistItem {
-  id: string;
-  text: string;
-}
+import {ChecklistItem, EvaluationType} from '~/types/habit.types';
+import {
+  COMMON_UNITS,
+  EVALUATION_TYPES,
+  TIME_UNITS,
+} from '~/utils/constants/habitConstants';
+import {SectionLabel} from './BasicInfo';
 
 interface EvaluationData {
-  type: string;
+  type: EvaluationType;
   target: number;
   unit: string;
   checklistItems?: ChecklistItem[];
@@ -79,24 +35,29 @@ interface EvaluationData {
 interface EvaluationSectionProps {
   evaluation: EvaluationData;
   onUpdateEvaluation: (evaluation: EvaluationData) => void;
+  onAddChecklistItem: (text: string) => void;
+  onUpdateChecklistItem: (itemId: string, text: string) => void;
+  onRemoveChecklistItem: (itemId: string) => void;
+  error?: string;
 }
 
 const EvaluationSection: React.FC<EvaluationSectionProps> = ({
   evaluation,
   onUpdateEvaluation,
+  onAddChecklistItem,
+  onUpdateChecklistItem,
+  onRemoveChecklistItem,
+  error,
 }) => {
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [unitModalVisible, setUnitModalVisible] = useState<boolean>(false);
-  const [checklistModalVisible, setChecklistModalVisible] =
-    useState<boolean>(false);
-  const [unitsListModalVisible, setUnitsListModalVisible] =
-    useState<boolean>(false);
-  const [newItemText, setNewItemText] = useState<string>('');
-  const [targetInputMode, setTargetInputMode] = useState<boolean>(false);
-  const [targetInputValue, setTargetInputValue] = useState<string>('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [unitModalVisible, setUnitModalVisible] = useState(false);
+  const [checklistModalVisible, setChecklistModalVisible] = useState(false);
+  const [unitsListModalVisible, setUnitsListModalVisible] = useState(false);
+  const [newItemText, setNewItemText] = useState('');
+  const [customUnitInput, setCustomUnitInput] = useState('');
   const [editingChecklistItem, setEditingChecklistItem] =
     useState<ChecklistItem | null>(null);
-  const [customUnitInput, setCustomUnitInput] = useState<string>('');
+
   const {theme} = useTheme();
 
   const bgColor = getThemeColor(theme, 'background', 'base');
@@ -107,20 +68,16 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
   const textPrimary = getThemeColor(theme, 'text', 'primary');
   const textSecondary = getThemeColor(theme, 'text', 'secondary');
   const textPlaceholder = getThemeColor(theme, 'text', 'tertiary');
+  const errorColor = getThemeColor(theme, 'text', 'error');
 
-  // Set targetInputValue when evaluation changes
-  useEffect(() => {
-    setTargetInputValue(evaluation.target.toString());
-  }, [evaluation.target]);
-
-  const handleSelectType = (type: string) => {
+  const handleSelectType = (type: EvaluationType) => {
     // Initialize appropriate defaults based on type
     let newEvaluation: EvaluationData;
 
     if (type === 'checklist') {
       newEvaluation = {
         type,
-        target: 0,
+        target: evaluation.checklistItems?.length || 0,
         unit: '',
         checklistItems: evaluation.checklistItems || [],
       };
@@ -129,21 +86,18 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
         type,
         target: 30, // Default to 30 minutes
         unit: 'minutes',
-        checklistItems: [],
       };
     } else if (type === 'numeric') {
       newEvaluation = {
         type,
         target: 1, // Default to 1
         unit: '',
-        checklistItems: [],
       };
     } else {
       newEvaluation = {
         type,
-        target: 0,
+        target: 1,
         unit: '',
-        checklistItems: [],
       };
     }
 
@@ -151,36 +105,22 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
     setModalVisible(false);
   };
 
-  const handleUpdateTargetValue = (increment: boolean) => {
+  const handleUpdateTarget = (increment: boolean) => {
     const currentTarget = evaluation.target || 0;
     const step = evaluation.type === 'timer' ? 5 : 1;
+    const max =
+      evaluation.type === 'checklist'
+        ? evaluation.checklistItems?.length || 0
+        : 999;
+
     const newTarget = increment
-      ? currentTarget + step
+      ? Math.min(max, currentTarget + step)
       : Math.max(0, currentTarget - step);
 
     onUpdateEvaluation({
       ...evaluation,
       target: newTarget,
     });
-  };
-
-  const handleTargetInputChange = (text: string) => {
-    if (/^\d*$/.test(text)) {
-      setTargetInputValue(text);
-    }
-  };
-
-  const handleTargetInputSubmit = () => {
-    const numValue = parseInt(targetInputValue, 10);
-    if (!isNaN(numValue) && numValue >= 0) {
-      onUpdateEvaluation({
-        ...evaluation,
-        target: numValue,
-      });
-    } else {
-      setTargetInputValue(evaluation.target.toString());
-    }
-    setTargetInputMode(false);
   };
 
   const handleUpdateUnit = (unit: string) => {
@@ -203,65 +143,25 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
     }
   };
 
+  const handleAddChecklistItemSubmit = () => {
+    if (newItemText.trim()) {
+      if (editingChecklistItem) {
+        // Update existing item
+        onUpdateChecklistItem(editingChecklistItem.id, newItemText.trim());
+        setEditingChecklistItem(null);
+      } else {
+        // Add new item
+        onAddChecklistItem(newItemText);
+      }
+      setNewItemText('');
+    }
+  };
+
   const handleEditChecklistItem = (item: ChecklistItem) => {
     setEditingChecklistItem(item);
     setNewItemText(item.text);
   };
 
-  const handleRemoveChecklistItem = (id: string) => {
-    // If deleting the item currently being edited, clear editing state
-    if (editingChecklistItem && editingChecklistItem.id === id) {
-      setEditingChecklistItem(null);
-      setNewItemText('');
-    }
-
-    const checklistItems = evaluation.checklistItems || [];
-    const newItems = checklistItems.filter(item => item.id !== id);
-
-    onUpdateEvaluation({
-      ...evaluation,
-      checklistItems: newItems,
-    });
-  };
-
-  // Modify your handleAddChecklistItem function to handle both adding and editing:
-  const handleAddChecklistItem = () => {
-    if (newItemText.trim()) {
-      const checklistItems = evaluation.checklistItems || [];
-
-      if (editingChecklistItem) {
-        // Update existing item
-        const updatedItems = checklistItems.map(item =>
-          item.id === editingChecklistItem.id
-            ? {...item, text: newItemText.trim()}
-            : item,
-        );
-
-        onUpdateEvaluation({
-          ...evaluation,
-          checklistItems: updatedItems,
-        });
-
-        setEditingChecklistItem(null);
-      } else {
-        // Add new item
-        const newItems = [
-          ...checklistItems,
-          {
-            id: Date.now().toString(),
-            text: newItemText.trim(),
-          },
-        ];
-
-        onUpdateEvaluation({
-          ...evaluation,
-          checklistItems: newItems,
-        });
-      }
-
-      setNewItemText('');
-    }
-  };
   const getEvaluationTypeLabel = (): string => {
     const type = EVALUATION_TYPES.find(t => t.id === evaluation.type);
     return type?.label || 'Select tracking method';
@@ -269,12 +169,21 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
 
   const getEvaluationIcon = () => {
     const type = EVALUATION_TYPES.find(t => t.id === evaluation.type);
-    return type?.icon || CheckCircle2;
+    return (type?.icon ||
+      'CheckCircle2') as keyof typeof import('lucide-react-native');
   };
 
-  const Icon = getEvaluationIcon();
-
-  const checklistItems = evaluation.checklistItems || [];
+  // Get the icon component
+  const IconComponent =
+    evaluation.type === 'boolean'
+      ? CheckCircle2
+      : evaluation.type === 'numeric'
+      ? Hash
+      : evaluation.type === 'timer'
+      ? Timer
+      : evaluation.type === 'checklist'
+      ? ListChecks
+      : CheckCircle2;
 
   return (
     <ViewX marginBottom={styleUtils.spacing.xl}>
@@ -282,30 +191,24 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
         flexDirection="row"
         alignItems="center"
         marginBottom={styleUtils.spacing.xs}>
-        <TextX
-          fontSize="sm"
-          fontWeight="medium"
-          color="secondary"
-          accessibilityRole="header">
-          Track Progress
-        </TextX>
+        <SectionLabel title="Track Progress" />
       </ViewX>
 
       <TouchableX
         height={44}
         borderRadius={styleUtils.borderRadius.xs}
-        borderWidth={1}
+        borderWidth={error ? 2 : 1}
         paddingHorizontal={styleUtils.spacing.sm}
         flexDirection="row"
         alignItems="center"
         justifyContent="space-between"
         backgroundColor={fieldColor}
-        borderColor={borderColor}
+        borderColor={error ? errorColor : borderColor}
         onPress={() => setModalVisible(true)}
         accessibilityLabel="Select tracking method"
         accessibilityHint="Choose how to track your habit progress">
         <ViewX flexDirection="row" alignItems="center">
-          <Icon size={16} color={textSecondary} strokeWidth={1.5} />
+          <IconComponent size={16} color={textSecondary} strokeWidth={1.5} />
           <TextX
             fontSize="sm"
             color="primary"
@@ -316,6 +219,13 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
         <ChevronRight size={16} color={textPlaceholder} strokeWidth={1.5} />
       </TouchableX>
 
+      {error && (
+        <TextX fontSize="xs" color="error" marginTop={styleUtils.spacing.xs}>
+          {error}
+        </TextX>
+      )}
+
+      {/* Numeric Target Config */}
       {evaluation.type === 'numeric' && (
         <ViewX
           backgroundColor={withAlpha(fieldColor, 0.3)}
@@ -333,47 +243,50 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
           </ViewX>
 
           <ViewX flexDirection="row" alignItems="center">
+            {/* Decrement button */}
+            <TouchableX
+              width={36}
+              height={36}
+              borderRadius={18}
+              justifyContent="center"
+              alignItems="center"
+              backgroundColor={withAlpha(fieldColor, 0.7)}
+              onPress={() => handleUpdateTarget(false)}
+              disabled={evaluation.target <= 1}
+              opacity={evaluation.target <= 1 ? 0.5 : 1}
+              accessibilityLabel="Decrease target">
+              <TextX fontSize="xl" fontWeight="semibold" color="tertiary">
+                -
+              </TextX>
+            </TouchableX>
+
+            {/* Target value */}
             <ViewX
               flex={1}
               flexDirection="row"
               justifyContent="center"
               alignItems="center">
-              {targetInputMode ? (
-                <TextInput
-                  style={{
-                    height: 44,
-                    borderWidth: 1,
-                    borderColor: borderColor,
-                    borderRadius: 8,
-                    color: textPrimary,
-                    padding: 8,
-                    fontSize: 20,
-                    textAlign: 'center',
-                    backgroundColor: withAlpha(fieldColor, 0.7),
-                    flex: 1,
-                  }}
-                  value={targetInputValue}
-                  onChangeText={handleTargetInputChange}
-                  keyboardType="numeric"
-                  autoFocus
-                  onBlur={handleTargetInputSubmit}
-                  onSubmitEditing={handleTargetInputSubmit}
-                />
-              ) : (
-                <TouchableX
-                  flexDirection="row"
-                  justifyContent="center"
-                  alignItems="center"
-                  padding={styleUtils.spacing.xs}
-                  flex={1}
-                  onPress={() => setTargetInputMode(true)}>
-                  <TextX fontSize="2xl" fontWeight="bold" color="accent">
-                    {evaluation.target}
-                  </TextX>
-                </TouchableX>
-              )}
+              <TextX fontSize="2xl" fontWeight="bold" color="accent">
+                {evaluation.target}
+              </TextX>
             </ViewX>
 
+            {/* Increment button */}
+            <TouchableX
+              width={36}
+              height={36}
+              borderRadius={18}
+              justifyContent="center"
+              alignItems="center"
+              backgroundColor={withAlpha(fieldColor, 0.7)}
+              onPress={() => handleUpdateTarget(true)}
+              accessibilityLabel="Increase target">
+              <TextX fontSize="xl" fontWeight="semibold" color="tertiary">
+                +
+              </TextX>
+            </TouchableX>
+
+            {/* Unit selector */}
             <ViewX marginLeft={styleUtils.spacing.md}>
               <TouchableX
                 style={{
@@ -382,7 +295,7 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
                   paddingVertical: styleUtils.spacing.xs,
                   borderRadius: styleUtils.borderRadius.xs,
                   borderWidth: 1,
-                  borderColor: borderColor,
+                  borderColor,
                   minWidth: 100,
                 }}
                 onPress={() => setUnitsListModalVisible(true)}>
@@ -404,12 +317,13 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
             <TextX fontSize="xs" color="tertiary">
               {`Track ${evaluation.target} ${
                 evaluation.unit || 'units'
-              } each time. Tap on the number to edit directly.`}
+              } each time.`}
             </TextX>
           </ViewX>
         </ViewX>
       )}
 
+      {/* Timer Target Config */}
       {evaluation.type === 'timer' && (
         <ViewX
           backgroundColor={withAlpha(fieldColor, 0.3)}
@@ -457,10 +371,10 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
               justifyContent="center"
               alignItems="center"
               backgroundColor={withAlpha(fieldColor, 0.7)}
-              onPress={() => handleUpdateTargetValue(false)}
+              onPress={() => handleUpdateTarget(false)}
               accessibilityLabel="Decrease target"
-              disabled={evaluation.target <= 0}
-              opacity={evaluation.target <= 0 ? 0.5 : 1}>
+              disabled={evaluation.target <= 5}
+              opacity={evaluation.target <= 5 ? 0.5 : 1}>
               <TextX fontSize="xl" fontWeight="semibold" color="tertiary">
                 -
               </TextX>
@@ -472,45 +386,16 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
               justifyContent="center"
               flex={1}
               paddingHorizontal={styleUtils.spacing.md}>
-              {targetInputMode ? (
-                <TextInput
-                  style={{
-                    height: 44,
-                    borderWidth: 1,
-                    borderColor: borderColor,
-                    borderRadius: 8,
-                    color: textPrimary,
-                    padding: 8,
-                    fontSize: 20,
-                    textAlign: 'center',
-                    backgroundColor: withAlpha(fieldColor, 0.7),
-                    flex: 1,
-                  }}
-                  value={targetInputValue}
-                  onChangeText={handleTargetInputChange}
-                  keyboardType="numeric"
-                  autoFocus
-                  onBlur={handleTargetInputSubmit}
-                  onSubmitEditing={handleTargetInputSubmit}
-                />
-              ) : (
-                <TouchableX
-                  flexDirection="row"
-                  alignItems="center"
-                  justifyContent="center"
-                  onPress={() => setTargetInputMode(true)}>
-                  <TextX fontSize="2xl" fontWeight="bold" color="accent">
-                    {evaluation.target}
-                  </TextX>
-                  <TextX
-                    fontSize="md"
-                    color="secondary"
-                    marginLeft={styleUtils.spacing.xs}
-                    marginBottom={2}>
-                    {evaluation.unit}
-                  </TextX>
-                </TouchableX>
-              )}
+              <TextX fontSize="2xl" fontWeight="bold" color="accent">
+                {evaluation.target}
+              </TextX>
+              <TextX
+                fontSize="md"
+                color="secondary"
+                marginLeft={styleUtils.spacing.xs}
+                marginBottom={2}>
+                {evaluation.unit}
+              </TextX>
             </ViewX>
 
             <TouchableX
@@ -520,7 +405,7 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
               justifyContent="center"
               alignItems="center"
               backgroundColor={withAlpha(fieldColor, 0.7)}
-              onPress={() => handleUpdateTargetValue(true)}
+              onPress={() => handleUpdateTarget(true)}
               accessibilityLabel="Increase target">
               <TextX fontSize="xl" fontWeight="semibold" color="tertiary">
                 +
@@ -534,11 +419,13 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
             borderTopColor={withAlpha(borderColor, 0.3)}
             paddingTop={styleUtils.spacing.sm}>
             <TextX fontSize="xs" color="tertiary">
-              {`Track ${evaluation.target} ${evaluation.unit} of activity each time. Tap on the number to edit directly.`}
+              {`Track ${evaluation.target} ${evaluation.unit} of activity each time.`}
             </TextX>
           </ViewX>
         </ViewX>
       )}
+
+      {/* Checklist Config */}
       {evaluation.type === 'checklist' && (
         <ViewX
           marginTop={styleUtils.spacing.sm}
@@ -569,17 +456,82 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
             </TouchableX>
           </ViewX>
 
-          {checklistItems.length > 0 ? (
-            <ViewX>
-              <TextX
-                fontSize="xs"
-                color="secondary"
-                marginBottom={styleUtils.spacing.xs}>
-                {checklistItems.length} task
-                {checklistItems.length !== 1 ? 's' : ''}
-              </TextX>
+          {/* Target selector for checklist */}
+          {evaluation.checklistItems &&
+            evaluation.checklistItems.length > 0 && (
+              <ViewX
+                flexDirection="row"
+                alignItems="center"
+                marginBottom={styleUtils.spacing.sm}
+                borderRadius={styleUtils.borderRadius.xs}
+                backgroundColor={withAlpha(fieldColor, 0.5)}
+                padding={styleUtils.spacing.xs}>
+                <TextX fontSize="xs" color="secondary">
+                  Complete
+                </TextX>
 
-              {checklistItems.slice(0, 3).map(item => (
+                <ViewX
+                  flexDirection="row"
+                  alignItems="center"
+                  marginHorizontal={styleUtils.spacing.xs}>
+                  <TouchableX
+                    width={24}
+                    height={24}
+                    borderRadius={12}
+                    justifyContent="center"
+                    alignItems="center"
+                    backgroundColor={withAlpha(fieldColor, 0.7)}
+                    onPress={() => handleUpdateTarget(false)}
+                    accessibilityLabel="Decrease target"
+                    disabled={evaluation.target <= 1}
+                    opacity={evaluation.target <= 1 ? 0.5 : 1}>
+                    <TextX fontSize="md" fontWeight="semibold" color="tertiary">
+                      -
+                    </TextX>
+                  </TouchableX>
+
+                  <TextX
+                    fontSize="md"
+                    fontWeight="bold"
+                    color="accent"
+                    marginHorizontal={styleUtils.spacing.xs}>
+                    {evaluation.target}
+                  </TextX>
+
+                  <TouchableX
+                    width={24}
+                    height={24}
+                    borderRadius={12}
+                    justifyContent="center"
+                    alignItems="center"
+                    backgroundColor={withAlpha(fieldColor, 0.7)}
+                    onPress={() => handleUpdateTarget(true)}
+                    accessibilityLabel="Increase target"
+                    disabled={
+                      evaluation.target >= evaluation.checklistItems.length
+                    }
+                    opacity={
+                      evaluation.target >= evaluation.checklistItems.length
+                        ? 0.5
+                        : 1
+                    }>
+                    <TextX fontSize="md" fontWeight="semibold" color="tertiary">
+                      +
+                    </TextX>
+                  </TouchableX>
+                </ViewX>
+
+                <TextX fontSize="xs" color="secondary">
+                  of {evaluation.checklistItems.length} tasks to mark habit as
+                  complete
+                </TextX>
+              </ViewX>
+            )}
+
+          {/* Display checklist items */}
+          {evaluation.checklistItems && evaluation.checklistItems.length > 0 ? (
+            <ViewX>
+              {evaluation.checklistItems.slice(0, 3).map(item => (
                 <ViewX
                   key={item.id}
                   flexDirection="row"
@@ -602,13 +554,13 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
                 </ViewX>
               ))}
 
-              {checklistItems.length > 3 && (
+              {evaluation.checklistItems.length > 3 && (
                 <TextX
                   fontSize="xs"
                   color="tertiary"
                   marginTop={2}
                   fontStyle="italic">
-                  ...and {checklistItems.length - 3} more
+                  ...and {evaluation.checklistItems.length - 3} more
                 </TextX>
               )}
             </ViewX>
@@ -630,6 +582,7 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
         </ViewX>
       )}
 
+      {/* Type Selection Modal */}
       <Modal
         visible={modalVisible}
         transparent={true}
@@ -668,55 +621,75 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
             </ViewX>
 
             <ViewX paddingVertical={8}>
-              {EVALUATION_TYPES.map(option => (
-                <TouchableX
-                  key={option.id}
-                  flexDirection="row"
-                  alignItems="center"
-                  justifyContent="space-between"
-                  paddingVertical={12}
-                  paddingHorizontal={16}
-                  backgroundColor={
-                    evaluation.type === option.id
-                      ? withAlpha(accentColor, 0.07)
-                      : 'transparent'
-                  }
-                  onPress={() => handleSelectType(option.id)}>
-                  <ViewX flexDirection="row" alignItems="center" flex={1}>
-                    <ViewX
-                      width={32}
-                      height={32}
-                      borderRadius={8}
-                      justifyContent="center"
-                      alignItems="center"
-                      backgroundColor={withAlpha(accentColor, 0.1)}
-                      marginRight={12}>
-                      <option.icon
-                        size={16}
-                        color={accentColor}
-                        strokeWidth={1.5}
-                      />
-                    </ViewX>
-                    <ViewX flex={1}>
-                      <TextX fontSize="sm" fontWeight="medium" color="primary">
-                        {option.label}
-                      </TextX>
-                      <TextX fontSize="xs" color="tertiary">
-                        {option.description}
-                      </TextX>
-                    </ViewX>
-                  </ViewX>
+              {EVALUATION_TYPES.map(option => {
+                // Get the icon component
+                const TypeIcon =
+                  option.id === 'boolean'
+                    ? CheckCircle2
+                    : option.id === 'numeric'
+                    ? Hash
+                    : option.id === 'timer'
+                    ? Timer
+                    : option.id === 'checklist'
+                    ? ListChecks
+                    : CheckCircle2;
 
-                  {evaluation.type === option.id && (
-                    <Check size={16} color={accentColor} strokeWidth={1.5} />
-                  )}
-                </TouchableX>
-              ))}
+                return (
+                  <TouchableX
+                    key={option.id}
+                    flexDirection="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    paddingVertical={12}
+                    paddingHorizontal={16}
+                    backgroundColor={
+                      evaluation.type === option.id
+                        ? withAlpha(accentColor, 0.07)
+                        : 'transparent'
+                    }
+                    onPress={() =>
+                      handleSelectType(option.id as EvaluationType)
+                    }>
+                    <ViewX flexDirection="row" alignItems="center" flex={1}>
+                      <ViewX
+                        width={32}
+                        height={32}
+                        borderRadius={8}
+                        justifyContent="center"
+                        alignItems="center"
+                        backgroundColor={withAlpha(accentColor, 0.1)}
+                        marginRight={12}>
+                        <TypeIcon
+                          size={16}
+                          color={accentColor}
+                          strokeWidth={1.5}
+                        />
+                      </ViewX>
+                      <ViewX flex={1}>
+                        <TextX
+                          fontSize="sm"
+                          fontWeight="medium"
+                          color="primary">
+                          {option.label}
+                        </TextX>
+                        <TextX fontSize="xs" color="tertiary">
+                          {option.description}
+                        </TextX>
+                      </ViewX>
+                    </ViewX>
+
+                    {evaluation.type === option.id && (
+                      <Check size={16} color={accentColor} strokeWidth={1.5} />
+                    )}
+                  </TouchableX>
+                );
+              })}
             </ViewX>
           </ViewX>
         </ViewX>
       </Modal>
 
+      {/* Timer Unit Selection Modal */}
       <Modal
         visible={unitModalVisible}
         transparent={true}
@@ -783,6 +756,7 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
         </ViewX>
       </Modal>
 
+      {/* Numeric Units Selection Modal */}
       <Modal
         visible={unitsListModalVisible}
         transparent={true}
@@ -839,6 +813,7 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
                     }
                     onPress={() => {
                       if (item.id === 'custom') {
+                        // Just focus on custom input field
                       } else {
                         handleUpdateUnit(item.label);
                       }
@@ -980,7 +955,7 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
                     }
                     placeholderTextColor={textPlaceholder}
                     returnKeyType="done"
-                    onSubmitEditing={handleAddChecklistItem}
+                    onSubmitEditing={handleEditChecklistItem}
                   />
                   <TouchableX
                     width={40}
@@ -989,7 +964,7 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
                     justifyContent="center"
                     alignItems="center"
                     backgroundColor={withAlpha(accentColor, 0.15)}
-                    onPress={handleAddChecklistItem}>
+                    onPress={handleAddChecklistItemSubmit}>
                     {editingChecklistItem ? (
                       <Check size={16} color={accentColor} strokeWidth={1.5} />
                     ) : (
@@ -1076,7 +1051,7 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
                         <TouchableX
                           padding={8}
                           borderRadius={16}
-                          onPress={() => handleRemoveChecklistItem(item.id)}>
+                          onPress={() => onRemoveChecklistItem(item.id)}>
                           <X size={16} color={accentColor} strokeWidth={2} />
                         </TouchableX>
                       </ViewX>

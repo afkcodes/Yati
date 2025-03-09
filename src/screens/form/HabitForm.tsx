@@ -391,9 +391,7 @@ const HabitForm: React.FC<HabitFormProps> = ({
           width="100%"
           paddingHorizontal={styleUtils.spacing.md}
           paddingTop={styleUtils.spacing.sm}
-          paddingBottom={
-            insets.bottom > 0 ? insets.bottom : styleUtils.spacing.md
-          }
+          paddingBottom={styleUtils.spacing.sm}
           borderTopWidth={1}
           borderTopColor={borderColor}
           backgroundColor={bgColor}>

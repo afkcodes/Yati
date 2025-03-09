@@ -114,10 +114,7 @@ const CreateHabitScreen: React.FC = () => {
   };
 
   return (
-    <ViewX
-      flex={1}
-      backgroundColor={theme === 'dark' ? '#0D0D0F' : '#F8F8FC'}
-      zIndex={10}>
+    <ViewX flex={1} variant="base" zIndex={10}>
       <HabitForm
         onSubmit={handleSubmit}
         onCancel={handleCancel}

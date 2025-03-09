@@ -5,10 +5,10 @@ import {NavigationContext} from 'navigation-react';
 import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
 import {Alert, ScrollView} from 'react-native';
 import {TextX, TouchableX, ViewX} from '~components/common';
-import {CalendarStrip} from '~components/common/CalenderStrip';
+import CalendarStrip from '~components/common/CalenderStrip';
 import GreetingHeader from '~components/specific/home/Greeting';
 import HabitCard from '~components/specific/home/Habit';
-import TimeFilter from '~components/specific/home/TimFilter';
+import TimeFilter from '~components/specific/home/TimeFilter';
 import {useTheme} from '~hooks/ThemeContext';
 import {
   habitActions,

@@ -1,14 +1,14 @@
-/* eslint-disable react-native/no-inline-styles */
 import {StateNavigator} from 'navigation';
 import {NavigationHandler} from 'navigation-react';
 import {
+  CoordinatorLayout,
   NavigationBar,
   NavigationStack,
   Scene,
   TabBar,
   TabBarItem,
 } from 'navigation-react-native';
-import {Fragment, useMemo, useRef} from 'react';
+import {useMemo, useRef} from 'react';
 import {useTheme} from '~hooks/ThemeContext';
 import {getThemeColor, themes} from '../styles/theme';
 import {getTabsConfig} from './navigator';
@@ -47,9 +47,10 @@ const BottomTabs = () => {
   });
 
   const navColor = getThemeColor(theme, 'background', 'surface');
+  const bgColor = getThemeColor('dark', 'background', 'base');
 
   return (
-    <Fragment>
+    <CoordinatorLayout>
       <NavigationBar hidden={true} />
       <TabBar
         primary={true}
@@ -72,15 +73,16 @@ const BottomTabs = () => {
                 ]
               }>
               <NavigationStack
-                backgroundColor={() => themes[theme].text.secondary}
-                crumbStyle={[
-                  {type: 'translate', startX: '-10%', duration: 300},
-                  {type: 'alpha', start: 50},
-                ]}
-                unmountStyle={[
-                  {type: 'translate', startX: '100%', duration: 300},
-                  {type: 'alpha', start: 100},
-                ]}>
+                backgroundColor={() => bgColor}
+                // crumbStyle={[
+                //   {type: 'translate', startX: '-10%', duration: 300},
+                //   {type: 'alpha', start: 50},
+                // ]}
+                // unmountStyle={[
+                //   {type: 'translate', startX: '100%', duration: 300},
+                //   {type: 'alpha', start: 100},
+                // ]}
+              >
                 {tab.scenes?.map(scene => (
                   <Scene key={scene.key} stateKey={scene.key}>
                     <scene.component />
@@ -91,7 +93,7 @@ const BottomTabs = () => {
           </TabBarItem>
         ))}
       </TabBar>
-    </Fragment>
+    </CoordinatorLayout>
   );
 };
 

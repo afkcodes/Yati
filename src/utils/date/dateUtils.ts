@@ -65,6 +65,23 @@ export const formatTime12Hour = (date: Date | string): string => {
 };
 
 /**
+ * Ensures a consistent date format - always returns a Date object normalized to start of day
+ * @param date Date or string to normalize
+ * @returns Normalized Date object
+ */
+export const normalizeDate = (date: Date | string | null | undefined): Date => {
+  if (!date) {
+    return startOfDay(new Date()); // Default to today
+  }
+
+  if (typeof date === 'string') {
+    return startOfDay(parseISO(date));
+  }
+
+  return startOfDay(new Date(date));
+};
+
+/**
  * Formats a time in 24-hour format
  * @param date The date object containing the time to format
  * @returns A formatted time string like "14:30"

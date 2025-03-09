@@ -47,7 +47,7 @@ const generateDateList = (daysToShow: number): DateItem[] => {
   return dateList;
 };
 
-export const CalendarStrip: React.FC<CalendarStripProps> = ({
+const CalendarStrip: React.FC<CalendarStripProps> = ({
   onDateSelect,
   selectedDate,
   daysToShow = 30,
@@ -107,6 +107,8 @@ export const CalendarStrip: React.FC<CalendarStripProps> = ({
     );
   };
 
+  console.log('rendering Calendar Strip');
+
   return (
     <View style={[styles.container, {backgroundColor}, style]}>
       <LegendList
@@ -152,3 +154,5 @@ const styles = StyleSheet.create({
   },
   selectedText: {},
 });
+
+export default CalendarStrip;

@@ -13,9 +13,14 @@ import {StateNavigator} from 'navigation';
 import * as React from 'react';
 import BootSplash from 'react-native-bootsplash';
 import TabView, {SceneMap} from 'react-native-bottom-tabs';
+import {SystemBars} from 'react-native-edge-to-edge';
+import BottomTabs from '~navigation/Tabs';
 import CreateHabitScreen from '~screens/create/CreateHabit';
+import HabitDetailScreen from '~screens/HabitDetails/HabitDetails';
 import Home from '~screens/Home/Home';
+import WelcomeScreen from '~screens/Onboarding/Welcome';
 import SettingsScreen from '~screens/Settings/Settings';
+import {habitActions} from '~state/habit.store';
 import {getThemeColor} from '~styles/theme';
 import {typography} from '~styles/tokens';
 import {wait} from '~utils/common';
@@ -23,6 +28,7 @@ import {wait} from '~utils/common';
 const homeNavigator = new StateNavigator([
   {key: 'home'},
   {key: 'create', trackCrumbTrail: true},
+  {key: 'habitDetail', trackCrumbTrail: true},
 ]);
 
 const HomeStack = () => {
@@ -45,6 +51,9 @@ const HomeStack = () => {
         </Scene>
         <Scene stateKey="create">
           <CreateHabitScreen />
+        </Scene>
+        <Scene stateKey="habitDetail">
+          <HabitDetailScreen />
         </Scene>
       </NavigationStack>
     </NavigationHandler>
@@ -98,7 +107,8 @@ const App = () => {
   const bgColor = getThemeColor('dark', 'background', 'base');
   React.useEffect(() => {
     const init = async () => {
-      wait(150);
+      await habitActions.preloadData();
+      await wait(100);
     };
 
     init().finally(async () => {
@@ -113,22 +123,27 @@ const App = () => {
         <ThemeProvider>
           <NavigationHandler stateNavigator={baseNavigator}>
             <BottomSheetModalProvider>
+              <SystemBars style="light" />
               <NavigationStack
                 backgroundColor={() => bgColor}
-                crumbStyle={[
-                  {type: 'translate', startX: '-10%', duration: 300},
-                  {type: 'alpha', start: 50},
-                ]}
-                unmountStyle={[
-                  {type: 'translate', startX: '100%', duration: 300},
-                  {type: 'alpha', start: 100},
-                ]}>
+                // crumbStyle={[
+                //   {type: 'translate', startX: '-10%', duration: 300},
+                //   {type: 'alpha', start: 50},
+                // ]}
+                // unmountStyle={[
+                //   {type: 'translate', startX: '100%', duration: 300},
+                //   {type: 'alpha', start: 100},
+                // ]}
+              >
                 <Scene stateKey="welcome">
-                  {/* <WelcomeScreen /> */}.
-                  <TabViewExample />
+                  <WelcomeScreen />
+                  {/* <BottomTabs /> */}
+
+                  {/* <TabViewExample /> */}
                 </Scene>
                 <Scene stateKey="tabs">
-                  <TabViewExample />
+                  {/* <TabViewExample /> */}
+                  <BottomTabs />
                 </Scene>
               </NavigationStack>
               <AnimatedModal />

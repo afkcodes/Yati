@@ -1,6 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react/no-unstable-nested-components */
 // components/habit/form/EvaluationSection.tsx
+import {LegendList} from '@legendapp/list';
 import {
   Check,
   CheckCircle2,
@@ -13,7 +14,7 @@ import {
   X,
 } from 'lucide-react-native';
 import React, {useState} from 'react';
-import {FlatList, Modal, StyleSheet, TextInput} from 'react-native';
+import {Modal, StyleSheet, TextInput} from 'react-native';
 import {TextX, TouchableX, ViewX} from '~/components/common';
 import {useTheme} from '~/hooks/ThemeContext';
 import {getThemeColor, styleUtils, withAlpha} from '~/styles/theme';
@@ -795,7 +796,7 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
             </ViewX>
 
             <ViewX style={{maxHeight: 350}}>
-              <FlatList
+              <LegendList
                 data={COMMON_UNITS}
                 keyExtractor={item => item.id}
                 renderItem={({item}) => (
@@ -1005,7 +1006,7 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
                   Task List
                 </TextX>
 
-                <FlatList
+                <LegendList
                   data={evaluation.checklistItems || []}
                   keyExtractor={item => item.id}
                   renderItem={({item}) => (

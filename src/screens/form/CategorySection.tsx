@@ -1,8 +1,9 @@
 // components/habit/form/CategorySection.tsx
+import {LegendList} from '@legendapp/list';
 import * as Icons from 'lucide-react-native';
 import {Check, ChevronRight} from 'lucide-react-native';
 import React, {useState} from 'react';
-import {FlatList, Modal, StyleSheet} from 'react-native';
+import {Modal, StyleSheet} from 'react-native';
 import {TextX, TouchableX, ViewX} from '~/components/common';
 import {useTheme} from '~/hooks/ThemeContext';
 import {getThemeColor, styleUtils, withAlpha} from '~/styles/theme';
@@ -150,7 +151,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
               </TextX>
             </ViewX>
 
-            <FlatList
+            <LegendList
               data={HABIT_CATEGORIES}
               keyExtractor={item => item.id}
               renderItem={({item}) => (

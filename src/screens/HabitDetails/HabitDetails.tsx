@@ -54,6 +54,7 @@ const HabitDetailScreen: React.FC = () => {
     [id: string]: boolean;
   }>({});
   const [numericValue, setNumericValue] = useState(0);
+  const [isUpdating, setIsUpdating] = useState(false);
   const {theme} = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -64,13 +65,26 @@ const HabitDetailScreen: React.FC = () => {
   const textSecondary = getThemeColor(theme, 'text', 'secondary');
   const accentColor = getThemeColor(theme, 'text', 'accent');
 
+  // Load habit data and progress for the selected date
   useEffect(() => {
     if (id) {
       const foundHabit = habits.find(h => h.id === id);
       if (foundHabit) {
         setHabit(foundHabit);
+
+        // Get progress for the selected date
         const dateStr = format(selectedDate, 'yyyy-MM-dd');
         const progress = foundHabit.progress?.[dateStr];
+
+        // Reset values first to ensure clean state
+        setNumericValue(0);
+        const initialProgress: {[id: string]: boolean} = {};
+        foundHabit.evaluation.checklistItems?.forEach(item => {
+          initialProgress[item.id] = false;
+        });
+        setChecklistProgress(initialProgress);
+
+        // Then apply current progress if it exists
         if (progress) {
           if (
             foundHabit.evaluation.type === 'numeric' ||
@@ -83,25 +97,16 @@ const HabitDetailScreen: React.FC = () => {
           ) {
             setChecklistProgress(progress.checklistProgress);
           }
-        } else {
-          if (
-            foundHabit.evaluation.type === 'numeric' ||
-            foundHabit.evaluation.type === 'timer'
-          ) {
-            setNumericValue(0);
-          } else if (foundHabit.evaluation.type === 'checklist') {
-            const initialProgress: {[id: string]: boolean} = {};
-            foundHabit.evaluation.checklistItems?.forEach(item => {
-              initialProgress[item.id] = false;
-            });
-            setChecklistProgress(initialProgress);
-          }
         }
       }
     }
   }, [id, habits, selectedDate]);
 
-  const handleBack = () => stateNavigator?.navigateBack(1);
+  const handleBack = () => {
+    if (stateNavigator) {
+      stateNavigator.navigateBack(1);
+    }
+  };
 
   const handleDelete = () => {
     setActionMenuVisible(false);
@@ -112,8 +117,12 @@ const HabitDetailScreen: React.FC = () => {
         style: 'destructive',
         onPress: () => {
           if (habit) {
-            habitActions.deleteHabit(habit.id);
-            handleBack();
+            try {
+              habitActions.deleteHabit(habit.id);
+              handleBack();
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete habit. Please try again.');
+            }
           }
         },
       },
@@ -122,9 +131,13 @@ const HabitDetailScreen: React.FC = () => {
 
   const handleEdit = () => {
     setActionMenuVisible(false);
-    Alert.alert('Coming Soon', 'Habit editing coming in next update!', [
-      {text: 'OK'},
-    ]);
+    if (habit) {
+      // You could navigate to the edit screen here instead of showing an alert
+      // E.g., stateNavigator.navigate('editHabit', { id: habit.id });
+      Alert.alert('Coming Soon', 'Habit editing coming in next update!', [
+        {text: 'OK'},
+      ]);
+    }
   };
 
   const handleArchive = () => {
@@ -138,8 +151,15 @@ const HabitDetailScreen: React.FC = () => {
           {
             text: 'Archive',
             onPress: () => {
-              habitActions.archiveHabit(habit.id);
-              handleBack();
+              try {
+                habitActions.archiveHabit(habit.id);
+                handleBack();
+              } catch (error) {
+                Alert.alert(
+                  'Error',
+                  'Failed to archive habit. Please try again.',
+                );
+              }
             },
           },
         ],
@@ -147,114 +167,208 @@ const HabitDetailScreen: React.FC = () => {
     }
   };
 
+  // Handle completion toggle with error handling and loading state
   const handleToggleCompletion = () => {
-    if (!habit) {
+    if (!habit || isUpdating) {
       return;
     }
-    trigger('impactMedium', {
-      enableVibrateFallback: true,
-      ignoreAndroidSystemSettings: false,
-    });
-    const dateStr = format(selectedDate, 'yyyy-MM-dd');
-    switch (habit.evaluation.type) {
-      case 'boolean':
-        habitActions.toggleHabitCompletion(habit.id, selectedDate);
-        break;
-      case 'numeric':
-      case 'timer':
-        const targetValue = habit.evaluation.target;
-        setNumericValue(targetValue);
-        habitActions.updateHabitValue(habit.id, targetValue, selectedDate);
-        break;
-      case 'checklist':
-        if (habit.evaluation.checklistItems) {
-          const allCompleted = Object.values(checklistProgress).every(Boolean);
-          const newProgress = habit.evaluation.checklistItems.reduce(
-            (acc, item) => {
-              acc[item.id] = !allCompleted;
-              return acc;
-            },
-            {} as {[id: string]: boolean},
-          );
-          setChecklistProgress(newProgress);
-          habit.evaluation.checklistItems.forEach(item => {
-            habitActions.toggleChecklistItem(
-              habit.id,
-              item.id,
-              selectedDate,
-              !allCompleted,
+
+    setIsUpdating(true);
+
+    try {
+      // Trigger haptic feedback
+      trigger('impactMedium', {
+        enableVibrateFallback: true,
+        ignoreAndroidSystemSettings: false,
+      });
+
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+
+      // Handle different evaluation types
+      switch (habit.evaluation.type) {
+        case 'boolean':
+          habitActions.toggleHabitCompletion(habit.id, selectedDate);
+          break;
+
+        case 'numeric':
+        case 'timer':
+          const targetValue = habit.evaluation.target;
+          // If already complete, set to 0, otherwise set to target
+          const valueToSet = habit.progress?.[dateStr]?.isCompleted
+            ? 0
+            : targetValue;
+          setNumericValue(valueToSet);
+          habitActions.updateHabitValue(habit.id, valueToSet, selectedDate);
+          break;
+
+        case 'checklist':
+          if (habit.evaluation.checklistItems) {
+            // Check if all items are completed to determine toggle direction
+            const allCompleted =
+              Object.values(checklistProgress).every(Boolean);
+
+            // Create a new progress object with all items toggled
+            const newProgress = habit.evaluation.checklistItems.reduce(
+              (acc, item) => {
+                acc[item.id] = !allCompleted;
+                return acc;
+              },
+              {} as {[id: string]: boolean},
             );
-          });
-        }
-        break;
+
+            // Update local state
+            setChecklistProgress(newProgress);
+
+            // We need to toggle each item individually
+            habit.evaluation.checklistItems.forEach(item => {
+              const currentState = checklistProgress[item.id] || false;
+              if (currentState === allCompleted) {
+                // Only toggle if the current state doesn't match our target state
+                habitActions.toggleChecklistItem(
+                  habit.id,
+                  item.id,
+                  selectedDate,
+                );
+              }
+            });
+          }
+          break;
+      }
+    } catch (error) {
+      Alert.alert(
+        'Error',
+        'Failed to update habit progress. Please try again.',
+      );
+    } finally {
+      setIsUpdating(false);
     }
   };
 
+  // Update numeric value with error handling
   const handleUpdateNumericValue = (increment: boolean) => {
-    if (!habit) {
+    if (!habit || isUpdating) {
       return;
     }
-    trigger('impactLight', {
-      enableVibrateFallback: true,
-      ignoreAndroidSystemSettings: false,
-    });
-    const step = increment ? 1 : -1;
-    const newValue = Math.max(0, numericValue + step);
-    setNumericValue(newValue);
-    habitActions.updateHabitValue(habit.id, newValue, selectedDate);
+
+    setIsUpdating(true);
+
+    try {
+      // Trigger haptic feedback
+      trigger('impactLight', {
+        enableVibrateFallback: true,
+        ignoreAndroidSystemSettings: false,
+      });
+
+      // Calculate new value with bounds checking
+      const step = increment ? 1 : -1;
+      const newValue = Math.max(0, numericValue + step);
+
+      // Update local state
+      setNumericValue(newValue);
+
+      // Update in storage
+      habitActions.updateHabitValue(habit.id, newValue, selectedDate);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update value. Please try again.');
+      // Revert to previous value
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const previousValue = habit.progress?.[dateStr]?.value || 0;
+      setNumericValue(previousValue);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
+  // Toggle a single checklist item - matches the actual implementation
   const handleToggleChecklistItem = (itemId: string) => {
-    if (!habit) {
+    if (!habit || isUpdating) {
       return;
     }
-    trigger('selection', {
-      enableVibrateFallback: true,
-      ignoreAndroidSystemSettings: false,
-    });
-    habitActions.toggleChecklistItem(habit.id, itemId, selectedDate);
-    setChecklistProgress(prev => ({...prev, [itemId]: !prev[itemId]}));
+
+    setIsUpdating(true);
+
+    try {
+      // Trigger haptic feedback
+      trigger('selection', {
+        enableVibrateFallback: true,
+        ignoreAndroidSystemSettings: false,
+      });
+
+      // Toggle value in local state for immediate UI feedback
+      const newValue = !checklistProgress[itemId];
+      setChecklistProgress(prev => ({...prev, [itemId]: newValue}));
+
+      // Call the actual implementation which toggles internally
+      habitActions.toggleChecklistItem(habit.id, itemId, selectedDate);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update checklist. Please try again.');
+      // Revert changes by reloading from habit
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const progress = habit.progress?.[dateStr];
+      if (progress?.checklistProgress) {
+        setChecklistProgress(progress.checklistProgress);
+      }
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
+  // Get current progress information
   const dateStr = format(selectedDate, 'yyyy-MM-dd');
   const progress = habit?.progress?.[dateStr];
   const isCompleted = progress?.isCompleted || false;
 
+  // Calculate completion percentage based on habit type
   const getCompletionPercentage = (): number => {
     if (!habit || !progress) {
       return 0;
     }
+
     if (habit.evaluation.type === 'boolean') {
       return isCompleted ? 100 : 0;
     }
+
     if (
       habit.evaluation.type === 'numeric' ||
       habit.evaluation.type === 'timer'
     ) {
+      // Ensure we have a valid target to prevent division by zero
+      if (habit.evaluation.target <= 0) {
+        return 0;
+      }
+
       const value = progress.value || 0;
       return Math.min(Math.round((value / habit.evaluation.target) * 100), 100);
     }
+
     if (
       habit.evaluation.type === 'checklist' &&
       habit.evaluation.checklistItems
     ) {
-      const completed = Object.values(checklistProgress).filter(Boolean).length;
+      // Ensure we have items to prevent division by zero
       const total = habit.evaluation.checklistItems.length;
-      return total > 0
-        ? Math.min(Math.round((completed / total) * 100), 100)
-        : 0;
+      if (total === 0) {
+        return 0;
+      }
+
+      const completed = Object.values(checklistProgress).filter(Boolean).length;
+      return Math.min(Math.round((completed / total) * 100), 100);
     }
+
     return 0;
   };
 
   const completionPercentage = getCompletionPercentage();
 
+  // Get a human-readable frequency description
   const getFrequencyDescription = (): string => {
     if (!habit) {
       return '';
     }
+
     const {type, value, timeOfDay} = habit.frequency;
     let description = '';
+
     if (type === 'daily') {
       description = 'Daily';
     } else if (type === 'hourly') {
@@ -270,34 +384,47 @@ const HabitDetailScreen: React.FC = () => {
       description =
         value.length === 1 ? `Day ${value[0]}` : `${value.length} days/month`;
     }
+
+    // Add time of day if available
     if (timeOfDay) {
       description += ` @ ${format(new Date(timeOfDay), 'h:mm a')}`;
     }
+
     return description;
   };
 
+  // Check if the habit should be active on the selected date
   const isHabitActiveToday = useMemo(() => {
     if (!habit) {
       return false;
     }
+
     const {type, value} = habit.frequency;
+
     if (type === 'daily' || type === 'hourly') {
       return true;
     }
+
     if (type === 'weekly') {
-      return value.includes(format(selectedDate, 'EEE').toLowerCase());
+      const dayOfWeek = format(selectedDate, 'EEE').toLowerCase();
+      return value.includes(dayOfWeek);
     }
+
     if (type === 'monthly') {
-      return value.includes(format(selectedDate, 'd'));
+      const dayOfMonth = format(selectedDate, 'd');
+      return value.includes(dayOfMonth);
     }
+
     return false;
   }, [habit, selectedDate]);
 
+  // Render progress bar component
   const renderProgressBar = () => {
     const safeWidth =
       isNaN(completionPercentage) || completionPercentage < 0
         ? '0%'
         : `${completionPercentage}%`;
+
     return (
       <ViewX marginVertical={8}>
         <ViewX
@@ -327,6 +454,7 @@ const HabitDetailScreen: React.FC = () => {
     );
   };
 
+  // Render a detail item with label, value and optional icon
   const renderDetailItem = (
     label: string,
     value: string,
@@ -352,8 +480,10 @@ const HabitDetailScreen: React.FC = () => {
     </ViewX>
   );
 
+  // Render a checklist item
   const renderChecklistItem = (item: any) => {
     const isItemCompleted = checklistProgress[item.id] || false;
+
     return (
       <TouchableX
         key={item.id}
@@ -368,7 +498,8 @@ const HabitDetailScreen: React.FC = () => {
             ? withAlpha(habit?.color || accentColor, 0.1)
             : surfaceColor
         }
-        onPress={() => handleToggleChecklistItem(item.id)}>
+        onPress={() => handleToggleChecklistItem(item.id)}
+        disabled={isUpdating}>
         <CheckCircle2
           size={20}
           color={isItemCompleted ? habit?.color || accentColor : textSecondary}
@@ -389,6 +520,7 @@ const HabitDetailScreen: React.FC = () => {
     );
   };
 
+  // Show loading state if habit not found
   if (!habit) {
     return (
       <ViewX
@@ -413,7 +545,7 @@ const HabitDetailScreen: React.FC = () => {
 
   return (
     <ViewX flex={1} backgroundColor={bgColor}>
-      {/* New Elegant Header Design */}
+      {/* Header with gradient background */}
       <LinearGradient
         colors={[
           withAlpha(habit.color || accentColor, 0.15),
@@ -426,7 +558,7 @@ const HabitDetailScreen: React.FC = () => {
           alignItems="center"
           paddingHorizontal={16}
           paddingVertical={8}>
-          <TouchableX onPress={handleBack} padding={8}>
+          <TouchableX onPress={handleBack} padding={8} disabled={isUpdating}>
             <ArrowLeft size={20} color={textPrimary} />
           </TouchableX>
 
@@ -457,12 +589,15 @@ const HabitDetailScreen: React.FC = () => {
             </ViewX>
           </ViewX>
 
-          <TouchableX onPress={() => setActionMenuVisible(true)} padding={8}>
+          <TouchableX
+            onPress={() => setActionMenuVisible(true)}
+            padding={8}
+            disabled={isUpdating}>
             <MoreVertical size={20} color={textPrimary} />
           </TouchableX>
         </ViewX>
 
-        {/* Compact Completion Card */}
+        {/* Completion card - only shown if habit is active today */}
         {isHabitActiveToday && (
           <ViewX marginHorizontal={16} marginBottom={12}>
             <ViewX
@@ -493,7 +628,8 @@ const HabitDetailScreen: React.FC = () => {
                     ? withAlpha(habit.color, 0.15)
                     : withAlpha(habit.color, 0.05)
                 }
-                onPress={handleToggleCompletion}>
+                onPress={handleToggleCompletion}
+                disabled={isUpdating}>
                 <CheckCircle2
                   size={16}
                   color={habit.color}
@@ -517,6 +653,7 @@ const HabitDetailScreen: React.FC = () => {
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{paddingBottom: Math.max(insets.bottom, 20)}}>
+        {/* Tracking section - only shown if habit is active today */}
         {isHabitActiveToday && (
           <ViewX
             padding={16}
@@ -535,6 +672,8 @@ const HabitDetailScreen: React.FC = () => {
                     ? 'Track Time'
                     : 'Tasks'}
                 </TextX>
+
+                {/* Numeric & Timer type UI */}
                 {(habit.evaluation.type === 'numeric' ||
                   habit.evaluation.type === 'timer') && (
                   <ViewX
@@ -589,7 +728,7 @@ const HabitDetailScreen: React.FC = () => {
                         alignItems="center"
                         opacity={numericValue <= 0 ? 0.5 : 1}
                         onPress={() => handleUpdateNumericValue(false)}
-                        disabled={numericValue <= 0}>
+                        disabled={numericValue <= 0 || isUpdating}>
                         <TextX
                           fontSize="xl"
                           color="secondary"
@@ -615,7 +754,8 @@ const HabitDetailScreen: React.FC = () => {
                         backgroundColor={withAlpha(habit.color, 0.1)}
                         justifyContent="center"
                         alignItems="center"
-                        onPress={() => handleUpdateNumericValue(true)}>
+                        onPress={() => handleUpdateNumericValue(true)}
+                        disabled={isUpdating}>
                         <TextX
                           fontSize="xl"
                           color="secondary"
@@ -626,6 +766,8 @@ const HabitDetailScreen: React.FC = () => {
                     </ViewX>
                   </ViewX>
                 )}
+
+                {/* Checklist type UI */}
                 {habit.evaluation.type === 'checklist' &&
                   habit.evaluation.checklistItems && (
                     <ViewX>
@@ -635,8 +777,10 @@ const HabitDetailScreen: React.FC = () => {
                         alignItems="center"
                         marginBottom={12}>
                         <TextX fontSize="sm" color="secondary">
-                          Complete {habit.evaluation.target} of{' '}
-                          {habit.evaluation.checklistItems.length} tasks
+                          Complete{' '}
+                          {habit.evaluation.target ||
+                            habit.evaluation.checklistItems.length}{' '}
+                          of {habit.evaluation.checklistItems.length} tasks
                         </TextX>
                         <ViewX
                           backgroundColor={
@@ -669,6 +813,7 @@ const HabitDetailScreen: React.FC = () => {
           </ViewX>
         )}
 
+        {/* Habit details section */}
         <ViewX padding={16}>
           <TextX
             fontSize="md"
@@ -677,6 +822,8 @@ const HabitDetailScreen: React.FC = () => {
             marginBottom={12}>
             About This Habit
           </TextX>
+
+          {/* Description card */}
           {habit.description && (
             <ViewX
               backgroundColor={surfaceColor}
@@ -690,6 +837,8 @@ const HabitDetailScreen: React.FC = () => {
               </TextX>
             </ViewX>
           )}
+
+          {/* Details card */}
           <ViewX
             backgroundColor={surfaceColor}
             borderRadius={12}
@@ -714,6 +863,7 @@ const HabitDetailScreen: React.FC = () => {
             )}
           </ViewX>
 
+          {/* Progress stats section */}
           <TextX
             fontSize="md"
             fontWeight="semibold"
@@ -726,6 +876,7 @@ const HabitDetailScreen: React.FC = () => {
             justifyContent="space-between"
             marginBottom={16}
             flexWrap="wrap">
+            {/* Current streak card */}
             <ViewX
               width="48%"
               backgroundColor={surfaceColor}
@@ -752,6 +903,8 @@ const HabitDetailScreen: React.FC = () => {
                 {habit.streak === 1 ? 'day' : 'days'}
               </TextX>
             </ViewX>
+
+            {/* Best streak card */}
             <ViewX
               width="48%"
               backgroundColor={surfaceColor}
@@ -778,6 +931,8 @@ const HabitDetailScreen: React.FC = () => {
                 {(habit.longestStreak || habit.streak) === 1 ? 'day' : 'days'}
               </TextX>
             </ViewX>
+
+            {/* Total completions card */}
             <ViewX
               width="100%"
               backgroundColor={surfaceColor}
@@ -797,7 +952,10 @@ const HabitDetailScreen: React.FC = () => {
                 </TextX>
               </ViewX>
               <TextX fontSize="2xl" fontWeight="bold" color="primary">
-                {habit.progress ? Object.keys(habit.progress).length : 0}
+                {habit.progress
+                  ? Object.values(habit.progress).filter(p => p.isCompleted)
+                      .length
+                  : 0}
               </TextX>
               <TextX fontSize="xs" color="secondary" marginTop={2}>
                 times
@@ -807,6 +965,7 @@ const HabitDetailScreen: React.FC = () => {
         </ViewX>
       </ScrollView>
 
+      {/* Action menu for edit/delete/archive */}
       <ActionMenu
         visible={actionMenuVisible}
         onClose={() => setActionMenuVisible(false)}

@@ -160,91 +160,91 @@ const isHabitActiveOnDate = (habit: Habit, date: Date): boolean => {
 };
 
 // Helper to get or create progress for a specific date
-const getOrCreateProgress = (habit: Habit, date: Date): DailyProgress => {
-  const dateStr = format(date, 'yyyy-MM-dd');
+// const getOrCreateProgress = (habit: Habit, date: Date): DailyProgress => {
+//   const dateStr = format(date, 'yyyy-MM-dd');
 
-  if (habit.progress && habit.progress[dateStr]) {
-    return habit.progress[dateStr];
-  }
+//   if (habit.progress && habit.progress[dateStr]) {
+//     return habit.progress[dateStr];
+//   }
 
-  // Create a new progress entry
-  const newProgress: DailyProgress = {
-    date: dateStr,
-    isCompleted: false,
-  };
+//   // Create a new progress entry
+//   const newProgress: DailyProgress = {
+//     date: dateStr,
+//     isCompleted: false,
+//   };
 
-  // Initialize specific fields based on evaluation type
-  if (
-    habit.evaluation.type === 'numeric' ||
-    habit.evaluation.type === 'timer'
-  ) {
-    newProgress.value = 0;
-  }
+//   // Initialize specific fields based on evaluation type
+//   if (
+//     habit.evaluation.type === 'numeric' ||
+//     habit.evaluation.type === 'timer'
+//   ) {
+//     newProgress.value = 0;
+//   }
 
-  if (
-    habit.evaluation.type === 'checklist' &&
-    habit.evaluation.checklistItems
-  ) {
-    newProgress.checklistProgress = {};
-    habit.evaluation.checklistItems.forEach(item => {
-      if (newProgress.checklistProgress) {
-        newProgress.checklistProgress[item.id] = false;
-      }
-    });
-  }
+//   if (
+//     habit.evaluation.type === 'checklist' &&
+//     habit.evaluation.checklistItems
+//   ) {
+//     newProgress.checklistProgress = {};
+//     habit.evaluation.checklistItems.forEach(item => {
+//       if (newProgress.checklistProgress) {
+//         newProgress.checklistProgress[item.id] = false;
+//       }
+//     });
+//   }
 
-  return newProgress;
-};
+//   return newProgress;
+// };
 
 // Helper to calculate streak
-const calculateStreak = (habit: Habit): number => {
-  let streak = 0;
-  let currentDate = new Date();
-  let consecutive = true;
+// const calculateStreak = (habit: Habit): number => {
+//   let streak = 0;
+//   let currentDate = new Date();
+//   let consecutive = true;
 
-  // Go back day by day and check if habit was completed
-  while (consecutive) {
-    const dateStr = format(currentDate, 'yyyy-MM-dd');
+//   // Go back day by day and check if habit was completed
+//   while (consecutive) {
+//     const dateStr = format(currentDate, 'yyyy-MM-dd');
 
-    // If habit is active on this date and has progress
-    if (
-      isHabitActiveOnDate(habit, currentDate) &&
-      habit.progress &&
-      habit.progress[dateStr]
-    ) {
-      if (habit.progress[dateStr].isCompleted) {
-        streak++;
-        currentDate = subDays(currentDate, 1);
-      } else {
-        consecutive = false;
-      }
-    }
-    // If habit should be active but has no progress entry, the streak is broken
-    else if (isHabitActiveOnDate(habit, currentDate)) {
-      consecutive = false;
-    }
-    // If habit is not active on this date, skip to the previous day
-    else {
-      currentDate = subDays(currentDate, 1);
-    }
+//     // If habit is active on this date and has progress
+//     if (
+//       isHabitActiveOnDate(habit, currentDate) &&
+//       habit.progress &&
+//       habit.progress[dateStr]
+//     ) {
+//       if (habit.progress[dateStr].isCompleted) {
+//         streak++;
+//         currentDate = subDays(currentDate, 1);
+//       } else {
+//         consecutive = false;
+//       }
+//     }
+//     // If habit should be active but has no progress entry, the streak is broken
+//     else if (isHabitActiveOnDate(habit, currentDate)) {
+//       consecutive = false;
+//     }
+//     // If habit is not active on this date, skip to the previous day
+//     else {
+//       currentDate = subDays(currentDate, 1);
+//     }
 
-    // Safety check - don't go back further than habit creation date
-    const createdDate = parseISO(habit.createdAt);
-    if (createdDate > currentDate) {
-      consecutive = false;
-    }
+//     // Safety check - don't go back further than habit creation date
+//     const createdDate = parseISO(habit.createdAt);
+//     if (createdDate > currentDate) {
+//       consecutive = false;
+//     }
 
-    // Additional safety check to prevent infinite loops
-    if (streak > 1000) {
-      console.warn(
-        `Streak calculation exceeded 1000 days for habit '${habit.title}', stopping`,
-      );
-      break;
-    }
-  }
+//     // Additional safety check to prevent infinite loops
+//     if (streak > 1000) {
+//       console.warn(
+//         `Streak calculation exceeded 1000 days for habit '${habit.title}', stopping`,
+//       );
+//       break;
+//     }
+//   }
 
-  return streak;
-};
+//   return streak;
+// };
 
 // Helper to update all streaks for habits
 const updateAllStreaks = (habits: Habit[]): Habit[] => {
@@ -266,34 +266,34 @@ const updateAllStreaks = (habits: Habit[]): Habit[] => {
 };
 
 // Helper function to calculate completion status for a habit
-export const isHabitCompleted = (
-  habit: Habit,
-  progress: DailyProgress,
-): boolean => {
-  if (!habit || !progress) {
-    return false;
-  }
+// export const isHabitCompleted = (
+//   habit: Habit,
+//   progress: DailyProgress,
+// ): boolean => {
+//   if (!habit || !progress) {
+//     return false;
+//   }
 
-  const {type, target} = habit.evaluation;
+//   const {type, target} = habit.evaluation;
 
-  if (type === 'boolean') {
-    return Boolean(progress.isCompleted);
-  }
+//   if (type === 'boolean') {
+//     return Boolean(progress.isCompleted);
+//   }
 
-  if (type === 'numeric' || type === 'timer') {
-    return (progress.value || 0) >= target;
-  }
+//   if (type === 'numeric' || type === 'timer') {
+//     return (progress.value || 0) >= target;
+//   }
 
-  if (type === 'checklist' && habit.evaluation.checklistItems) {
-    // Count completed checklist items
-    const completedItems = Object.values(
-      progress.checklistProgress || {},
-    ).filter(Boolean).length;
-    return completedItems >= target;
-  }
+//   if (type === 'checklist' && habit.evaluation.checklistItems) {
+//     // Count completed checklist items
+//     const completedItems = Object.values(
+//       progress.checklistProgress || {},
+//     ).filter(Boolean).length;
+//     return completedItems >= target;
+//   }
 
-  return false;
-};
+//   return false;
+// };
 
 // Helper to convert form data to habit
 const convertFormToHabit = (formData: HabitFormData): Habit => {
@@ -757,72 +757,68 @@ export const habitActions = {
     itemId: string,
     date: Date = new Date(),
   ): void => {
+    // Ensure valid date
     const validDate = ensureValidDate(date);
     const dateStr = format(validDate, 'yyyy-MM-dd');
 
-    const currentState = getHabitStoreSnapshot();
-
     // Find the habit first to confirm it exists
-    const habitIndex = currentState.habits.findIndex(h => h.id === habitId);
-    if (habitIndex === -1) {
-      console.error(
-        `Cannot toggle checklist item: Habit with ID ${habitId} not found`,
-      );
+    const habit = getHabitStoreSnapshot().habits.find(h => h.id === habitId);
+    if (!habit || habit.evaluation.type !== 'checklist') {
       return;
     }
 
-    const updatedHabits = currentState.habits.map(habit => {
-      if (habit.id === habitId && habit.evaluation.type === 'checklist') {
-        // Get or create progress for this date
-        const progress = getOrCreateProgress(habit, validDate);
+    // Verify the checklist item exists
+    if (!habit.evaluation.checklistItems?.some(item => item.id === itemId)) {
+      console.warn(`Checklist item ${itemId} not found in habit ${habitId}`);
+      return;
+    }
 
-        // Initialize checklist progress if needed
-        const checklistProgress = progress.checklistProgress || {};
+    // Get or create progress for this date
+    const progress = getOrCreateProgress(habit, validDate);
 
-        // Toggle this item
-        const updatedChecklistProgress = {
-          ...checklistProgress,
-          [itemId]: !checklistProgress[itemId],
-        };
+    // Initialize checklist progress if needed
+    if (!progress.checklistProgress) {
+      progress.checklistProgress = {};
+    }
 
-        // Count completed items
-        const completedItems = Object.values(updatedChecklistProgress).filter(
-          Boolean,
-        ).length;
+    // Toggle this item
+    progress.checklistProgress[itemId] = !progress.checklistProgress[itemId];
 
-        // Check if the target is met
-        const isCompleted = completedItems >= habit.evaluation.target;
+    // Count completed items
+    const completedCount = Object.values(progress.checklistProgress).filter(
+      completed => completed,
+    ).length;
 
-        const updatedProgress: DailyProgress = {
-          ...progress,
-          checklistProgress: updatedChecklistProgress,
-          isCompleted,
-        };
+    // Check if the target is met
+    const target =
+      habit.evaluation.target ||
+      (habit.evaluation.checklistItems
+        ? habit.evaluation.checklistItems.length
+        : 0);
+    progress.isCompleted = completedCount >= target;
 
-        // Update habit with new progress
-        const updatedHabit: Habit = {
-          ...habit,
+    // Update habit with new progress
+    const updatedHabits = getHabitStoreSnapshot().habits.map(h => {
+      if (h.id === habitId) {
+        return {
+          ...h,
           progress: {
-            ...habit.progress,
-            [dateStr]: updatedProgress,
+            ...h.progress,
+            [dateStr]: progress,
           },
-          lastUpdatedAt: new Date().toISOString(),
         };
-
-        return updatedHabit;
       }
-      return habit;
+      return h;
     });
 
     // Update streaks for all habits
     const habitsWithUpdatedStreaks = updateAllStreaks(updatedHabits);
 
-    setHabitStore({
-      habits: habitsWithUpdatedStreaks,
-    });
-
     // Persist to storage
     persistHabits(habitsWithUpdatedStreaks);
+
+    // Update state
+    setHabitStore({habits: habitsWithUpdatedStreaks});
   },
 
   // Set the selected date
@@ -961,3 +957,265 @@ export const habitActions = {
 };
 
 export {useHabitStore};
+
+// ---------------------------------------------------
+
+// Fix 1: Improve the getOrCreateProgress function to better handle date consistency
+const getOrCreateProgress = (habit: Habit, date: Date): DailyProgress => {
+  // Normalize date to ensure consistency
+  const normalizedDate = startOfDay(date);
+  const dateStr = format(normalizedDate, 'yyyy-MM-dd');
+
+  // Check if progress exists for this date
+  if (habit.progress && habit.progress[dateStr]) {
+    return habit.progress[dateStr];
+  }
+
+  // Create a new progress entry with the correct normalized date
+  const newProgress: DailyProgress = {
+    date: dateStr,
+    isCompleted: false,
+  };
+
+  // Initialize specific fields based on evaluation type
+  if (
+    habit.evaluation.type === 'numeric' ||
+    habit.evaluation.type === 'timer'
+  ) {
+    newProgress.value = 0;
+  } else if (
+    habit.evaluation.type === 'checklist' &&
+    habit.evaluation.checklistItems
+  ) {
+    newProgress.checklistProgress = {};
+    // Initialize all checklist items as not completed
+    habit.evaluation.checklistItems.forEach(item => {
+      if (newProgress.checklistProgress) {
+        newProgress.checklistProgress[item.id] = false;
+      }
+    });
+  }
+
+  return newProgress;
+};
+
+// Fix 2: Improve isHabitCompleted to handle all evaluation types correctly
+export const isHabitCompleted = (
+  habit: Habit,
+  progress: DailyProgress,
+): boolean => {
+  if (!progress) {
+    return false;
+  }
+
+  // For boolean type, simply use isCompleted flag
+  if (habit.evaluation.type === 'boolean') {
+    return progress.isCompleted;
+  }
+
+  // For numeric or timer type, compare value to target
+  if (
+    (habit.evaluation.type === 'numeric' ||
+      habit.evaluation.type === 'timer') &&
+    typeof progress.value === 'number'
+  ) {
+    return progress.value >= habit.evaluation.target;
+  }
+
+  // For checklist type, check if enough items are completed
+  if (habit.evaluation.type === 'checklist' && progress.checklistProgress) {
+    // Count completed items
+    const completedCount = Object.values(progress.checklistProgress).filter(
+      completed => completed,
+    ).length;
+
+    // If target is 0 or not set, consider all items must be completed
+    const target =
+      habit.evaluation.target ||
+      (habit.evaluation.checklistItems
+        ? habit.evaluation.checklistItems.length
+        : 0);
+
+    return completedCount >= target;
+  }
+
+  return false;
+};
+
+// Fix 3: Improve updateNumericValue to handle validation and edge cases
+const updateNumericValue = (
+  habitId: string,
+  value: number,
+  date: Date = new Date(),
+): void => {
+  // Ensure valid date and find habit
+  const validDate = ensureValidDate(date);
+  const dateStr = format(validDate, 'yyyy-MM-dd');
+
+  // Find the habit first to confirm it exists
+  const habit = getHabitStoreSnapshot().habits.find(h => h.id === habitId);
+  if (!habit) {
+    return;
+  }
+
+  // Only process for numeric or timer habits
+  if (
+    habit.evaluation.type !== 'numeric' &&
+    habit.evaluation.type !== 'timer'
+  ) {
+    return;
+  }
+
+  // Get or create progress for this date
+  const progress = getOrCreateProgress(habit, validDate);
+
+  // Ensure value is not negative
+  const newValue = Math.max(0, value);
+
+  // Update value and check if completed
+  progress.value = newValue;
+  progress.isCompleted = newValue >= habit.evaluation.target;
+
+  // Update habit with new progress
+  const updatedHabits = getHabitStoreSnapshot().habits.map(h => {
+    if (h.id === habitId) {
+      return {
+        ...h,
+        progress: {
+          ...h.progress,
+          [dateStr]: progress,
+        },
+      };
+    }
+    return h;
+  });
+
+  // Update streaks for all habits
+  const habitsWithUpdatedStreaks = updateAllStreaks(updatedHabits);
+
+  // Persist to storage
+  persistHabits(habitsWithUpdatedStreaks);
+
+  // Update state
+  setHabitStore({habits: habitsWithUpdatedStreaks});
+};
+
+// Fix 4: Improve toggleChecklistItem to handle missing checklist items
+const toggleChecklistItem = (
+  habitId: string,
+  itemId: string,
+  date: Date = new Date(),
+): void => {
+  // Ensure valid date
+  const validDate = ensureValidDate(date);
+  const dateStr = format(validDate, 'yyyy-MM-dd');
+
+  // Find the habit first to confirm it exists
+  const habit = get().habits.find(h => h.id === habitId);
+  if (!habit || habit.evaluation.type !== 'checklist') {
+    return;
+  }
+
+  // Verify the checklist item exists
+  if (!habit.evaluation.checklistItems?.some(item => item.id === itemId)) {
+    console.warn(`Checklist item ${itemId} not found in habit ${habitId}`);
+    return;
+  }
+
+  // Get or create progress for this date
+  const progress = getOrCreateProgress(habit, validDate);
+
+  // Initialize checklist progress if needed
+  if (!progress.checklistProgress) {
+    progress.checklistProgress = {};
+  }
+
+  // Toggle this item
+  progress.checklistProgress[itemId] = !progress.checklistProgress[itemId];
+
+  // Count completed items
+  const completedCount = Object.values(progress.checklistProgress).filter(
+    completed => completed,
+  ).length;
+
+  // Check if the target is met
+  const target =
+    habit.evaluation.target ||
+    (habit.evaluation.checklistItems
+      ? habit.evaluation.checklistItems.length
+      : 0);
+  progress.isCompleted = completedCount >= target;
+
+  // Update habit with new progress
+  const updatedHabits = get().habits.map(h => {
+    if (h.id === habitId) {
+      return {
+        ...h,
+        progress: {
+          ...h.progress,
+          [dateStr]: progress,
+        },
+      };
+    }
+    return h;
+  });
+
+  // Update streaks for all habits
+  const habitsWithUpdatedStreaks = updateAllStreaks(updatedHabits);
+
+  // Persist to storage
+  persistHabits(habitsWithUpdatedStreaks);
+
+  // Update state
+  set({habits: habitsWithUpdatedStreaks});
+};
+
+// Fix 5: Improve calculateStreak to handle different frequency types
+const calculateStreak = (habit: Habit): number => {
+  if (!habit) {
+    return 0;
+  }
+
+  let streak = 0;
+  let currentDate = new Date(); // Start from today
+  let daysChecked = 0;
+  const maxDaysToCheck = 365; // Safety limit
+
+  // Go back day by day and check if habit was completed
+  while (daysChecked < maxDaysToCheck) {
+    const dateStr = format(currentDate, 'yyyy-MM-dd');
+    const progress = habit.progress && habit.progress[dateStr];
+
+    // Check if the habit should be active on this date based on frequency
+    const isActive = isHabitActiveOnDate(habit, currentDate);
+
+    if (isActive) {
+      // If habit is active on this date and has progress
+      if (progress) {
+        // Check if it was completed based on its type
+        const wasCompleted = isHabitCompleted(habit, progress);
+
+        if (wasCompleted) {
+          streak++; // Increment streak for completed habits
+        } else {
+          break; // Streak is broken
+        }
+      } else {
+        // If habit should be active but has no progress entry, the streak is broken
+        break;
+      }
+    }
+    // If habit is not active on this date, just move to the previous day without affecting the streak
+
+    // Move to previous day
+    currentDate = subDays(currentDate, 1);
+    daysChecked++;
+
+    // Safety check - don't go back further than habit creation date
+    if (habit.createdAt && new Date(habit.createdAt) > currentDate) {
+      break;
+    }
+  }
+
+  return streak;
+};

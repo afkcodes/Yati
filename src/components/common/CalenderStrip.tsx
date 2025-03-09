@@ -125,7 +125,7 @@ const CalendarStrip: React.FC<CalendarStripProps> = ({
         contentContainerStyle={{
           paddingHorizontal: s(4),
         }}
-        key={selectedDate.toISOString()}
+        extraData={selectedDate}
       />
     </View>
   );
@@ -155,4 +155,4 @@ const styles = StyleSheet.create({
   selectedText: {},
 });
 
-export default CalendarStrip;
+export default React.memo(CalendarStrip);

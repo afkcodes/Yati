@@ -16,6 +16,8 @@
 		5D92AFF84F4144979990DFCC /* Gilroy-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7A1E73A1F78A4F20850EFDA6 /* Gilroy-Regular.ttf */; };
 		B52A741E98644726A47E5AAF /* Gilroy-Semibold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 560A10F66D494D10BD99E77A /* Gilroy-Semibold.ttf */; };
 		46B63974673B47E9A1AC96C8 /* JosefinSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 188E5671244747449BFB878F /* JosefinSans-Bold.ttf */; };
+		689AF11350D8435C9AE89499 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1E05BABFD3FF4CACAF6FE600 /* BootSplash.storyboard */; };
+		7E9AB54D6C4F4EDB96AF052A /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 274D1F38A13B40AE84920434 /* Colors.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +47,8 @@
 		7A1E73A1F78A4F20850EFDA6 /* Gilroy-Regular.ttf */ = {isa = PBXFileReference; name = "Gilroy-Regular.ttf"; path = "../assets/fonts/Gilroy-Regular.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		560A10F66D494D10BD99E77A /* Gilroy-Semibold.ttf */ = {isa = PBXFileReference; name = "Gilroy-Semibold.ttf"; path = "../assets/fonts/Gilroy-Semibold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 		188E5671244747449BFB878F /* JosefinSans-Bold.ttf */ = {isa = PBXFileReference; name = "JosefinSans-Bold.ttf"; path = "../assets/fonts/JosefinSans-Bold.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		1E05BABFD3FF4CACAF6FE600 /* BootSplash.storyboard */ = {isa = PBXFileReference; name = "BootSplash.storyboard"; path = "Yati/BootSplash.storyboard"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		274D1F38A13B40AE84920434 /* Colors.xcassets */ = {isa = PBXFileReference; name = "Colors.xcassets"; path = "Yati/Colors.xcassets"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = folder.assetcatalog; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +79,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				1E05BABFD3FF4CACAF6FE600 /* BootSplash.storyboard */,
+				274D1F38A13B40AE84920434 /* Colors.xcassets */,
 			);
 			name = Yati;
 			sourceTree = "<group>";
@@ -214,6 +220,8 @@
 				5D92AFF84F4144979990DFCC /* Gilroy-Regular.ttf in Resources */,
 				B52A741E98644726A47E5AAF /* Gilroy-Semibold.ttf in Resources */,
 				46B63974673B47E9A1AC96C8 /* JosefinSans-Bold.ttf in Resources */,
+				689AF11350D8435C9AE89499 /* BootSplash.storyboard in Resources */,
+				7E9AB54D6C4F4EDB96AF052A /* Colors.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,4 +1,6 @@
 package codes.afk.habit.tracker.yati
+
+import com.facebook.react.views.text.ReactFontManager
 import android.content.res.Configuration
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
@@ -38,6 +40,8 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    ReactFontManager.getInstance().addCustomFont(this, "Josefin Sans", R.font.josefin_sans)
+    ReactFontManager.getInstance().addCustomFont(this, "Gilroy", R.font.gilroy)
     SoLoader.init(this, OpenSourceMergedSoMapping)
     if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
       // If you opted-in for the New Architecture, we load the native entry point for this app.

@@ -12,5 +12,6 @@ module.exports = {
       },
     ],
     'react-native-reanimated/plugin',
+    'react-native-boost/plugin',
   ],
 };

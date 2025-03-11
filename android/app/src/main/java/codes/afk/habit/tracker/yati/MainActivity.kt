@@ -1,4 +1,6 @@
 package codes.afk.habit.tracker.yati
+import android.os.Bundle
+import com.zoontek.rnbootsplash.RNBootSplash
 import expo.modules.ReactActivityDelegateWrapper
 
 import com.facebook.react.ReactActivity
@@ -13,6 +15,11 @@ class MainActivity : ReactActivity() {
    * rendering of the component.
    */
   override fun getMainComponentName(): String = "Yati"
+
+   override fun onCreate(savedInstanceState: Bundle?) {
+    RNBootSplash.init(this, R.style.BootTheme) // ⬅️ initialize the splash screen
+    super.onCreate(savedInstanceState) // super.onCreate(null) with react-native-screens
+  }
 
   /**
    * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]

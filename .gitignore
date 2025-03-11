@@ -79,3 +79,4 @@ package-lock.json
 dist/
 web-build/
 android/*/*/*/assets/*
+.kotlin

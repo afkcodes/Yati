@@ -1,35 +1,163 @@
 /* eslint-disable react-native/no-inline-styles */
+import {LegendList} from '@legendapp/list';
+import {format, isValid, startOfDay} from 'date-fns';
 import {Plus} from 'lucide-react-native';
 import {NavigationContext} from 'navigation-react';
-import {useContext, useState} from 'react';
-import {ScrollView} from 'react-native';
-import {TouchableX, ViewX} from '~components/common';
-import {CalendarStrip} from '~components/common/CalenderStrip';
+import {
+  Fragment,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import {Alert} from 'react-native';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import CalendarStrip from '~components/common/CalenderStrip';
 import GreetingHeader from '~components/specific/home/Greeting';
 import HabitCard from '~components/specific/home/Habit';
-import TimeFilter from '~components/specific/home/TimFilter';
-import {habitData} from '~data/habits';
+import TimeFilter from '~components/specific/home/TimeFilter';
 import {useTheme} from '~hooks/ThemeContext';
-import {getThemeColor, styleUtils} from '~styles/theme';
+import {
+  habitActions,
+  isHabitCompleted,
+  useHabitStore,
+} from '~state/habit.store';
+import {getThemeColor, styleUtils, withAlpha} from '~styles/theme';
+import {Habit, TimePeriod} from '~types/habit.types';
 import {h, vs, w} from '~utils/screenUtil';
 
+const EmptyState = ({
+  onCreateHabit,
+  accentColor,
+}: {
+  onCreateHabit: () => void;
+  accentColor: string;
+}) => (
+  <ViewX
+    flex={1}
+    justifyContent="center"
+    alignItems="center"
+    paddingTop={vs(60)}>
+    <TouchableX
+      onPress={onCreateHabit}
+      padding={styleUtils.spacing.md}
+      borderRadius={styleUtils.borderRadius.md}
+      backgroundColor={withAlpha(accentColor, 0.1)}>
+      <TextX color="accent" fontSize="md" textAlign="center">
+        No habits for this day.{'\n'}Create a new habit to get started!
+      </TextX>
+    </TouchableX>
+  </ViewX>
+);
+
 const Home = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const startDate = new Date(2025, 0, 1); // Jan 1, 2024
-  const endDate = new Date(2025, 1, 8); // Dec 31, 2024
   const {stateNavigator} = useContext(NavigationContext);
   const {theme} = useTheme();
 
-  const [selectedTime, setSelectedTime] = useState<any>('all');
-  const [habits, _setHabits] = useState(habitData);
+  const [{habits: allHabits, selectedDate: storedDate}] = useHabitStore();
 
-  const filteredHabits = habits.filter(
-    habit => selectedTime === 'all' || habit.timePeriod === selectedTime,
-  );
+  // Ensure we always have a valid date
+  const validStoredDate = useMemo(() => {
+    return storedDate && isValid(storedDate)
+      ? startOfDay(storedDate)
+      : startOfDay(new Date());
+  }, [storedDate]);
+
+  const [selectedDate, setSelectedDate] = useState(validStoredDate);
+  const [selectedTime, setSelectedTime] = useState<TimePeriod | 'all'>('all');
+  const [habitsForDate, setHabitsForDate] = useState<Habit[]>([]);
 
   const backgroundColor = getThemeColor(theme, 'background', 'primary');
-  const navBackgroundColor = getThemeColor(theme, 'background', 'primary');
+  const navBackgroundColor = getThemeColor(theme, 'background', 'surface');
   const accentColor = getThemeColor(theme, 'background', 'accent');
+
+  // Update stored date when selection changes
+  useEffect(() => {
+    if (selectedDate && isValid(selectedDate)) {
+      habitActions.setSelectedDate(startOfDay(selectedDate));
+    }
+  }, [selectedDate]);
+
+  // Refresh habits list when dependencies change
+  useEffect(() => {
+    if (selectedDate && isValid(selectedDate)) {
+      console.log(`Loading habits for: ${format(selectedDate, 'yyyy-MM-dd')}`);
+      const normalizedDate = startOfDay(selectedDate);
+      const filtered = habitActions.getHabitsForDate(
+        normalizedDate,
+        selectedTime,
+      );
+      console.log(
+        `Found ${filtered.length} habits for selected date and time filter`,
+      );
+      setHabitsForDate(filtered);
+    }
+  }, [allHabits, selectedDate, selectedTime]);
+
+  const isCompleted = useCallback(
+    (habit: Habit): boolean => {
+      if (!selectedDate || !isValid(selectedDate)) {
+        return false;
+      }
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const progress = habit.progress?.[dateStr];
+      return progress ? isHabitCompleted(habit, progress) : false;
+    },
+    [selectedDate],
+  );
+
+  const handleToggleHabit = (habit: Habit) => {
+    if (!selectedDate || !isValid(selectedDate)) {
+      return;
+    }
+
+    switch (habit.evaluation.type) {
+      case 'boolean':
+        habitActions.toggleHabitCompletion(habit.id, selectedDate);
+        break;
+
+      case 'numeric':
+      case 'timer':
+      case 'checklist':
+        if (stateNavigator) {
+          stateNavigator.navigate('habitDetail', {id: habit.id});
+        }
+        break;
+
+      default:
+        habitActions.toggleHabitCompletion(habit.id, selectedDate);
+    }
+  };
+
+  const handleCreateHabit = () => {
+    if (stateNavigator) {
+      stateNavigator.navigate('create');
+    } else {
+      console.error('Navigation not available');
+    }
+  };
+
+  const handleDateSelect = (date: Date) => {
+    if (date && isValid(date)) {
+      console.log(`Selected date: ${format(date, 'yyyy-MM-dd')}`);
+      setSelectedDate(startOfDay(date));
+    }
+  };
+
+  const renderHabitItem = ({item}: {item: Habit}) => (
+    <HabitCard
+      key={item.id}
+      title={item.title}
+      frequency={
+        item.frequency.type === 'daily' ? 'Every day' : item.frequency.type
+      }
+      color={item.color}
+      isCompleted={isCompleted(item)}
+      streak={item.streak}
+      onToggleComplete={() => handleToggleHabit(item)}
+    />
+  );
 
   return (
     <ViewX variant="base" flex={1} backgroundColor={backgroundColor}>
@@ -41,7 +169,16 @@ const Home = () => {
         onPressNotification={() => {
           // Show notifications screen/modal
         }}
+        onPressStreak={() => {
+          // Show streak details
+          Alert.alert(
+            'Streak Info',
+            'You have a 5-day streak going. Keep it up!',
+          );
+        }}
       />
+
+      {/* Calendar strip at bottom */}
       <ViewX
         backgroundColor={navBackgroundColor}
         width={w(100)}
@@ -55,12 +192,13 @@ const Home = () => {
           alignItems="flex-start">
           <CalendarStrip
             selectedDate={selectedDate}
-            onDateSelect={setSelectedDate}
-            startDate={startDate}
-            endDate={endDate}
+            onDateSelect={handleDateSelect}
+            daysToShow={30}
           />
         </ViewX>
       </ViewX>
+
+      {/* Create habit button */}
       <TouchableX
         position="absolute"
         justifyContent="center"
@@ -68,9 +206,7 @@ const Home = () => {
         bottom={h(10)}
         right={w(2)}
         zIndex={100}
-        onPress={() => {
-          stateNavigator.navigate('create');
-        }}
+        onPress={handleCreateHabit}
         height={vs(56)}
         width={vs(56)}
         backgroundColor={accentColor}
@@ -85,18 +221,26 @@ const Home = () => {
             onSelectTime={setSelectedTime}
           />
         </ViewX>
-        <ScrollView
-          style={{flex: 1, marginTop: 12}}
-          contentContainerStyle={{paddingBottom: 120, paddingTop: 16}}>
-          {filteredHabits.map(habit => (
-            <HabitCard
-              isCompleted={false}
-              key={habit.id}
-              {...habit}
-              onToggleComplete={() => {}}
-            />
-          ))}
-        </ScrollView>
+
+        <Fragment>
+          <LegendList
+            data={habitsForDate}
+            renderItem={renderHabitItem}
+            keyExtractor={item => item.id}
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingBottom: 120,
+              paddingTop: 16,
+            }}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <EmptyState
+                onCreateHabit={handleCreateHabit}
+                accentColor={accentColor}
+              />
+            }
+          />
+        </Fragment>
       </ViewX>
     </ViewX>
   );

@@ -23,7 +23,7 @@ type BackgroundVariant =
   | 'info';
 
 interface ViewXProps extends ViewStyle {
-  children?: React.ReactNode;
+  children?: React.ReactNode | undefined;
   style?: StyleProp<ViewStyle>;
   onLayout?: (event: LayoutChangeEvent) => void;
   testID?: string;
@@ -60,6 +60,7 @@ const ViewX: React.FC<ViewXProps> = ({
 
   return (
     <View
+      collapsable={false}
       style={[styles.container, style]}
       onLayout={onLayout}
       testID={testID}

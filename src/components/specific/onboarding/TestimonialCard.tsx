@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import {LinearGradient} from 'expo-linear-gradient';
 import {Quote} from 'lucide-react-native';
 import {Image, StyleSheet} from 'react-native';

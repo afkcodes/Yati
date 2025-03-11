@@ -3,7 +3,8 @@
     "baseUrl": ".",
     "paths": {"~*": ["./src/*"]},
     "jsx": "react-jsx",
-    "target": "ES2015"
+    "target": "ES2015",
+    "module": "ESNext"
   },
   "extends": "@react-native/typescript-config/tsconfig.json"
 }

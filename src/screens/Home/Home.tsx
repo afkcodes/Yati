@@ -1,9 +1,10 @@
 /* eslint-disable react-native/no-inline-styles */
+import {LegendList} from '@legendapp/list';
 import {format, isValid, startOfDay} from 'date-fns';
 import {Plus} from 'lucide-react-native';
 import {NavigationContext} from 'navigation-react';
 import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
-import {Alert, ScrollView} from 'react-native';
+import {Alert} from 'react-native';
 import {TextX, TouchableX, ViewX} from '~components/common';
 import CalendarStrip from '~components/common/CalenderStrip';
 import GreetingHeader from '~components/specific/home/Greeting';
@@ -18,6 +19,30 @@ import {
 import {getThemeColor, styleUtils, withAlpha} from '~styles/theme';
 import {Habit, TimePeriod} from '~types/habit.types';
 import {h, vs, w} from '~utils/screenUtil';
+
+const EmptyState = ({
+  onCreateHabit,
+  accentColor,
+}: {
+  onCreateHabit: () => void;
+  accentColor: string;
+}) => (
+  <ViewX
+    flex={1}
+    justifyContent="center"
+    alignItems="center"
+    paddingTop={vs(60)}>
+    <TouchableX
+      onPress={onCreateHabit}
+      padding={styleUtils.spacing.md}
+      borderRadius={styleUtils.borderRadius.md}
+      backgroundColor={withAlpha(accentColor, 0.1)}>
+      <TextX color="accent" fontSize="md" textAlign="center">
+        No habits for this day.{'\n'}Create a new habit to get started!
+      </TextX>
+    </TouchableX>
+  </ViewX>
+);
 
 const Home = () => {
   const {stateNavigator} = useContext(NavigationContext);
@@ -113,6 +138,20 @@ const Home = () => {
     }
   };
 
+  const renderHabitItem = ({item}: {item: Habit}) => (
+    <HabitCard
+      key={item.id}
+      title={item.title}
+      frequency={
+        item.frequency.type === 'daily' ? 'Every day' : item.frequency.type
+      }
+      color={item.color}
+      isCompleted={isCompleted(item)}
+      streak={item.streak}
+      onToggleComplete={() => handleToggleHabit(item)}
+    />
+  );
+
   return (
     <ViewX variant="base" flex={1} backgroundColor={backgroundColor}>
       <GreetingHeader
@@ -176,44 +215,23 @@ const Home = () => {
           />
         </ViewX>
 
-        <ScrollView
-          style={{flex: 1, marginTop: 12}}
-          contentContainerStyle={{paddingBottom: 120, paddingTop: 16}}>
-          {habitsForDate.length > 0 ? (
-            habitsForDate.map(habit => (
-              <HabitCard
-                key={habit.id}
-                title={habit.title}
-                frequency={
-                  habit.frequency.type === 'daily'
-                    ? 'Every day'
-                    : habit.frequency.type
-                }
-                color={habit.color}
-                isCompleted={isCompleted(habit)}
-                streak={habit.streak}
-                onToggleComplete={() => handleToggleHabit(habit)}
-              />
-            ))
-          ) : (
-            <ViewX
-              flex={1}
-              justifyContent="center"
-              alignItems="center"
-              paddingTop={vs(60)}>
-              <TouchableX
-                onPress={handleCreateHabit}
-                padding={styleUtils.spacing.md}
-                borderRadius={styleUtils.borderRadius.md}
-                backgroundColor={withAlpha(accentColor, 0.1)}>
-                <TextX color="accent" fontSize="md" textAlign="center">
-                  No habits for this day.{'\n'}Create a new habit to get
-                  started!
-                </TextX>
-              </TouchableX>
-            </ViewX>
-          )}
-        </ScrollView>
+        <LegendList
+          data={habitsForDate}
+          renderItem={renderHabitItem}
+          keyExtractor={item => item.id}
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 120,
+            paddingTop: 16,
+          }}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <EmptyState
+              onCreateHabit={handleCreateHabit}
+              accentColor={accentColor}
+            />
+          }
+        />
       </ViewX>
     </ViewX>
   );

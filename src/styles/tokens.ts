@@ -73,7 +73,7 @@ export const typography = {
     medium: 'Gilroy',
     semibold: 'Gilroy',
     bold: 'Gilroy',
-    title: 'JosefinSans',
+    title: 'Josefin Sans',
   },
   fontWeight: {
     regular: '400',

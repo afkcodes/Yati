@@ -60,6 +60,7 @@ const ViewX: React.FC<ViewXProps> = ({
 
   return (
     <View
+      collapsable={false}
       style={[styles.container, style]}
       onLayout={onLayout}
       testID={testID}

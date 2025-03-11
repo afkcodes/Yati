@@ -3,7 +3,14 @@ import {LegendList} from '@legendapp/list';
 import {format, isValid, startOfDay} from 'date-fns';
 import {Plus} from 'lucide-react-native';
 import {NavigationContext} from 'navigation-react';
-import {useCallback, useContext, useEffect, useMemo, useState} from 'react';
+import {
+  Fragment,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import {Alert} from 'react-native';
 import {TextX, TouchableX, ViewX} from '~components/common';
 import CalendarStrip from '~components/common/CalenderStrip';
@@ -215,23 +222,25 @@ const Home = () => {
           />
         </ViewX>
 
-        <LegendList
-          data={habitsForDate}
-          renderItem={renderHabitItem}
-          keyExtractor={item => item.id}
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingBottom: 120,
-            paddingTop: 16,
-          }}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <EmptyState
-              onCreateHabit={handleCreateHabit}
-              accentColor={accentColor}
-            />
-          }
-        />
+        <Fragment>
+          <LegendList
+            data={habitsForDate}
+            renderItem={renderHabitItem}
+            keyExtractor={item => item.id}
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingBottom: 120,
+              paddingTop: 16,
+            }}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <EmptyState
+                onCreateHabit={handleCreateHabit}
+                accentColor={accentColor}
+              />
+            }
+          />
+        </Fragment>
       </ViewX>
     </ViewX>
   );

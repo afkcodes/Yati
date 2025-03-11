@@ -2,7 +2,6 @@ import {NavigationContext} from 'navigation-react';
 import React, {useContext, useState} from 'react';
 import {Alert} from 'react-native';
 import {ViewX} from '~/components/common';
-import {useTheme} from '~/hooks/ThemeContext';
 import HabitForm from '~/screens/form/HabitForm';
 import {habitActions} from '~/state/habit.store';
 import {HabitFormData} from '~/types/habit.types';
@@ -18,7 +17,6 @@ import {
  */
 const CreateHabitScreen: React.FC = () => {
   const {stateNavigator} = useContext(NavigationContext);
-  const {theme} = useTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (formData: HabitFormData) => {

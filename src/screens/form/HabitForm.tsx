@@ -1,4 +1,4 @@
-// screens/form/HabitForm.tsx
+/* eslint-disable react-native/no-inline-styles */
 import {Check, ChevronLeft} from 'lucide-react-native';
 import React, {useEffect, useState} from 'react';
 import {
@@ -40,7 +40,7 @@ const DEFAULT_FORM_DATA: HabitFormData = {
   title: '',
   description: '',
   color: '#8B5CF6', // Default color (purple)
-  categoryId: '',
+  categoryId: 'career', //TODO: FIX Category
   frequency: {
     type: 'daily',
     value: [],
@@ -116,7 +116,10 @@ const HabitForm: React.FC<HabitFormProps> = ({
   };
 
   const updateCategory = (categoryId: string) => {
-    setFormData(prev => ({...prev, categoryId}));
+    // #TODO: has been kept to fix category id thing
+    console.log(categoryId);
+    // setFormData(prev => ({...prev, categoryId}));
+    setFormData(prev => ({...prev}));
     setFormTouched(true);
   };
 

@@ -187,7 +187,7 @@ const isHabitActiveOnTriggerDate = async (
   triggerDate: Date,
 ): Promise<boolean> => {
   const {type, value} = habit.frequency;
-  const triggerDateStr = format(triggerDate, 'yyyy-MM-dd');
+  // const triggerDateStr = format(triggerDate, 'yyyy-MM-dd');
 
   // Skip if habit was created after the trigger date
   if (parseISO(habit.createdAt) > triggerDate) {

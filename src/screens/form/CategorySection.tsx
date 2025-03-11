@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 // components/habit/form/CategorySection.tsx
 import {LegendList} from '@legendapp/list';
 import * as Icons from 'lucide-react-native';

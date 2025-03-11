@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import {LegendList} from '@legendapp/list';
 import {format, isSameDay, subDays} from 'date-fns';
-import React, {useMemo, useRef} from 'react';
+import React, {Fragment, useMemo, useRef} from 'react';
 import {Dimensions, StyleSheet, View} from 'react-native';
 import {useTheme} from '~hooks/ThemeContext';
 import {getThemeColor} from '~styles/theme';
@@ -111,22 +111,24 @@ const CalendarStrip: React.FC<CalendarStripProps> = ({
 
   return (
     <View style={[styles.container, {backgroundColor}, style]}>
-      <LegendList
-        ref={listRef}
-        data={dateList}
-        renderItem={renderItem}
-        keyExtractor={item => item.date.toISOString()}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        estimatedItemSize={TOTAL_ITEM_WIDTH}
-        initialScrollIndex={
-          dateList.length - Math.floor(SCREEN_WIDTH / TOTAL_ITEM_WIDTH)
-        }
-        contentContainerStyle={{
-          paddingHorizontal: s(4),
-        }}
-        extraData={selectedDate}
-      />
+      <Fragment>
+        <LegendList
+          ref={listRef}
+          data={dateList}
+          renderItem={renderItem}
+          keyExtractor={item => item.date.toISOString()}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          estimatedItemSize={TOTAL_ITEM_WIDTH}
+          initialScrollIndex={
+            dateList.length - Math.floor(SCREEN_WIDTH / TOTAL_ITEM_WIDTH)
+          }
+          contentContainerStyle={{
+            paddingHorizontal: s(4),
+          }}
+          extraData={selectedDate}
+        />
+      </Fragment>
     </View>
   );
 };

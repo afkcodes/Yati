@@ -5,7 +5,7 @@ import {getThemeColor, themes} from '~/styles/theme';
 import type {FontSize, FontWeight} from '~/types/common.types';
 
 // Define specific text color variants to avoid type errors
-type TextColorVariant =
+export type TextColorVariant =
   | 'primary'
   | 'secondary'
   | 'tertiary'

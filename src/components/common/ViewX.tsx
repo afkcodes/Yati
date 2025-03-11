@@ -23,7 +23,7 @@ type BackgroundVariant =
   | 'info';
 
 interface ViewXProps extends ViewStyle {
-  children?: React.ReactNode;
+  children?: React.ReactNode | undefined;
   style?: StyleProp<ViewStyle>;
   onLayout?: (event: LayoutChangeEvent) => void;
   testID?: string;

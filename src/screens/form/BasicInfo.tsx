@@ -1,13 +1,13 @@
-/* eslint-disable react-native/no-inline-styles */
-// components/habit/form/BasicInfoSection.tsx
+// screens/form/BasicInfo.tsx
 import {Check} from 'lucide-react-native';
-import React from 'react';
-import {TextInput} from 'react-native';
-import {TextX, TouchableX, ViewX} from '~/components/common';
-import SquircleViewContainer from '~/containers/SquircleViewContainer';
-import {useTheme} from '~/hooks/ThemeContext';
-import {getThemeColor, styleUtils} from '~/styles/theme';
-import {COLOR_PALETTE} from '~/utils/constants/habitConstants';
+import React, {useState} from 'react';
+import {Animated, Easing, StyleSheet, TextInput} from 'react-native';
+import {TextX, TouchableX, ViewX} from '~components/common';
+import SquircleViewContainer from '~containers/SquircleViewContainer';
+import {useTheme} from '~hooks/ThemeContext';
+import {getThemeColor} from '~styles/theme';
+import {COLOR_PALETTE} from '~utils/constants/habitConstants';
+import {s, vs} from '~utils/screenUtil';
 
 interface BasicInfoSectionProps {
   title: string;
@@ -29,10 +29,16 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
   onUpdate,
 }) => {
   const {theme} = useTheme();
+  const [titleFocused, setTitleFocused] = useState(false);
+  const [descFocused, setDescFocused] = useState(false);
+  const [colorAnimation] = useState(new Animated.Value(1));
+
+  // Theme colors
   const inputBg = getThemeColor(theme, 'background', 'field');
   const textPrimary = getThemeColor(theme, 'text', 'primary');
   const textPlaceholder = getThemeColor(theme, 'text', 'tertiary');
   const borderColor = getThemeColor(theme, 'border', 'subtle');
+  const accentColor = getThemeColor(theme, 'text', 'accent');
   const errorColor = getThemeColor(theme, 'text', 'error');
 
   const handleTitleChange = (text: string) => {
@@ -44,148 +50,226 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
   };
 
   const handleColorSelect = (selectedColor: string) => {
+    // Animate color selection
+    Animated.sequence([
+      Animated.timing(colorAnimation, {
+        toValue: 1.2,
+        duration: 150,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(colorAnimation, {
+        toValue: 1,
+        duration: 150,
+        easing: Easing.inOut(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     onUpdate({color: selectedColor});
   };
 
-  // Shared input styles
-  const inputStyle = {
-    color: textPrimary,
-    fontSize: 15,
-    fontFamily: theme === 'dark' ? 'Gilroy-Medium' : 'Gilroy-Regular',
-    paddingHorizontal: styleUtils.spacing.sm,
-  };
+  // Calculate derived styles
+  const titleBorderColor = error
+    ? errorColor
+    : titleFocused
+      ? accentColor
+      : borderColor;
+
+  const descBorderColor = descFocused ? accentColor : borderColor;
 
   return (
-    <ViewX marginBottom={styleUtils.spacing.xl}>
+    <ViewX>
+      {/* Title Input */}
       <SectionLabel title="Name" isRequired />
 
       <SquircleViewContainer
-        borderRadius="sm"
+        borderRadius="md"
         backgroundColor={inputBg}
-        borderColor={error ? errorColor : borderColor}
-        borderWidth={error ? 2 : 1}
-        height={44}>
+        borderColor={titleBorderColor}
+        borderWidth={error || titleFocused ? 2 : 1}
+        height={vs(56)}>
         <TextInput
-          style={inputStyle}
+          style={[styles.input, {color: textPrimary}, styles.titleInput]}
           value={title}
           onChangeText={handleTitleChange}
           placeholder="What habit do you want to build?"
           placeholderTextColor={textPlaceholder}
+          onFocus={() => setTitleFocused(true)}
+          onBlur={() => setTitleFocused(false)}
           accessibilityLabel="Habit name"
           accessibilityHint="Enter a name for your habit"
           maxLength={50}
+          selectionColor={accentColor}
         />
       </SquircleViewContainer>
 
       {error && (
-        <TextX fontSize="xs" color="error" marginTop={styleUtils.spacing.xs}>
+        <TextX
+          fontSize="xs"
+          color="error"
+          marginTop={vs(6)}
+          marginBottom={vs(8)}
+          marginLeft={s(4)}>
           {error}
         </TextX>
       )}
 
-      <SectionLabel title="Description" />
+      {/* Additional spacing between title and description */}
+      <ViewX height={vs(24)} />
+
+      {/* Description Input */}
+      <SectionLabel
+        title="Description"
+        caption="Help yourself remember why this habit matters to you"
+      />
 
       <SquircleViewContainer
-        borderRadius="sm"
+        borderRadius="md"
         backgroundColor={inputBg}
-        borderColor={borderColor}
-        borderWidth={1}
-        height={100}>
+        borderColor={descBorderColor}
+        borderWidth={descFocused ? 2 : 1}
+        height={vs(120)}>
         <TextInput
-          style={{
-            ...inputStyle,
-            height: 100,
-            paddingTop: styleUtils.spacing.sm,
-            paddingBottom: styleUtils.spacing.sm,
-            textAlignVertical: 'top',
-          }}
+          style={[styles.input, {color: textPrimary}, styles.descriptionInput]}
           value={description}
           onChangeText={handleDescriptionChange}
           placeholder="Describe your habit (optional)"
           placeholderTextColor={textPlaceholder}
           multiline
           numberOfLines={4}
+          textAlignVertical="top"
+          onFocus={() => setDescFocused(true)}
+          onBlur={() => setDescFocused(false)}
           accessibilityLabel="Habit description"
           accessibilityHint="Enter an optional description for your habit"
           maxLength={200}
+          selectionColor={accentColor}
         />
       </SquircleViewContainer>
 
-      <SectionLabel title="Color" />
+      {/* Additional spacing between description and color */}
+      <ViewX height={vs(28)} />
 
-      <ViewX
-        flexDirection="row"
-        flexWrap="wrap"
-        justifyContent="space-between"
-        marginTop={styleUtils.spacing.xs}
-        columnGap={12}
-        paddingHorizontal={styleUtils.spacing['2xs']}>
-        {COLOR_PALETTE.map(paletteColor => {
-          const isSelected = paletteColor === color;
-          return (
-            <TouchableX
-              key={paletteColor}
-              onPress={() => handleColorSelect(paletteColor)}
-              width={32}
-              height={32}
-              borderRadius={16}
-              marginBottom={styleUtils.spacing.sm}
-              backgroundColor={paletteColor}
-              borderWidth={isSelected ? 2 : 0}
-              borderColor={isSelected ? 'white' : 'transparent'}
-              justifyContent="center"
-              alignItems="center"
-              accessibilityLabel={`Select ${paletteColor} color`}
-              accessibilityRole="radio"
-              accessibilityState={{checked: isSelected}}>
-              {isSelected && (
-                <ViewX
-                  width={20}
-                  height={20}
-                  borderRadius={10}
-                  borderWidth={2}
-                  borderColor="white"
-                  backgroundColor="transparent"
-                  opacity={0.9}
-                  justifyContent="center"
-                  alignItems="center">
-                  <Check size={12} color="white" />
-                </ViewX>
-              )}
-            </TouchableX>
-          );
-        })}
+      {/* Color Selection */}
+      <SectionLabel
+        title="Color"
+        caption="Give your habit a distinct identity"
+      />
+
+      <ViewX style={styles.colorGridContainer}>
+        <ViewX style={styles.colorGrid}>
+          {COLOR_PALETTE.map(paletteColor => {
+            const isSelected = paletteColor === color;
+
+            // Animated style for selected color
+            const animatedStyle = isSelected
+              ? {
+                  transform: [{scale: colorAnimation}],
+                }
+              : undefined;
+
+            return (
+              <TouchableX
+                key={paletteColor}
+                onPress={() => handleColorSelect(paletteColor)}
+                width={s(32)}
+                height={s(32)}
+                borderRadius={s(24)}
+                marginRight={s(12)}
+                marginBottom={vs(12)}
+                backgroundColor={paletteColor}
+                borderWidth={isSelected ? 2 : 0}
+                borderColor={isSelected ? 'white' : 'transparent'}
+                justifyContent="center"
+                alignItems="center"
+                accessibilityLabel={`Select ${paletteColor} color`}
+                accessibilityRole="radio"
+                accessibilityState={{checked: isSelected}}>
+                {isSelected && (
+                  <Animated.View style={[styles.checkCircle, animatedStyle]}>
+                    <Check size={16} color="#FFFFFF" strokeWidth={2.5} />
+                  </Animated.View>
+                )}
+              </TouchableX>
+            );
+          })}
+        </ViewX>
       </ViewX>
+
+      {/* Bottom padding for section */}
+      <ViewX height={vs(12)} />
     </ViewX>
   );
 };
 
+// Enhanced section label component
 export const SectionLabel: React.FC<{
   title: string;
   isRequired?: boolean;
-}> = ({title, isRequired}) => (
-  <ViewX
-    flexDirection="row"
-    alignItems="center"
-    accessibilityLabel={`${title}${isRequired ? ' (required)' : ''}`}>
-    <TextX
-      fontSize="sm"
-      fontWeight="medium"
-      color="secondary"
-      marginVertical={styleUtils.spacing.sm}>
-      {title}
-    </TextX>
-    {isRequired && (
-      <ViewX
-        flexDirection="row"
-        alignItems="center"
-        paddingHorizontal={styleUtils.spacing['2xs']}>
-        <TextX fontSize="lg" fontWeight="semibold" color="error">
-          *
+  caption?: string;
+}> = ({title, isRequired, caption}) => {
+  return (
+    <ViewX
+      marginBottom={vs(12)}
+      accessibilityLabel={`${title}${isRequired ? ' (required)' : ''}`}>
+      <ViewX flexDirection="row" alignItems="center">
+        <TextX fontSize="sm" fontWeight="semibold" color="secondary">
+          {title}
         </TextX>
+        {isRequired && (
+          <TextX
+            fontSize="md"
+            fontWeight="bold"
+            color="accent"
+            marginLeft={s(4)}>
+            *
+          </TextX>
+        )}
       </ViewX>
-    )}
-  </ViewX>
-);
+
+      {caption && (
+        <TextX fontSize="xs" color="tertiary" marginTop={vs(4)}>
+          {caption}
+        </TextX>
+      )}
+    </ViewX>
+  );
+};
+
+const styles = StyleSheet.create({
+  input: {
+    padding: 0,
+    paddingHorizontal: s(16),
+    flex: 1,
+  },
+  titleInput: {
+    fontSize: s(16),
+    fontWeight: '500',
+  },
+  descriptionInput: {
+    fontSize: s(15),
+    paddingTop: vs(16),
+    paddingBottom: vs(16),
+    textAlignVertical: 'top',
+  },
+  colorGridContainer: {
+    marginTop: vs(8),
+  },
+  colorGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginVertical: vs(8),
+    marginRight: -s(12), // Offset the marginRight on color items
+  },
+  checkCircle: {
+    width: s(28),
+    height: s(28),
+    borderRadius: s(14),
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 export default BasicInfoSection;

@@ -1,5 +1,8 @@
-// Basic types
+/**
+ * Basic type definitions
+ */
 export type TimePeriod = 'morning' | 'evening' | 'night';
+
 export type HabitCategory =
   | 'health'
   | 'learning'
@@ -9,80 +12,106 @@ export type HabitCategory =
   | 'sleep'
   | 'goals'
   | 'career';
+
 export type FrequencyType = 'hourly' | 'daily' | 'weekly' | 'monthly';
+
 export type EvaluationType = 'boolean' | 'numeric' | 'timer' | 'checklist';
 
-// Habit evaluation data
+/**
+ * Checklist item structure
+ */
 export interface ChecklistItem {
   id: string;
   text: string;
   completed: boolean;
 }
 
+/**
+ * Defines how a habit's progress is evaluated
+ */
 export interface HabitEvaluation {
-  type: EvaluationType;
-  target: number;
-  unit: string;
-  checklistItems?: ChecklistItem[];
-  currentValue?: number; // For numeric/timer types
+  type: EvaluationType; // How to track progress
+  target: number; // Target value to reach (e.g., 5 glasses of water)
+  unit: string; // Unit of measurement (e.g., "glasses", "minutes")
+  checklistItems?: ChecklistItem[]; // For checklist type
 }
 
-// Frequency data (when the habit should be performed)
-export interface FrequencyData {
-  type: FrequencyType;
+/**
+ * Defines when the habit should be performed
+ */
+export interface HabitFrequency {
+  type: FrequencyType; // How often to perform the habit
   value: string[]; // Days of week or dates of month
-  timeOfDay: Date | null;
+  timeOfDay: Date | null; // Specific time to perform the habit
   interval?: number; // For hourly frequency (every X hours)
 }
 
-// Goal data
-export interface GoalData {
-  enabled: boolean;
-  target: number; // Number of completions
-  deadline: Date | null;
+/**
+ * Defines a goal for a habit
+ */
+export interface HabitGoal {
+  enabled: boolean; // Whether a goal is set
+  target: number; // Number of completions to reach
+  deadline: Date | null; // Date by which to complete the goal
   progress: number; // Current progress towards goal (0-100)
 }
 
-// Tracking progress for a specific day
+/**
+ * Progress tracking for a specific day
+ */
 export interface DailyProgress {
   date: string; // ISO format date string
-  isCompleted: boolean;
+  isCompleted: boolean; // Whether the habit was completed on this day
   value?: number; // For numeric/timer habits
   checklistProgress?: {[itemId: string]: boolean}; // For checklist habits
-  notes?: string;
+  notes?: string; // Optional notes for the day
 }
 
-// Main Habit interface
+/**
+ * Main Habit interface
+ */
 export interface Habit {
-  id: string;
-  title: string;
-  description?: string;
-  color: string;
-  category: HabitCategory;
-  timePeriod: TimePeriod;
-  createdAt: string; // ISO date string
-  lastUpdatedAt: string; // ISO date string
+  id: string; // Unique identifier
+  title: string; // Name of the habit
+  description?: string; // Detailed description
+  color: string; // Color used for UI elements
+  category: HabitCategory; // Categorization
+  timePeriod: TimePeriod; // Time of day period
 
-  // Core tracking data
-  frequency: FrequencyData;
+  // Tracking configuration
+  frequency: HabitFrequency;
   evaluation: HabitEvaluation;
-  goal?: GoalData;
+  goal?: HabitGoal;
 
-  // Status and progress
-  streak: number;
-  longestStreak: number;
-  progress: {[date: string]: DailyProgress}; // Keyed by date strings
+  // Status tracking
+  createdAt: string; // ISO date string when created
+  lastUpdatedAt: string; // ISO date string of last update
+  streak: number; // Current streak count
+  longestStreak: number; // Best streak ever achieved
+  progress: {[date: string]: DailyProgress}; // Progress keyed by date
   archivedAt?: string; // ISO date string if archived
 }
 
-// Form data for creating/editing
+/**
+ * Habit form data used for creation/editing
+ */
 export interface HabitFormData {
   title: string;
   description: string;
   color: string;
   categoryId: HabitCategory;
-  frequency: FrequencyData;
-  evaluation: HabitEvaluation;
+  frequency: {
+    type: FrequencyType;
+    value: string[];
+    timeOfDay: Date | null;
+    interval?: number;
+  };
+  evaluation: {
+    type: EvaluationType;
+    target: number;
+    unit: string;
+    checklistItems?: ChecklistItem[];
+  };
   goal: {
     enabled: boolean;
     target: number;
@@ -91,7 +120,9 @@ export interface HabitFormData {
   reminders: Date[];
 }
 
-// Validation error interface
+/**
+ * Validation error interface
+ */
 export interface HabitFormErrors {
   title?: string;
   categoryId?: string;
@@ -100,14 +131,4 @@ export interface HabitFormErrors {
   goal?: string;
   general?: string;
   reminders?: string;
-}
-
-// Helper for analytics and stats
-export interface HabitStats {
-  totalHabits: number;
-  completedToday: number;
-  currentStreaks: {[habitId: string]: number};
-  longestStreaks: {[habitId: string]: number};
-  categoryBreakdown: {[category in HabitCategory]?: number};
-  completionRate: number; // 0-1
 }

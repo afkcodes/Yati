@@ -12,7 +12,6 @@ import BootSplash from 'react-native-bootsplash';
 import {SystemBars} from 'react-native-edge-to-edge';
 import BottomTabs from '~navigation/Tabs';
 import WelcomeScreen from '~screens/Onboarding/Welcome';
-import {habitActions} from '~state/habit.store';
 import {getThemeColor} from '~styles/theme';
 import {wait} from '~utils/common';
 
@@ -20,7 +19,7 @@ const App = () => {
   const bgColor = getThemeColor('dark', 'background', 'base');
   React.useEffect(() => {
     const init = async () => {
-      await habitActions.preloadData();
+      // await habitActions.preloadData();
       await wait(100);
     };
 

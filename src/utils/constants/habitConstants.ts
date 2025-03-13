@@ -1,3 +1,13 @@
+import {
+  Book,
+  Brain,
+  Briefcase,
+  Coffee,
+  Dumbbell,
+  Heart,
+  Moon,
+  Target,
+} from 'lucide-react-native';
 import {HabitCategory} from '~/types/habit.types';
 
 // Category definitions with icons, colors, and descriptions
@@ -5,56 +15,56 @@ export const HABIT_CATEGORIES = [
   {
     id: 'mindfulness' as HabitCategory,
     name: 'Mindfulness',
-    icon: 'Brain',
+    icon: Brain,
     color: '#8B5CF6',
     description: 'Meditation, awareness, calm',
   },
   {
     id: 'learning' as HabitCategory,
     name: 'Learning',
-    icon: 'Book',
+    icon: Book,
     color: '#3B82F6',
     description: 'Education, skills, knowledge',
   },
   {
     id: 'fitness' as HabitCategory,
     name: 'Fitness',
-    icon: 'Dumbbell',
+    icon: Dumbbell,
     color: '#10B981',
     description: 'Exercise, strength, movement',
   },
   {
     id: 'health' as HabitCategory,
     name: 'Health',
-    icon: 'Heart',
+    icon: Heart,
     color: '#EF4444',
     description: 'Wellness, nutrition, self-care',
   },
   {
     id: 'sleep' as HabitCategory,
     name: 'Sleep',
-    icon: 'Moon',
+    icon: Moon,
     color: '#6366F1',
     description: 'Rest, recovery, schedule',
   },
   {
     id: 'productivity' as HabitCategory,
     name: 'Productivity',
-    icon: 'Coffee',
+    icon: Coffee,
     color: '#F59E0B',
     description: 'Focus, efficiency, organization',
   },
   {
     id: 'goals' as HabitCategory,
     name: 'Goals',
-    icon: 'Target',
+    icon: Target,
     color: '#EC4899',
     description: 'Achievements, targets, progress',
   },
   {
     id: 'career' as HabitCategory,
     name: 'Career',
-    icon: 'Briefcase',
+    icon: Briefcase,
     color: '#14B8A6',
     description: 'Work, professional growth',
   },

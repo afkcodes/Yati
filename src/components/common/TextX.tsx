@@ -4,7 +4,7 @@ import {useTheme} from '~/hooks/ThemeContext';
 import {getThemeColor, themes} from '~/styles/theme';
 import type {FontSize, FontWeight} from '~/types/common.types';
 
-// Define specific text color variants to avoid type errors
+// Define specific text color variants and allow custom colors
 export type TextColorVariant =
   | 'primary'
   | 'secondary'
@@ -14,7 +14,8 @@ export type TextColorVariant =
   | 'success'
   | 'error'
   | 'warning'
-  | 'info';
+  | 'info'
+  | string; // Allow any string for custom colors
 
 // Create a type that combines TextStyle with TextProps, but omits the specific props we handle
 interface TextXProps
@@ -43,8 +44,26 @@ const TextX: React.FC<TextXProps> = ({
   const styleProps = JSON.stringify(rest);
   const {theme} = useTheme();
 
-  // Get the appropriate text color from theme
-  const textColor = getThemeColor(theme, 'text', color);
+  // Determine if the color is a predefined variant or custom color
+  const textColor = useMemo(() => {
+    // Check if color is one of the predefined variants
+    const predefinedVariants = [
+      'primary',
+      'secondary',
+      'tertiary',
+      'disabled',
+      'accent',
+      'success',
+      'error',
+      'warning',
+      'info',
+    ];
+
+    return predefinedVariants.includes(color)
+      ? getThemeColor(theme, 'text', color as Exclude<TextColorVariant, string>)
+      : color; // Use the custom color directly
+  }, [color, theme]);
+
   const textSize = themes[theme].typography.fontSizes[fontSize];
   const fontFamily = themes[theme].typography.fontFamily[fontWeight];
   const fontW = themes[theme].typography.fontWeight[fontWeight];

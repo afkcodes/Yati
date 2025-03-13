@@ -23,10 +23,12 @@ import {
   Trash2,
   User,
 } from 'lucide-react-native';
-import React, {useCallback, useMemo, useState} from 'react';
-import {Platform, ScrollView, StyleSheet, Switch} from 'react-native';
+import {NavigationContext} from 'navigation-react';
+import React, {useCallback, useContext, useMemo, useState} from 'react';
+import {Alert, Platform, ScrollView, StyleSheet} from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {TextX, TouchableX, ViewX} from '~/components/common';
+import Header from '~/components/common/Header'; // Import the Header component
 import {useTheme} from '~/hooks/ThemeContext';
 import {getThemeColor, withAlpha} from '~/styles/theme';
 import {s, vs} from '~/utils/screenUtil';
@@ -60,6 +62,7 @@ interface ToggleSettingProps {
 const SettingsScreen: React.FC = () => {
   const {theme, setTheme} = useTheme();
   const insets = useSafeAreaInsets();
+  const {stateNavigator} = useContext(NavigationContext);
 
   // State for toggle settings
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -85,6 +88,63 @@ const SettingsScreen: React.FC = () => {
   const handleThemeToggle = useCallback(() => {
     setTheme(theme === 'dark' ? 'light' : 'dark');
   }, [theme, setTheme]);
+
+  // Handle navigation back
+  const handleBack = useCallback(() => {
+    if (stateNavigator) {
+      stateNavigator.navigateBack(1);
+    }
+  }, [stateNavigator]);
+
+  // Handle placeholder onPress events
+  const handlePress = useCallback(() => {
+    // This would be replaced with actual navigation or action logic
+    console.log('Setting item pressed');
+  }, []);
+
+  // Handle logout
+  const handleLogout = useCallback(() => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out of your account?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: () => {
+            console.log('User logged out');
+            // Implement actual logout functionality here
+          },
+        },
+      ],
+    );
+  }, []);
+
+  // Handle clear data
+  const handleClearData = useCallback(() => {
+    Alert.alert(
+      'Clear All Data',
+      'This will permanently delete all your app data. This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete Everything',
+          style: 'destructive',
+          onPress: () => {
+            console.log('All data cleared');
+            // Implement actual data clearing functionality here
+          },
+        },
+      ],
+    );
+  }, []);
 
   // Render section header - memoized to prevent recreating on every render
   const renderSectionHeader = useCallback(
@@ -182,7 +242,7 @@ const SettingsScreen: React.FC = () => {
     [colors],
   );
 
-  // Render toggle setting
+  // Render toggle setting with custom switch
   const renderToggleSetting = useCallback(
     ({
       icon,
@@ -203,23 +263,37 @@ const SettingsScreen: React.FC = () => {
         isLast,
         onPress: () => onValueChange(!value), // Toggle when pressing the item
         rightElement: (
-          <Switch
-            value={value}
-            style={{height: vs(12)}}
-            onValueChange={onValueChange}
-            trackColor={{
-              false: withAlpha(colors.textSecondary, 0.2),
-              true: withAlpha(colors.accentColor, 0.8),
-            }}
-            thumbColor={Platform.OS === 'ios' ? undefined : '#FFFFFF'}
-            ios_backgroundColor={withAlpha(colors.textSecondary, 0.2)}
-          />
+          <TouchableX
+            width={44}
+            height={24}
+            borderRadius={12}
+            backgroundColor={
+              value
+                ? withAlpha(colors.accentColor, 0.3)
+                : withAlpha(colors.textSecondary, 0.2)
+            }
+            onPress={() => onValueChange(!value)}
+            accessibilityRole="switch"
+            accessibilityState={{checked: value}}
+            accessibilityLabel={`Toggle ${title}`}>
+            <ViewX
+              width={20}
+              height={20}
+              borderRadius={10}
+              backgroundColor={
+                value ? colors.accentColor : colors.textSecondary
+              }
+              position="absolute"
+              top={2}
+              left={value ? 22 : 2}
+            />
+          </TouchableX>
         ),
       }),
     [renderSettingItem, colors],
   );
 
-  // Render a group of settings
+  // Function to render a group of settings
   const renderSettingGroup = useCallback(
     (items: React.ReactElement[]): React.ReactElement => (
       <ViewX
@@ -227,7 +301,8 @@ const SettingsScreen: React.FC = () => {
         borderRadius={12}
         overflow="hidden"
         marginBottom={vs(8)}
-        backgroundColor={colors.surfaceColor}>
+        backgroundColor={colors.surfaceColor}
+        style={styles.settingGroupShadow}>
         {items.map((item, index) => (
           <React.Fragment key={`setting-item-${index}`}>{item}</React.Fragment>
         ))}
@@ -236,26 +311,14 @@ const SettingsScreen: React.FC = () => {
     [colors.surfaceColor],
   );
 
-  // Handle placeholder onPress events
-  const handlePress = useCallback(() => {
-    // This would be replaced with actual navigation or action logic
-    console.log('Setting item pressed');
-  }, []);
-
   return (
     <ViewX flex={1} backgroundColor={colors.bgColor}>
-      <ViewX
-        paddingTop={insets.top}
-        paddingHorizontal={s(16)}
-        paddingVertical={vs(12)}
-        zIndex={10}
-        variant="base"
-        borderBottomWidth={StyleSheet.hairlineWidth}
-        borderBottomColor="rgba(150, 150, 150, 0.2)">
-        <TextX fontSize="xl" fontWeight="semibold">
-          Settings
-        </TextX>
-      </ViewX>
+      {/* Use the reusable Header component */}
+      <Header
+        title="Settings"
+        showBackButton={false}
+        onBackPress={handleBack}
+      />
 
       <ScrollView
         style={styles.scrollView}
@@ -264,6 +327,46 @@ const SettingsScreen: React.FC = () => {
           styles.scrollContent,
           {paddingBottom: insets.bottom},
         ]}>
+        {/* Appearance */}
+        {renderSectionHeader('Appearance')}
+        {renderSettingGroup([
+          renderToggleSetting({
+            icon: theme === 'dark' ? Moon : Sun,
+            title: 'Dark Mode',
+            subtitle:
+              theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
+            value: theme === 'dark',
+            onValueChange: handleThemeToggle,
+            iconColor: theme === 'dark' ? '#8B5CF6' : '#F59E0B',
+            isFirst: true,
+          }),
+
+          renderSettingItem({
+            icon: Palette,
+            title: 'Theme Colors',
+            subtitle: 'Customize app appearance',
+            value: 'Default',
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
+            iconColor: '#32D74B',
+          }),
+
+          renderSettingItem({
+            icon: Smartphone,
+            title: 'App Icon',
+            subtitle: 'Change app icon style',
+            value: Platform.OS === 'ios' ? 'Change' : 'Default',
+            onPress: handlePress,
+            rightElement: (
+              <ChevronRight size={16} color={colors.textSecondary} />
+            ),
+            iconColor: '#BF5AF2',
+            isLast: true,
+          }),
+        ])}
+
         {/* Habit Preferences */}
         {renderSectionHeader('Habit Preferences')}
         {renderSettingGroup([
@@ -347,46 +450,6 @@ const SettingsScreen: React.FC = () => {
           }),
         ])}
 
-        {/* Appearance */}
-        {renderSectionHeader('Appearance')}
-        {renderSettingGroup([
-          renderToggleSetting({
-            icon: theme === 'dark' ? Moon : Sun,
-            title: 'Dark Mode',
-            subtitle:
-              theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode',
-            value: theme === 'dark',
-            onValueChange: handleThemeToggle,
-            iconColor: theme === 'dark' ? '#8B5CF6' : '#F59E0B',
-            isFirst: true,
-          }),
-
-          renderSettingItem({
-            icon: Palette,
-            title: 'Theme Colors',
-            subtitle: 'Customize app appearance',
-            value: 'Customize',
-            onPress: handlePress,
-            rightElement: (
-              <ChevronRight size={16} color={colors.textSecondary} />
-            ),
-            iconColor: '#32D74B',
-          }),
-
-          renderSettingItem({
-            icon: Smartphone,
-            title: 'App Icon',
-            subtitle: 'Change app icon style',
-            value: Platform.OS === 'ios' ? 'Change' : 'Default',
-            onPress: handlePress,
-            rightElement: (
-              <ChevronRight size={16} color={colors.textSecondary} />
-            ),
-            iconColor: '#BF5AF2',
-            isLast: true,
-          }),
-        ])}
-
         {/* Data & Privacy */}
         {renderSectionHeader('Data & Privacy')}
         {renderSettingGroup([
@@ -421,15 +484,6 @@ const SettingsScreen: React.FC = () => {
               <ChevronRight size={16} color={colors.textSecondary} />
             ),
             iconColor: '#FF375F',
-          }),
-
-          renderSettingItem({
-            icon: Trash2,
-            title: 'Clear All Data',
-            subtitle: 'Permanently delete all app data',
-            onPress: handlePress,
-            destructive: true,
-            iconColor: '#FF453A',
             isLast: true,
           }),
         ])}
@@ -445,6 +499,7 @@ const SettingsScreen: React.FC = () => {
             rightElement: (
               <ChevronRight size={16} color={colors.textSecondary} />
             ),
+            iconColor: '#5856D6',
             isFirst: true,
           }),
 
@@ -518,18 +573,30 @@ const SettingsScreen: React.FC = () => {
         {renderSectionHeader('Danger Zone')}
         {renderSettingGroup([
           renderSettingItem({
+            icon: Trash2,
+            title: 'Clear All Data',
+            subtitle: 'Permanently delete all app data',
+            onPress: handleClearData,
+            destructive: true,
+            iconColor: '#FF453A',
+            isFirst: true,
+          }),
+
+          renderSettingItem({
             icon: LogOut,
             title: 'Log Out',
             subtitle: 'Sign out of your account',
-            onPress: handlePress,
+            onPress: handleLogout,
             destructive: true,
-            isFirst: true,
             isLast: true,
           }),
         ])}
 
         {/* Version information */}
-        <ViewX paddingVertical={vs(20)} marginBottom={vs(20)}>
+        <ViewX
+          paddingVertical={vs(20)}
+          marginBottom={vs(20)}
+          alignItems="center">
           <TextX fontSize="xs" color="tertiary" textAlign="center">
             Version 1.0.0 (Build 100)
           </TextX>
@@ -545,6 +612,13 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: vs(20),
+  },
+  settingGroupShadow: {
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   settingItemFirst: {
     borderTopLeftRadius: 12,

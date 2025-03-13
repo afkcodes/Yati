@@ -104,7 +104,7 @@ const create = <T>(eventName: string, initState: T, sliceName?: string) => {
           if (callback) {
             if (typeof data === 'object' && data !== null) {
               // If data is an object, merge it with the previous state
-              callback((prev: T) => ({...prev, ...data} as T));
+              callback((prev: T) => ({...prev, ...data}) as T);
             } else {
               // If data is not an object, replace the entire state
               callback(data);

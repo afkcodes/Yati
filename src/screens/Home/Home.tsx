@@ -1,17 +1,15 @@
 /* eslint-disable react-native/no-inline-styles */
-import {LegendList} from '@legendapp/list';
 import {format, isValid, startOfDay} from 'date-fns';
 import {Plus} from 'lucide-react-native';
 import {NavigationContext} from 'navigation-react';
-import {
-  Fragment,
+import React, {
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
 } from 'react';
-import {Alert} from 'react-native';
+import {Alert, FlatList} from 'react-native';
 import {TextX, TouchableX, ViewX} from '~components/common';
 import CalendarStrip from '~components/common/CalenderStrip';
 import GreetingHeader from '~components/specific/home/Greeting';
@@ -27,37 +25,46 @@ import {getThemeColor, styleUtils, withAlpha} from '~styles/theme';
 import {Habit, TimePeriod} from '~types/habit.types';
 import {h, vs, w} from '~utils/screenUtil';
 
-const EmptyState = ({
-  onCreateHabit,
-  accentColor,
-}: {
-  onCreateHabit: () => void;
-  accentColor: string;
-}) => (
-  <ViewX
-    flex={1}
-    justifyContent="center"
-    alignItems="center"
-    paddingTop={vs(60)}>
-    <TouchableX
-      onPress={onCreateHabit}
-      padding={styleUtils.spacing.md}
-      borderRadius={styleUtils.borderRadius.md}
-      backgroundColor={withAlpha(accentColor, 0.1)}>
-      <TextX color="accent" fontSize="md" textAlign="center">
-        No habits for this day.{'\n'}Create a new habit to get started!
-      </TextX>
-    </TouchableX>
-  </ViewX>
+const EmptyState = React.memo(
+  ({
+    onCreateHabit,
+    accentColor,
+  }: {
+    onCreateHabit: () => void;
+    accentColor: string;
+  }) => (
+    <ViewX
+      flex={1}
+      justifyContent="center"
+      alignItems="center"
+      paddingTop={vs(60)}>
+      <TouchableX
+        onPress={onCreateHabit}
+        padding={styleUtils.spacing.md}
+        borderRadius={styleUtils.borderRadius.md}
+        backgroundColor={withAlpha(accentColor, 0.1)}>
+        <TextX color="accent" fontSize="md" textAlign="center">
+          No habits for this day.{'\n'}Create a new habit to get started!
+        </TextX>
+      </TouchableX>
+    </ViewX>
+  ),
+  (prevProps, nextProps) => prevProps.accentColor === nextProps.accentColor,
 );
+
+const debounce = (func: (...args: any[]) => void, wait: number) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: any[]) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
 
 const Home = () => {
   const {stateNavigator} = useContext(NavigationContext);
   const {theme} = useTheme();
-
   const [{habits: allHabits, selectedDate: storedDate}] = useHabitStore();
 
-  // Ensure we always have a valid date
   const validStoredDate = useMemo(() => {
     return storedDate && isValid(storedDate)
       ? startOfDay(storedDate)
@@ -72,27 +79,26 @@ const Home = () => {
   const navBackgroundColor = getThemeColor(theme, 'background', 'surface');
   const accentColor = getThemeColor(theme, 'background', 'accent');
 
-  // Update stored date when selection changes
   useEffect(() => {
     if (selectedDate && isValid(selectedDate)) {
       habitActions.setSelectedDate(startOfDay(selectedDate));
     }
   }, [selectedDate]);
 
-  // Refresh habits list when dependencies change
   useEffect(() => {
-    if (selectedDate && isValid(selectedDate)) {
-      console.log(`Loading habits for: ${format(selectedDate, 'yyyy-MM-dd')}`);
-      const normalizedDate = startOfDay(selectedDate);
-      const filtered = habitActions.getHabitsForDate(
-        normalizedDate,
-        selectedTime,
-      );
-      console.log(
-        `Found ${filtered.length} habits for selected date and time filter`,
-      );
-      setHabitsForDate(filtered);
-    }
+    const updateHabits = debounce(() => {
+      if (selectedDate && isValid(selectedDate)) {
+        const normalizedDate = startOfDay(selectedDate);
+        const filtered = [
+          ...habitActions.getHabitsForDate(normalizedDate, selectedTime),
+        ];
+        setHabitsForDate(filtered);
+      } else {
+        setHabitsForDate([]);
+      }
+    }, 100);
+
+    updateHabits();
   }, [allHabits, selectedDate, selectedTime]);
 
   const isCompleted = useCallback(
@@ -107,56 +113,53 @@ const Home = () => {
     [selectedDate],
   );
 
-  const handleToggleHabit = (habit: Habit) => {
-    if (!selectedDate || !isValid(selectedDate)) {
-      return;
-    }
+  const handleToggleHabit = useCallback(
+    (habit: Habit) => {
+      if (!selectedDate || !isValid(selectedDate)) {
+        return;
+      }
+      switch (habit.evaluation.type) {
+        case 'boolean':
+          habitActions.toggleHabitCompletion(habit.id, selectedDate);
+          break;
+        case 'numeric':
+        case 'timer':
+        case 'checklist':
+          stateNavigator?.navigate('habitDetail', {id: habit.id});
+          break;
+        default:
+          habitActions.toggleHabitCompletion(habit.id, selectedDate);
+      }
+    },
+    [selectedDate, stateNavigator],
+  );
 
-    switch (habit.evaluation.type) {
-      case 'boolean':
-        habitActions.toggleHabitCompletion(habit.id, selectedDate);
-        break;
-
-      case 'numeric':
-      case 'timer':
-      case 'checklist':
-        if (stateNavigator) {
-          stateNavigator.navigate('habitDetail', {id: habit.id});
-        }
-        break;
-
-      default:
-        habitActions.toggleHabitCompletion(habit.id, selectedDate);
-    }
-  };
-
-  const handleCreateHabit = () => {
-    if (stateNavigator) {
-      stateNavigator.navigate('create');
-    } else {
+  const handleCreateHabit = useCallback(() => {
+    stateNavigator?.navigate('create') ??
       console.error('Navigation not available');
-    }
-  };
+  }, [stateNavigator]);
 
-  const handleDateSelect = (date: Date) => {
+  const handleDateSelect = useCallback((date: Date) => {
     if (date && isValid(date)) {
-      console.log(`Selected date: ${format(date, 'yyyy-MM-dd')}`);
       setSelectedDate(startOfDay(date));
     }
-  };
+  }, []);
 
-  const renderHabitItem = ({item}: {item: Habit}) => (
-    <HabitCard
-      key={item.id}
-      title={item.title}
-      frequency={
-        item.frequency.type === 'daily' ? 'Every day' : item.frequency.type
-      }
-      color={item.color}
-      isCompleted={isCompleted(item)}
-      streak={item.streak}
-      onToggleComplete={() => handleToggleHabit(item)}
-    />
+  const renderHabitItem = useCallback(
+    ({item}: {item: Habit}) => (
+      <HabitCard
+        key={item.id}
+        title={item.title}
+        frequency={
+          item.frequency.type === 'daily' ? 'Every day' : item.frequency.type
+        }
+        color={item.color}
+        isCompleted={isCompleted(item)}
+        streak={item.streak}
+        onToggleComplete={() => handleToggleHabit(item)}
+      />
+    ),
+    [isCompleted, handleToggleHabit],
   );
 
   return (
@@ -166,19 +169,15 @@ const Home = () => {
         avatar="https://scontent.fblr20-4.fna.fbcdn.net/v/t39.30808-6/405331272_24313753894937170_7956735316394196740_n.jpg?_nc_cat=103&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=z8ZuBDudHt0Q7kNvgEXyu0U&_nc_oc=Adi2jpdaXW2Gb2wjvw4k0uvvUzu28uN9lMhEOR-nKKUEQb4BO9DAtebGtrWHPgYm4sKuEfr5SBdy4t6yWThPhazL&_nc_zt=23&_nc_ht=scontent.fblr20-4.fna&_nc_gid=ATSIm0AytsYwRGtOSsVhiGw&oh=00_AYCH23sAu5ygCPNPHOf0OAdwvDF1mci3heJWRaeuhTNbzw&oe=67CB1889"
         streakCount={5}
         hasUnreadNotifications={true}
-        onPressNotification={() => {
-          // Show notifications screen/modal
-        }}
-        onPressStreak={() => {
-          // Show streak details
+        onPressNotification={() => {}}
+        onPressStreak={() =>
           Alert.alert(
             'Streak Info',
             'You have a 5-day streak going. Keep it up!',
-          );
-        }}
+          )
+        }
       />
 
-      {/* Calendar strip at bottom */}
       <ViewX
         backgroundColor={navBackgroundColor}
         width={w(100)}
@@ -186,19 +185,13 @@ const Home = () => {
         bottom={0}
         zIndex={100}
         paddingVertical={styleUtils.spacing['2xs']}>
-        <ViewX
-          overflow="hidden"
-          justifyContent="center"
-          alignItems="flex-start">
-          <CalendarStrip
-            selectedDate={selectedDate}
-            onDateSelect={handleDateSelect}
-            daysToShow={30}
-          />
-        </ViewX>
+        <CalendarStrip
+          selectedDate={selectedDate}
+          onDateSelect={handleDateSelect}
+          daysToShow={30}
+        />
       </ViewX>
 
-      {/* Create habit button */}
       <TouchableX
         position="absolute"
         justifyContent="center"
@@ -215,32 +208,24 @@ const Home = () => {
       </TouchableX>
 
       <ViewX variant="base" flex={1} paddingTop={12}>
-        <ViewX paddingTop={12}>
-          <TimeFilter
-            selectedTime={selectedTime}
-            onSelectTime={setSelectedTime}
-          />
-        </ViewX>
+        <TimeFilter
+          selectedTime={selectedTime}
+          onSelectTime={setSelectedTime}
+        />
 
-        <Fragment>
-          <LegendList
-            data={habitsForDate}
-            renderItem={renderHabitItem}
-            keyExtractor={item => item.id}
-            contentContainerStyle={{
-              flexGrow: 1,
-              paddingBottom: 120,
-              paddingTop: 16,
-            }}
-            showsVerticalScrollIndicator={false}
-            ListEmptyComponent={
-              <EmptyState
-                onCreateHabit={handleCreateHabit}
-                accentColor={accentColor}
-              />
-            }
-          />
-        </Fragment>
+        <FlatList
+          data={habitsForDate}
+          renderItem={renderHabitItem}
+          keyExtractor={(item: Habit) => item.id.toString()}
+          contentContainerStyle={{paddingBottom: 120, paddingTop: 16}}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <EmptyState
+              onCreateHabit={handleCreateHabit}
+              accentColor={accentColor}
+            />
+          }
+        />
       </ViewX>
     </ViewX>
   );

@@ -17,10 +17,12 @@ import HabitCard from '~components/specific/home/Habit';
 import TimeFilter from '~components/specific/home/TimeFilter';
 import {useTheme} from '~hooks/ThemeContext';
 import {
+  getHabitStoreSnapshot,
   habitActions,
   isHabitCompleted,
   useHabitStore,
 } from '~state/habit.store';
+import {streakActions} from '~state/streak.store';
 import {getThemeColor, styleUtils, withAlpha} from '~styles/theme';
 import {Habit, TimePeriod} from '~types/habit.types';
 import {h, vs, w} from '~utils/screenUtil';
@@ -115,28 +117,51 @@ const Home = () => {
 
   const handleToggleHabit = useCallback(
     (habit: Habit) => {
+      const dateStr = format(selectedDate, 'yyyy-MM-dd');
       if (!selectedDate || !isValid(selectedDate)) {
         return;
       }
+
+      // Handle different evaluation types
       switch (habit.evaluation.type) {
         case 'boolean':
+          // Toggle boolean habit completion
           habitActions.toggleHabitCompletion(habit.id, selectedDate);
           break;
         case 'numeric':
         case 'timer':
         case 'checklist':
+          // These types need more interaction, so navigate to details
           stateNavigator?.navigate('habitDetail', {id: habit.id});
-          break;
+          return; // Exit early since we're navigating away
         default:
+          // Fallback to toggle completion for any other types
           habitActions.toggleHabitCompletion(habit.id, selectedDate);
+      }
+
+      // After toggling, get the updated habit with its new completion status
+      const updatedHabit = getHabitStoreSnapshot().habits.find(
+        _h => _h.id === habit.id,
+      );
+
+      if (updatedHabit) {
+        // Get the current completion status after the toggle
+        const currentlyCompleted =
+          updatedHabit.progress[dateStr]?.isCompleted || false;
+
+        // Update streak with the current (post-toggle) status
+        streakActions.updateStreakAfterCompletion(
+          updatedHabit,
+          dateStr,
+          currentlyCompleted,
+        );
       }
     },
     [selectedDate, stateNavigator],
   );
 
   const handleCreateHabit = useCallback(() => {
-    stateNavigator?.navigate('create') ??
-      console.error('Navigation not available');
+    stateNavigator?.navigate('create');
   }, [stateNavigator]);
 
   const handleDateSelect = useCallback((date: Date) => {
@@ -161,6 +186,8 @@ const Home = () => {
     ),
     [isCompleted, handleToggleHabit],
   );
+
+  console.log(habitsForDate);
 
   return (
     <ViewX variant="base" flex={1} backgroundColor={backgroundColor}>

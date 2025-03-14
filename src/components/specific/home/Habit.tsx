@@ -78,7 +78,6 @@ const HabitCard: React.FC<HabitCardProps> = ({
       borderRadius={s(8)}
       backgroundColor={cardBg}
       position="relative"
-      zIndex={1}
       overflow="hidden">
       <Animated.View
         style={{
@@ -87,7 +86,6 @@ const HabitCard: React.FC<HabitCardProps> = ({
           right: 0,
           top: 0,
           bottom: 0,
-          zIndex: 1,
           backgroundColor: withAlpha(accentColor, 0.1),
           opacity: bgOpacity,
         }}

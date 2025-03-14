@@ -1,5 +1,5 @@
 // utils/habit/habitUtils.ts
-import {format} from 'date-fns';
+import {format, startOfDay} from 'date-fns';
 import {habitActions} from '~/state/habit.store';
 import {Habit} from '~/types/habit.types';
 
@@ -13,7 +13,7 @@ export const isHabitCompleted = (
   habit: Habit,
   date: Date = new Date(),
 ): boolean => {
-  const dateStr = format(date, 'yyyy-MM-dd');
+  const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
   return habit.progress?.[dateStr]?.isCompleted || false;
 };
 
@@ -27,7 +27,7 @@ export const getHabitNumericValue = (
   habit: Habit,
   date: Date = new Date(),
 ): number => {
-  const dateStr = format(date, 'yyyy-MM-dd');
+  const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
   return habit.progress?.[dateStr]?.value || 0;
 };
 
@@ -41,7 +41,7 @@ export const getHabitChecklistProgress = (
   habit: Habit,
   date: Date = new Date(),
 ): {[itemId: string]: boolean} => {
-  const dateStr = format(date, 'yyyy-MM-dd');
+  const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
   return habit.progress?.[dateStr]?.checklistProgress || {};
 };
 
@@ -59,7 +59,7 @@ export const getHabitCompletionPercentage = (
     return 1;
   }
 
-  const dateStr = format(date, 'yyyy-MM-dd');
+  const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
   const progress = habit.progress?.[dateStr];
 
   if (!progress) {

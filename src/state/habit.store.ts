@@ -2,6 +2,7 @@ import {format, isValid, parseISO, startOfDay} from 'date-fns';
 import {MMKV} from 'react-native-mmkv';
 import {Habit, HabitFormData, TimePeriod} from '~/types/habit.types';
 import {create} from '~/utils/store/createStore';
+import {isHabitActiveOnDate} from '~utils/habit/habitUtils';
 
 // Initialize MMKV storage
 const storage = new MMKV({
@@ -65,10 +66,10 @@ const {
   useStore: useHabitStore,
   set: setHabitStore,
   getStoreSnapshot: getHabitStoreSnapshot,
-} = create<HabitStoreState>('HABITS', loadInitialState());
+} = create<HabitStoreState>('HABITS', loadInitialState() as HabitStoreState);
 
 // Helper to persist habits to storage
-const persistHabits = (habits: Habit[]): void => {
+export const persistHabits = (habits: Habit[]): void => {
   try {
     if (!Array.isArray(habits)) {
       console.error('Cannot persist habits: not an array', habits);
@@ -285,7 +286,7 @@ export const habitActions = {
   // Toggle habit completion
   toggleHabitCompletion: (habitId: string, date: Date): void => {
     const currentState = getHabitStoreSnapshot();
-    const dateStr = format(date, 'yyyy-MM-dd');
+    const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
 
     const updatedHabits = currentState.habits.map(habit => {
       if (habit.id !== habitId) {
@@ -323,7 +324,7 @@ export const habitActions = {
   // Update habit value (for numeric and timer habits)
   updateHabitValue: (habitId: string, value: number, date: Date): void => {
     const currentState = getHabitStoreSnapshot();
-    const dateStr = format(date, 'yyyy-MM-dd');
+    const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
 
     const updatedHabits = currentState.habits.map(habit => {
       if (habit.id !== habitId) {
@@ -371,7 +372,7 @@ export const habitActions = {
   // Toggle a checklist item
   toggleChecklistItem: (habitId: string, itemId: string, date: Date): void => {
     const currentState = getHabitStoreSnapshot();
-    const dateStr = format(date, 'yyyy-MM-dd');
+    const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
 
     const updatedHabits = currentState.habits.map(habit => {
       if (habit.id !== habitId) {
@@ -432,21 +433,75 @@ export const habitActions = {
     persistHabits(updatedHabits);
   },
 
-  // Get habits for a specific date and time filter
   getHabitsForDate: (
     date: Date,
     timeFilter: TimePeriod | 'all' = 'all',
   ): Habit[] => {
     const currentState = getHabitStoreSnapshot();
 
-    // Get all habits
-    const allHabits = currentState.habits;
+    if (!Array.isArray(currentState.habits)) {
+      console.error(
+        'getHabitsForDate: current state habits is not an array',
+        currentState.habits,
+      );
+      return [];
+    }
 
-    // Filter by time period if needed
-    return timeFilter === 'all'
-      ? allHabits
-      : allHabits.filter(habit => habit.timePeriod === timeFilter);
+    // Convert to start of day for consistent comparison
+    const targetDate = ensureValidDate(date);
+    const dateStr = format(targetDate, 'yyyy-MM-dd');
+
+    console.log(
+      `Getting habits for date: ${dateStr}, timeFilter: ${timeFilter}`,
+    );
+    console.log(`Total habits in store: ${currentState.habits.length}`);
+
+    // Filter habits that are active on this date and not archived
+    const filteredHabits = currentState.habits.filter(habit => {
+      // Skip archived habits (if archived before or on this date)
+      const archiveCheck = !(
+        habit.archivedAt && ensureValidDate(habit.archivedAt) <= targetDate
+      );
+
+      // Skip habits created after this date
+      const creationCheck = !(ensureValidDate(habit.createdAt) > targetDate);
+
+      // Filter by time period if not 'all'
+      const timePeriodCheck =
+        timeFilter === 'all' || habit.timePeriod === timeFilter;
+
+      // Check if habit is active on this date based on frequency
+      const isActive = isHabitActiveOnDate(habit, targetDate);
+
+      const passes =
+        archiveCheck && creationCheck && timePeriodCheck && isActive;
+
+      if (!passes) {
+        console.log(`  Filtering out habit: ${habit.title} (ID: ${habit.id})`);
+        if (!archiveCheck) {
+          console.log('    Reason: Archived');
+        }
+        if (!creationCheck) {
+          console.log('    Reason: Created after selected date');
+        }
+        if (!timePeriodCheck) {
+          console.log('    Reason: Time period mismatch');
+        }
+        if (!isActive) {
+          console.log('    Reason: Not active based on frequency');
+        }
+      }
+
+      return passes;
+    });
+
+    console.log(`Filtered habits count: ${filteredHabits.length}`);
+    filteredHabits.forEach(habit => {
+      console.log(`  - ${habit.title} (ID: ${habit.id})`);
+    });
+
+    return filteredHabits;
   },
 };
 
-export {useHabitStore};
+export {getHabitStoreSnapshot, setHabitStore, useHabitStore};

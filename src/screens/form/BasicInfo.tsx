@@ -6,6 +6,7 @@ import {TextX, TouchableX, ViewX} from '~components/common';
 import SquircleViewContainer from '~containers/SquircleViewContainer';
 import {useTheme} from '~hooks/ThemeContext';
 import {getThemeColor} from '~styles/theme';
+import {typography} from '~styles/tokens';
 import {COLOR_PALETTE} from '~utils/constants/habitConstants';
 import {s, vs} from '~utils/screenUtil';
 
@@ -246,12 +247,14 @@ const styles = StyleSheet.create({
   titleInput: {
     fontSize: s(16),
     fontWeight: '500',
+    fontFamily: typography.fontFamily.regular,
   },
   descriptionInput: {
     fontSize: s(15),
     paddingTop: vs(16),
     paddingBottom: vs(16),
     textAlignVertical: 'top',
+    fontFamily: typography.fontFamily.regular,
   },
   colorGridContainer: {
     marginTop: vs(8),

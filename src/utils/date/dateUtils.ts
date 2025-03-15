@@ -247,16 +247,19 @@ export const generateCalendarGrid = (
  * @returns A standardized date string
  */
 export const toDateString = (date: Date): string => {
-  return format(date, 'yyyy-MM-dd');
+  // Ensure we're working with a date object at the start of day in local timezone
+  const normalizedDate = startOfDay(date);
+  return format(normalizedDate, 'yyyy-MM-dd');
 };
 
 /**
  * Parse a date string in "yyyy-MM-dd" format
  * @param dateStr The date string to parse
- * @returns A Date object
+ * @returns A Date object normalized to start of day in local timezone
  */
 export const fromDateString = (dateStr: string): Date => {
-  return parseISO(dateStr);
+  const parsedDate = parseISO(dateStr);
+  return startOfDay(parsedDate);
 };
 
 /**
@@ -308,4 +311,24 @@ export const getWeekDays = (
   }
 
   return days;
+};
+
+/**
+ * Gets today's date normalized to the start of day in local timezone
+ * @returns Today's date at start of day
+ */
+export const getLocalToday = (): Date => {
+  return startOfDay(new Date());
+};
+
+/**
+ * Check if two dates represent the same day in local timezone
+ * @param date1 First date to compare
+ * @param date2 Second date to compare
+ * @returns Whether the dates represent the same day
+ */
+export const isSameLocalDay = (date1: Date, date2: Date): boolean => {
+  const d1 = startOfDay(date1);
+  const d2 = startOfDay(date2);
+  return d1.getTime() === d2.getTime();
 };

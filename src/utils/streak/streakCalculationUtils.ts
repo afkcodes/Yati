@@ -6,6 +6,7 @@ import {
   endOfMonth,
   endOfWeek,
   format,
+  isAfter,
   isBefore,
   isSameDay,
   isWithinInterval,
@@ -17,30 +18,57 @@ import {
 } from 'date-fns';
 import {Habit} from '~/types/habit.types';
 import {StreakSettings} from '~/types/streak.types';
-import {toDateString} from '~/utils/date/dateUtils';
+import {
+  fromDateString,
+  getLocalToday,
+  isSameLocalDay,
+  toDateString,
+} from '~/utils/date/dateUtils';
 
 /**
- * Determines if a habit should be active on a given date based on its frequency
+ * Determines if a habit is active on a specific date based on its frequency
+ * @param habit The habit to check
+ * @param date The date to check
+ * @returns Whether the habit is scheduled for the given date
  */
 export const isHabitScheduledForDate = (habit: Habit, date: Date): boolean => {
-  const {frequency} = habit;
-  const dayOfWeek = format(date, 'EEE').toLowerCase(); // mon, tue, etc.
-  const dayOfMonth = format(date, 'd'); // 1-31
+  try {
+    const normalizedDate = startOfDay(date);
+    const {frequency} = habit;
 
-  switch (frequency.type) {
-    case 'daily':
-      return true;
-    case 'weekly':
-      return frequency.value.includes(dayOfWeek);
-    case 'monthly':
-      return frequency.value.includes(dayOfMonth);
-    case 'hourly':
-      return true; // Hourly habits are active every day
-    default:
+    // Skip if habit was created after this date
+    if (habit.createdAt && isAfter(parseISO(habit.createdAt), normalizedDate)) {
       return false;
+    }
+
+    // Skip if habit was archived before or on this date
+    if (
+      habit.archivedAt &&
+      !isAfter(parseISO(habit.archivedAt), normalizedDate)
+    ) {
+      return false;
+    }
+
+    const dayOfWeek = format(normalizedDate, 'EEE').toLowerCase(); // mon, tue, etc.
+    const dayOfMonth = format(normalizedDate, 'd'); // 1-31
+
+    switch (frequency.type) {
+      case 'daily':
+        return true;
+      case 'weekly':
+        return frequency.value.includes(dayOfWeek);
+      case 'monthly':
+        return frequency.value.includes(dayOfMonth);
+      case 'hourly':
+        return true; // Hourly habits are active every day
+      default:
+        return false;
+    }
+  } catch (error) {
+    console.error('Error checking if habit is scheduled for date:', error);
+    return false;
   }
 };
-
 /**
  * Gets all dates when a habit was scheduled in a date range
  */
@@ -62,16 +90,24 @@ export const getScheduledDatesInRange = (
 export const getCompletedDates = (habit: Habit): Date[] => {
   return Object.entries(habit.progress)
     .filter(([_, progress]) => progress.isCompleted)
-    .map(([dateStr]) => parseISO(dateStr))
+    .map(([dateStr]) => fromDateString(dateStr))
     .sort((a, b) => a.getTime() - b.getTime());
 };
 
 /**
- * Checks if a habit was completed on a specific date
+ * Determines if a habit was completed on a specific date
+ * @param habit The habit to check
+ * @param date The date to check
+ * @returns Whether the habit was completed on the date
  */
 export const wasHabitCompletedOnDate = (habit: Habit, date: Date): boolean => {
-  const dateStr = toDateString(date);
-  return Boolean(habit.progress[dateStr]?.isCompleted);
+  try {
+    const dateStr = toDateString(date);
+    return Boolean(habit.progress[dateStr]?.isCompleted);
+  } catch (error) {
+    console.error('Error checking habit completion status:', error);
+    return false;
+  }
 };
 
 /**
@@ -84,7 +120,7 @@ export const isStreakActive = (
   habit: Habit,
   settings: StreakSettings,
 ): boolean => {
-  const today = startOfDay(new Date());
+  const today = getLocalToday();
 
   // Find the most recent date when the habit was scheduled before today
   let date = today;
@@ -129,19 +165,41 @@ export const isStreakActive = (
 
 /**
  * Calculates the current streak for a habit
+ * @param habit The habit to calculate streak for
+ * @param settings Streak settings that affect calculation
+ * @returns The current streak count
  */
 export const calculateCurrentStreak = (
   habit: Habit,
   settings: StreakSettings,
 ): number => {
-  if (!habit || !habit.progress || Object.keys(habit.progress).length === 0) {
+  // Add proper error handling and validation
+  if (!habit || !habit.progress) {
+    console.warn('Invalid habit data passed to calculateCurrentStreak');
     return 0;
   }
 
-  const today = startOfDay(new Date());
+  // Early return if no progress data
+  if (Object.keys(habit.progress).length === 0) {
+    return 0;
+  }
+
+  const today = getLocalToday();
   let currentDate = today;
   let streak = 0;
-  let foundStart = false;
+
+  // Check if we have any completed days at all
+  const hasAnyCompletions = Object.values(habit.progress).some(
+    p => p.isCompleted,
+  );
+  if (!hasAnyCompletions) {
+    return 0;
+  }
+
+  // Log initial state for debugging
+  console.debug('[Streak] Calculating streak for:', habit.title);
+  console.debug('[Streak] Today:', toDateString(today));
+  console.debug('[Streak] Count today setting:', settings.countTodayInStreaks);
 
   // Go backwards from today to find streak
   for (let i = 0; i < 366; i++) {
@@ -149,32 +207,57 @@ export const calculateCurrentStreak = (
     // If the habit is scheduled for this date
     if (isHabitScheduledForDate(habit, currentDate)) {
       const wasCompleted = wasHabitCompletedOnDate(habit, currentDate);
+      const dateStr = toDateString(currentDate);
 
-      // Special case for today
-      if (isSameDay(currentDate, today)) {
-        // If today is scheduled but not completed yet
-        if (!wasCompleted && settings.countTodayInStreaks) {
-          // We don't count today, but we continue checking previous days
-          foundStart = true;
-        } else if (wasCompleted) {
-          // If today is completed, count it and continue
-          streak++;
-          foundStart = true;
-        } else {
-          // Today is not scheduled or we don't count today
-          // Continue to previous day
-        }
-      }
-      // For past days
-      else if (foundStart || wasCompleted) {
+      console.debug(
+        `[Streak] Checking date: ${dateStr}, scheduled: true, completed: ${wasCompleted}`,
+      );
+
+      // For today
+      if (isSameLocalDay(currentDate, today)) {
         if (wasCompleted) {
+          // Today is completed, count it
           streak++;
-          foundStart = true;
+          console.debug(
+            '[Streak] Today is completed, adding to streak:',
+            streak,
+          );
+        } else if (!settings.countTodayInStreaks) {
+          // We don't count today in streaks, continue to previous days
+          console.debug(
+            '[Streak] Today not counting in streak calculation, continuing to past days',
+          );
         } else {
-          // Found a scheduled day that wasn't completed, streak ends
+          // Today is scheduled but not completed and we're counting today
+          // This breaks the streak
+          console.debug(
+            '[Streak] Today counts in streak but is not completed, breaking streak',
+          );
           break;
         }
       }
+      // For past days
+      else {
+        if (wasCompleted) {
+          // Past day was completed, count it
+          streak++;
+          console.debug(
+            `[Streak] Past day ${dateStr} was completed, streak: ${streak}`,
+          );
+        } else {
+          // Found a scheduled day that wasn't completed
+          // This breaks the streak
+          console.debug(
+            `[Streak] Found incomplete scheduled day ${dateStr}, breaking streak`,
+          );
+          break;
+        }
+      }
+    } else {
+      // Date not scheduled, skip it without breaking streak
+      console.debug(
+        `[Streak] Date ${toDateString(currentDate)} not scheduled, skipping`,
+      );
     }
 
     // Move to the previous day
@@ -182,10 +265,14 @@ export const calculateCurrentStreak = (
 
     // If we've gone before the habit was created, stop
     if (habit.createdAt && isBefore(currentDate, parseISO(habit.createdAt))) {
+      console.debug(
+        '[Streak] Reached habit creation date, stopping calculation',
+      );
       break;
     }
   }
 
+  console.debug(`[Streak] Final streak calculation: ${streak}`);
   return streak;
 };
 
@@ -395,45 +482,62 @@ export const calculateCompletionRate = (
 
 /**
  * Gets the start date of the current streak
+ * @param habit The habit to check
+ * @param settings Streak settings
+ * @returns The start date of the current streak or null
  */
 export const getCurrentStreakStartDate = (
   habit: Habit,
   settings: StreakSettings,
 ): Date | null => {
-  const currentStreak = calculateCurrentStreak(habit, settings);
+  try {
+    const currentStreak = calculateCurrentStreak(habit, settings);
 
-  if (currentStreak === 0) {
-    return null;
-  }
+    if (currentStreak === 0) {
+      return null;
+    }
 
-  const today = startOfDay(new Date());
-  let currentDate = today;
-  let daysFound = 0;
+    const today = getLocalToday();
+    let currentDate = today;
+    let daysFound = 0;
 
-  // Go backwards to find the start date
-  for (let i = 0; i < 366; i++) {
-    if (isHabitScheduledForDate(habit, currentDate)) {
-      const wasCompleted = wasHabitCompletedOnDate(habit, currentDate);
+    // Go backwards to find the start date
+    for (let i = 0; i < 366; i++) {
+      if (isHabitScheduledForDate(habit, currentDate)) {
+        const wasCompleted = wasHabitCompletedOnDate(habit, currentDate);
 
-      if (isSameDay(currentDate, today) && !wasCompleted) {
-        // Skip today if not completed and we're counting backward
-      } else if (wasCompleted) {
-        daysFound++;
+        if (
+          isSameLocalDay(currentDate, today) &&
+          !wasCompleted &&
+          !settings.countTodayInStreaks
+        ) {
+          // Skip today if not completed and we're not counting today
+        } else if (wasCompleted) {
+          daysFound++;
 
-        // If we've found all days in the streak, this is the start date
-        if (daysFound === currentStreak) {
-          return currentDate;
+          // If we've found all days in the streak, this is the start date
+          if (daysFound === currentStreak) {
+            return currentDate;
+          }
+        } else {
+          // Found a break in the streak
+          break;
         }
-      } else {
-        // Found a break in the streak
+      }
+
+      currentDate = subDays(currentDate, 1);
+
+      // If we've gone before the habit was created, stop
+      if (habit.createdAt && isBefore(currentDate, parseISO(habit.createdAt))) {
         break;
       }
     }
 
-    currentDate = subDays(currentDate, 1);
+    return null;
+  } catch (error) {
+    console.error('Error finding streak start date:', error);
+    return null;
   }
-
-  return null;
 };
 
 /**

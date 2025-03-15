@@ -5,7 +5,14 @@ import notifee, {
   TimestampTrigger,
   TriggerType,
 } from '@notifee/react-native';
-import {format, isBefore, parseISO, setHours, setMinutes} from 'date-fns';
+import {
+  format,
+  isBefore,
+  parseISO,
+  setHours,
+  setMinutes,
+  startOfDay,
+} from 'date-fns';
 import {Habit} from '~/types/habit.types';
 
 interface ReminderSettings {
@@ -187,15 +194,15 @@ const isHabitActiveOnTriggerDate = async (
   triggerDate: Date,
 ): Promise<boolean> => {
   const {type, value} = habit.frequency;
-  // const triggerDateStr = format(triggerDate, 'yyyy-MM-dd');
+  const normalizedTriggerDate = startOfDay(triggerDate);
 
   // Skip if habit was created after the trigger date
-  if (parseISO(habit.createdAt) > triggerDate) {
+  if (parseISO(habit.createdAt) > normalizedTriggerDate) {
     return false;
   }
 
   // Skip if habit is archived
-  if (habit.archivedAt && parseISO(habit.archivedAt) <= triggerDate) {
+  if (habit.archivedAt && parseISO(habit.archivedAt) <= normalizedTriggerDate) {
     return false;
   }
 
@@ -210,13 +217,13 @@ const isHabitActiveOnTriggerDate = async (
 
   if (type === 'weekly') {
     // Check if the day of week matches
-    const dayOfWeek = format(triggerDate, 'EEE').toLowerCase();
+    const dayOfWeek = format(normalizedTriggerDate, 'EEE').toLowerCase();
     return value.includes(dayOfWeek);
   }
 
   if (type === 'monthly') {
     // Check if the day of month matches
-    const dayOfMonth = format(triggerDate, 'd');
+    const dayOfMonth = format(normalizedTriggerDate, 'd');
     return value.includes(dayOfMonth);
   }
 

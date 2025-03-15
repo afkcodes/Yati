@@ -1,52 +1,7 @@
 // utils/streak/streakIntegration.ts
-import {format, startOfDay} from 'date-fns';
-import {useEffect} from 'react';
-import {
-  getHabitStoreSnapshot,
-  habitActions,
-  useHabitStore,
-} from '~/state/habit.store';
+import {getHabitStoreSnapshot, habitActions} from '~/state/habit.store';
 import {streakActions} from '~/state/streak.store';
-import {Habit} from '~/types/habit.types';
-
-/**
- * Hook to initialize streak tracking for all habits and keep them synchronized
- * with habit updates.
- *
- * This hook should be called in a top-level component (like App.tsx or the main navigator)
- * to ensure streak data is always up-to-date.
- */
-export const useStreakIntegration = () => {
-  const [habitData] = useHabitStore();
-
-  // Initialize and update streaks whenever habits change
-  useEffect(() => {
-    if (habitData.habits.length > 0) {
-      // Recalculate streaks for all habits
-      streakActions.recalculateAllStreaks(habitData.habits);
-    }
-  }, [habitData.habits]);
-
-  // Return the habit and streak integration functions for manual use
-  return {
-    updateStreakForHabit: (habit: Habit) => {
-      return streakActions.recalculateStreakForHabit(habit);
-    },
-
-    updateStreakAfterCompletion: (
-      habit: Habit,
-      date: Date,
-      completed: boolean,
-    ) => {
-      const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
-      return streakActions.updateStreakAfterCompletion(
-        habit,
-        dateStr,
-        completed,
-      );
-    },
-  };
-};
+import {toDateString} from '~/utils/date/dateUtils';
 
 /**
  * Wrapper for habit actions that also updates streak data.
@@ -62,7 +17,7 @@ export const habitStreakActions = {
     const habit = habits.find(h => h.id === habitId);
 
     if (habit) {
-      const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
+      const dateStr = toDateString(date);
       const isCompleted = habit.progress[dateStr]?.isCompleted || false;
 
       // Update streak data
@@ -86,7 +41,7 @@ export const habitStreakActions = {
       return;
     }
 
-    const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
+    const dateStr = toDateString(date);
     const wasCompleted = habit.progress[dateStr]?.isCompleted || false;
 
     // Update the habit
@@ -127,7 +82,7 @@ export const habitStreakActions = {
       return;
     }
 
-    const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
+    const dateStr = toDateString(date);
     const wasCompleted = habit.progress[dateStr]?.isCompleted || false;
 
     // Update the checklist item

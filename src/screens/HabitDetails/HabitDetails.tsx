@@ -73,7 +73,7 @@ const HabitDetailScreen: React.FC = () => {
         setHabit(foundHabit);
 
         // Get progress for the selected date
-        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        const dateStr = toDateString(selectedDate);
         const progress = foundHabit.progress?.[dateStr];
 
         // Reset values first to ensure clean state
@@ -182,7 +182,7 @@ const HabitDetailScreen: React.FC = () => {
         ignoreAndroidSystemSettings: false,
       });
 
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const dateStr = toDateString(selectedDate);
 
       // Handle different evaluation types
       switch (habit.evaluation.type) {
@@ -271,7 +271,7 @@ const HabitDetailScreen: React.FC = () => {
     } catch (error) {
       Alert.alert('Error', 'Failed to update value. Please try again.');
       // Revert to previous value
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const dateStr = toDateString(selectedDate);
       const previousValue = habit.progress?.[dateStr]?.value || 0;
       setNumericValue(previousValue);
     } finally {
@@ -303,7 +303,7 @@ const HabitDetailScreen: React.FC = () => {
     } catch (error) {
       Alert.alert('Error', 'Failed to update checklist. Please try again.');
       // Revert changes by reloading from habit
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const dateStr = toDateString(selectedDate);
       const progress = habit.progress?.[dateStr];
       if (progress?.checklistProgress) {
         setChecklistProgress(progress.checklistProgress);
@@ -314,7 +314,7 @@ const HabitDetailScreen: React.FC = () => {
   };
 
   // Get current progress information
-  const dateStr = format(selectedDate, 'yyyy-MM-dd');
+  const dateStr = toDateString(selectedDate);
   const progress = habit?.progress?.[dateStr];
   const isCompleted = progress?.isCompleted || false;
 
@@ -669,8 +669,8 @@ const HabitDetailScreen: React.FC = () => {
                   {habit.evaluation.type === 'numeric'
                     ? 'Track Amount'
                     : habit.evaluation.type === 'timer'
-                    ? 'Track Time'
-                    : 'Tasks'}
+                      ? 'Track Time'
+                      : 'Tasks'}
                 </TextX>
 
                 {/* Numeric & Timer type UI */}

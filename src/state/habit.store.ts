@@ -1,8 +1,10 @@
 import {format, isValid, parseISO, startOfDay} from 'date-fns';
 import {MMKV} from 'react-native-mmkv';
 import {Habit, HabitFormData, TimePeriod} from '~/types/habit.types';
+import {getLocalToday, toDateString} from '~/utils/date/dateUtils';
 import {create} from '~/utils/store/createStore';
 import {isHabitActiveOnDate} from '~utils/habit/habitUtils';
+import {streakActions} from './streak.store';
 
 // Initialize MMKV storage
 const storage = new MMKV({
@@ -268,7 +270,7 @@ export const habitActions = {
 
   // Set the selected date
   setSelectedDate: (date: Date): void => {
-    const validDate = ensureValidDate(date);
+    const validDate = date ? startOfDay(date) : getLocalToday();
     console.log(`Setting selected date to: ${format(validDate, 'yyyy-MM-dd')}`);
 
     setHabitStore({
@@ -283,154 +285,289 @@ export const habitActions = {
     });
   },
 
-  // Toggle habit completion
+  /**
+   * Toggles a habit's completion for a specific date
+   */
   toggleHabitCompletion: (habitId: string, date: Date): void => {
-    const currentState = getHabitStoreSnapshot();
-    const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
+    try {
+      const currentState = getHabitStoreSnapshot();
 
-    const updatedHabits = currentState.habits.map(habit => {
-      if (habit.id !== habitId) {
-        return habit;
+      // Validate inputs
+      if (!habitId) {
+        console.error('Invalid habit ID passed to toggleHabitCompletion');
+        return;
       }
 
-      // Get current progress for this date
-      const currentProgress = habit.progress?.[dateStr] || {isCompleted: false};
+      if (!date || !isValid(date)) {
+        console.error('Invalid date passed to toggleHabitCompletion');
+        return;
+      }
 
-      // Toggle completion state
-      const newProgress = {
-        ...currentProgress,
-        isCompleted: !currentProgress.isCompleted,
-      };
+      const dateStr = toDateString(date);
+      console.debug(
+        `[Habit Store] Toggling completion for habit ${habitId} on ${dateStr}`,
+      );
 
-      // Update habit with new progress
-      return {
-        ...habit,
-        progress: {
-          ...habit.progress,
-          [dateStr]: newProgress,
-        },
-        lastUpdatedAt: new Date().toISOString(),
-      };
-    });
+      const updatedHabits = currentState.habits.map(habit => {
+        if (habit.id !== habitId) {
+          return habit;
+        }
 
-    setHabitStore({
-      habits: updatedHabits,
-    });
+        // Get current progress for this date
+        const currentProgress = habit.progress?.[dateStr] || {
+          isCompleted: false,
+        };
+        const newCompletionStatus = !currentProgress.isCompleted;
 
-    // Persist to storage
-    persistHabits(updatedHabits);
+        // Toggle completion state
+        const newProgress = {
+          ...currentProgress,
+          isCompleted: newCompletionStatus,
+        };
+
+        console.debug(
+          `[Habit Store] ${habit.title} completion changed to: ${newCompletionStatus}`,
+        );
+
+        // Update habit with new progress
+        const updatedHabit = {
+          ...habit,
+          progress: {
+            ...habit.progress,
+            [dateStr]: newProgress,
+          },
+          lastUpdatedAt: new Date().toISOString(),
+        };
+
+        // Update streak separately
+        streakActions.updateStreakAfterCompletion(
+          updatedHabit,
+          dateStr,
+          newCompletionStatus,
+        );
+
+        return updatedHabit;
+      });
+
+      setHabitStore({
+        habits: updatedHabits,
+      });
+
+      // Persist to storage
+      persistHabits(updatedHabits);
+    } catch (error) {
+      console.error('Error toggling habit completion:', error);
+    }
   },
 
-  // Update habit value (for numeric and timer habits)
+  /**
+   * Updates a numeric or timer habit value
+   */
   updateHabitValue: (habitId: string, value: number, date: Date): void => {
-    const currentState = getHabitStoreSnapshot();
-    const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
+    try {
+      const currentState = getHabitStoreSnapshot();
 
-    const updatedHabits = currentState.habits.map(habit => {
-      if (habit.id !== habitId) {
-        return habit;
+      // Validate inputs
+      if (!habitId) {
+        console.error('Invalid habit ID passed to updateHabitValue');
+        return;
       }
 
-      // Get current progress for this date
-      const currentProgress = habit.progress?.[dateStr] || {
-        isCompleted: false,
-        value: 0,
-      };
+      if (!date || !isValid(date)) {
+        console.error('Invalid date passed to updateHabitValue');
+        return;
+      }
 
-      // Check if completion state changes
-      const isCompleted =
-        (habit.evaluation.type === 'numeric' ||
-          habit.evaluation.type === 'timer') &&
-        value >= habit.evaluation.target;
+      if (typeof value !== 'number' || isNaN(value)) {
+        console.error('Invalid value passed to updateHabitValue:', value);
+        return;
+      }
 
-      // Update progress with new value
-      const newProgress = {
-        ...currentProgress,
-        value,
-        isCompleted,
-      };
+      const dateStr = toDateString(date);
+      console.debug(
+        `[Habit Store] Updating value for habit ${habitId} on ${dateStr} to ${value}`,
+      );
 
-      // Update habit with new progress
-      return {
-        ...habit,
-        progress: {
-          ...habit.progress,
-          [dateStr]: newProgress,
-        },
-        lastUpdatedAt: new Date().toISOString(),
-      };
-    });
+      const updatedHabits = currentState.habits.map(habit => {
+        if (habit.id !== habitId) {
+          return habit;
+        }
 
-    setHabitStore({
-      habits: updatedHabits,
-    });
+        // Get current progress for this date
+        const currentProgress = habit.progress?.[dateStr] || {
+          isCompleted: false,
+          value: 0,
+        };
 
-    // Persist to storage
-    persistHabits(updatedHabits);
+        // Only proceed if this is a numeric or timer habit
+        if (
+          habit.evaluation.type !== 'numeric' &&
+          habit.evaluation.type !== 'timer'
+        ) {
+          console.warn(
+            `Attempt to update value for non-numeric/timer habit: ${habit.title}`,
+          );
+          return habit;
+        }
+
+        // Check if completion state changes
+        const isCompleted = value >= habit.evaluation.target;
+        const statusChanged = currentProgress.isCompleted !== isCompleted;
+
+        // Update progress with new value
+        const newProgress = {
+          ...currentProgress,
+          value,
+          isCompleted,
+        };
+
+        // Update habit with new progress
+        const updatedHabit = {
+          ...habit,
+          progress: {
+            ...habit.progress,
+            [dateStr]: newProgress,
+          },
+          lastUpdatedAt: new Date().toISOString(),
+        };
+
+        console.debug(
+          `[Habit Store] ${habit.title} value updated to: ${value}, completed: ${isCompleted}`,
+        );
+
+        // Update streak if completion status changed
+        if (statusChanged) {
+          streakActions.updateStreakAfterCompletion(
+            updatedHabit,
+            dateStr,
+            isCompleted,
+          );
+        }
+
+        return updatedHabit;
+      });
+
+      setHabitStore({
+        habits: updatedHabits,
+      });
+
+      // Persist to storage
+      persistHabits(updatedHabits);
+    } catch (error) {
+      console.error('Error updating habit value:', error);
+    }
   },
 
-  // Toggle a checklist item
+  /**
+   * Toggles a checklist item for a specific habit and date
+   */
   toggleChecklistItem: (habitId: string, itemId: string, date: Date): void => {
-    const currentState = getHabitStoreSnapshot();
-    const dateStr = format(startOfDay(date), 'yyyy-MM-dd');
+    try {
+      const currentState = getHabitStoreSnapshot();
 
-    const updatedHabits = currentState.habits.map(habit => {
-      if (habit.id !== habitId) {
-        return habit;
+      // Validate inputs
+      if (!habitId || !itemId) {
+        console.error('Invalid IDs passed to toggleChecklistItem');
+        return;
       }
 
-      // Get current progress for this date
-      const currentProgress = habit.progress?.[dateStr] || {
-        isCompleted: false,
-        checklistProgress: {},
-      };
+      if (!date || !isValid(date)) {
+        console.error('Invalid date passed to toggleChecklistItem');
+        return;
+      }
 
-      // Current checklist progress
-      const checklistProgress = currentProgress.checklistProgress || {};
+      const dateStr = toDateString(date);
+      console.debug(
+        `[Habit Store] Toggling checklist item ${itemId} for habit ${habitId} on ${dateStr}`,
+      );
 
-      // Toggle the specific item
-      const newChecklistProgress = {
-        ...checklistProgress,
-        [itemId]: !checklistProgress[itemId],
-      };
+      const updatedHabits = currentState.habits.map(habit => {
+        if (habit.id !== habitId) {
+          return habit;
+        }
 
-      // Count completed items
-      const completedCount =
-        Object.values(newChecklistProgress).filter(Boolean).length;
+        // Only proceed if this is a checklist habit
+        if (
+          habit.evaluation.type !== 'checklist' ||
+          !habit.evaluation.checklistItems
+        ) {
+          console.warn(
+            `Attempt to toggle checklist item for non-checklist habit: ${habit.title}`,
+          );
+          return habit;
+        }
 
-      // Check if overall completion state changes based on target
-      const target =
-        habit.evaluation.target ||
-        (habit.evaluation.checklistItems
-          ? habit.evaluation.checklistItems.length
-          : 0);
+        // Get current progress for this date
+        const currentProgress = habit.progress?.[dateStr] || {
+          isCompleted: false,
+          checklistProgress: {},
+        };
 
-      const isCompleted = completedCount >= target;
+        // Current checklist progress
+        const checklistProgress = currentProgress.checklistProgress || {};
 
-      // Update progress with new checklist state
-      const newProgress = {
-        ...currentProgress,
-        checklistProgress: newChecklistProgress,
-        isCompleted,
-      };
+        // Toggle the specific item
+        const newChecklistProgress = {
+          ...checklistProgress,
+          [itemId]: !checklistProgress[itemId],
+        };
 
-      // Update habit with new progress
-      return {
-        ...habit,
-        progress: {
-          ...habit.progress,
-          [dateStr]: newProgress,
-        },
-        lastUpdatedAt: new Date().toISOString(),
-      };
-    });
+        // Count completed items
+        const completedCount =
+          Object.values(newChecklistProgress).filter(Boolean).length;
 
-    setHabitStore({
-      habits: updatedHabits,
-    });
+        // Check if overall completion state changes based on target
+        const target =
+          habit.evaluation.target ||
+          (habit.evaluation.checklistItems
+            ? habit.evaluation.checklistItems.length
+            : 0);
 
-    // Persist to storage
-    persistHabits(updatedHabits);
+        const isCompleted = completedCount >= target;
+        const statusChanged = currentProgress.isCompleted !== isCompleted;
+
+        // Update progress with new checklist state
+        const newProgress = {
+          ...currentProgress,
+          checklistProgress: newChecklistProgress,
+          isCompleted,
+        };
+
+        // Update habit with new progress
+        const updatedHabit = {
+          ...habit,
+          progress: {
+            ...habit.progress,
+            [dateStr]: newProgress,
+          },
+          lastUpdatedAt: new Date().toISOString(),
+        };
+
+        console.debug(
+          `[Habit Store] Checklist item toggled, completed count: ${completedCount}/${target}, completed: ${isCompleted}`,
+        );
+
+        // Update streak if completion status changed
+        if (statusChanged) {
+          streakActions.updateStreakAfterCompletion(
+            updatedHabit,
+            dateStr,
+            isCompleted,
+          );
+        }
+
+        return updatedHabit;
+      });
+
+      setHabitStore({
+        habits: updatedHabits,
+      });
+
+      // Persist to storage
+      persistHabits(updatedHabits);
+    } catch (error) {
+      console.error('Error toggling checklist item:', error);
+    }
   },
 
   getHabitsForDate: (

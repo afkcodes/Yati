@@ -1,5 +1,5 @@
 // utils/habit/habitUtils.ts
-import {format, startOfDay} from 'date-fns';
+import {format, isAfter, parseISO, startOfDay} from 'date-fns';
 import {habitActions} from '~/state/habit.store';
 import {Habit} from '~/types/habit.types';
 
@@ -103,32 +103,55 @@ export const getHabitCompletionPercentage = (
  * @returns Whether the habit is active on the date
  */
 export const isHabitActiveOnDate = (habit: Habit, date: Date): boolean => {
-  // Check frequency type
-  const {type, value} = habit.frequency;
+  try {
+    // Normalize the date to ensure consistent timezone handling
+    const normalizedDate = startOfDay(date);
 
-  if (type === 'daily') {
-    return true;
+    // Skip if habit was created after this date
+    if (habit.createdAt && isAfter(parseISO(habit.createdAt), normalizedDate)) {
+      return false;
+    }
+
+    // Skip if habit is archived
+    if (
+      habit.archivedAt &&
+      !isAfter(parseISO(habit.archivedAt), normalizedDate)
+    ) {
+      return false;
+    }
+
+    // Check frequency type
+    const {type, value} = habit.frequency;
+
+    if (type === 'daily') {
+      return true;
+    }
+
+    if (type === 'hourly') {
+      return true;
+    }
+
+    if (type === 'weekly') {
+      // Check if the day of week matches
+      const day = format(normalizedDate, 'EEE').toLowerCase();
+      return value.includes(day);
+    }
+
+    if (type === 'monthly') {
+      // Check if the day of month matches
+      const dayOfMonth = format(normalizedDate, 'd');
+      return value.includes(dayOfMonth);
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Error checking if habit is active on date:', error, {
+      habit: habit?.id,
+      date: date?.toString(),
+    });
+    return false;
   }
-
-  if (type === 'hourly') {
-    return true;
-  }
-
-  if (type === 'weekly') {
-    // Check if the day of week matches
-    const day = format(date, 'EEE').toLowerCase();
-    return value.includes(day);
-  }
-
-  if (type === 'monthly') {
-    // Check if the day of month matches
-    const dayOfMonth = format(date, 'd');
-    return value.includes(dayOfMonth);
-  }
-
-  return false;
 };
-
 /**
  * Toggles the completion of a habit based on its type
  * @param habit The habit to toggle

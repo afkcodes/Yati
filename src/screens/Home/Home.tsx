@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import {format, isValid, startOfDay} from 'date-fns';
+import {isValid, startOfDay} from 'date-fns';
 import {Plus} from 'lucide-react-native';
 import {NavigationContext} from 'navigation-react';
 import React, {
@@ -25,6 +25,7 @@ import {
 import {streakActions} from '~state/streak.store';
 import {getThemeColor, styleUtils, withAlpha} from '~styles/theme';
 import {Habit, TimePeriod} from '~types/habit.types';
+import {getLocalToday, toDateString} from '~utils/date/dateUtils';
 import {h, vs, w} from '~utils/screenUtil';
 
 const EmptyState = React.memo(
@@ -70,7 +71,7 @@ const Home = () => {
   const validStoredDate = useMemo(() => {
     return storedDate && isValid(storedDate)
       ? startOfDay(storedDate)
-      : startOfDay(new Date());
+      : getLocalToday();
   }, [storedDate]);
 
   const [selectedDate, setSelectedDate] = useState(validStoredDate);
@@ -108,7 +109,7 @@ const Home = () => {
       if (!selectedDate || !isValid(selectedDate)) {
         return false;
       }
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const dateStr = toDateString(selectedDate);
       const progress = habit.progress?.[dateStr];
       return progress ? isHabitCompleted(habit, progress) : false;
     },
@@ -117,7 +118,7 @@ const Home = () => {
 
   const handleToggleHabit = useCallback(
     (habit: Habit) => {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+      const dateStr = toDateString(selectedDate);
       if (!selectedDate || !isValid(selectedDate)) {
         return;
       }

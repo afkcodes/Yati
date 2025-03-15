@@ -1,10 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
 import {LegendList} from '@legendapp/list';
-import {format, isSameDay, subDays} from 'date-fns';
+import {format, startOfDay, subDays} from 'date-fns';
 import React, {Fragment, useMemo, useRef} from 'react';
 import {Dimensions, StyleSheet, View} from 'react-native';
 import {useTheme} from '~hooks/ThemeContext';
 import {getThemeColor} from '~styles/theme';
+import {getLocalToday, isSameLocalDay} from '~utils/date/dateUtils';
 import {s} from '~utils/screenUtil';
 import TextX from './TextX';
 import TouchableX from './TouchableX';
@@ -30,16 +31,16 @@ const TOTAL_ITEM_WIDTH = ITEM_WIDTH + ITEM_MARGIN * 2;
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const generateDateList = (daysToShow: number): DateItem[] => {
-  const today = new Date();
+  const today = getLocalToday(); // Use our consistent utility
   const dateList: DateItem[] = [];
 
   for (let i = daysToShow - 1; i >= 0; i--) {
-    const date = subDays(today, i);
+    const date = startOfDay(subDays(today, i)); // Ensure date is normalized
     dateList.push({
       date,
       dayName: format(date, 'EEE'),
       dayNumber: format(date, 'd'),
-      isToday: isSameDay(date, today),
+      isToday: isSameLocalDay(date, today), // Use our consistent comparison
       isDisabled: false,
     });
   }
@@ -56,6 +57,11 @@ const CalendarStrip: React.FC<CalendarStripProps> = ({
   const listRef = useRef<any>(null);
   const {theme} = useTheme();
 
+  const normalizedSelectedDate = useMemo(
+    () => (selectedDate ? startOfDay(selectedDate) : getLocalToday()),
+    [selectedDate],
+  );
+
   // Generate list of dates ending with today
   const dateList = useMemo(() => generateDateList(daysToShow), [daysToShow]);
 
@@ -68,7 +74,7 @@ const CalendarStrip: React.FC<CalendarStripProps> = ({
   const disabledTextColor = getThemeColor(theme, 'text', 'disabled');
 
   const renderItem = ({item}: {item: DateItem}) => {
-    const isSelected = isSameDay(item.date, selectedDate);
+    const isSelected = isSameLocalDay(item.date, normalizedSelectedDate);
 
     return (
       <TouchableX

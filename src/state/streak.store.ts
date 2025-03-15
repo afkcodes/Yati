@@ -6,7 +6,6 @@ import {
   StreakData,
   StreakSettings,
 } from '~/types/streak.types';
-import {toDateString} from '~/utils/date/dateUtils';
 import {create} from '~/utils/store/createStore';
 import {
   calculateCompletionRate,
@@ -24,6 +23,8 @@ import {
   persistHabits,
   setHabitStore,
 } from './habit.store';
+
+import {toDateString} from '~/utils/date/dateUtils';
 
 // Initialize storage
 const storage = new MMKV();
@@ -162,18 +163,18 @@ export const streakActions = {
     return streaks[habitId] || null;
   },
 
-  // Update streak data after a habit completion
   updateStreakAfterCompletion: (
     habit: Habit,
-    date: string,
+    dateStr: string,
     completed: boolean,
   ) => {
-    const {streaks, settings} = getStoreSnapshot();
-    let streakData = streaks[habit.id];
+    try {
+      const {streaks, settings} = getStoreSnapshot();
+      // Ensure date string is properly formatted
+      const normalizedDateStr = dateStr.trim();
 
-    // Initialize streak data if it doesn't exist
-    if (!streakData) {
-      streakData = {
+      // Initialize streak data if it doesn't exist
+      let streakData = streaks[habit.id] || {
         habitId: habit.id,
         currentStreak: 0,
         longestStreak: 0,
@@ -184,103 +185,87 @@ export const streakActions = {
         perfectMonths: 0,
         isStreakActive: false,
       };
+
+      // Create a simulated habit with the updated completion status for calculation
+      const simulatedHabit = {
+        ...habit,
+        progress: {
+          ...habit.progress,
+          [normalizedDateStr]: {
+            ...(habit.progress[normalizedDateStr] || {}),
+            isCompleted: completed,
+          },
+        },
+      };
+
+      // Calculate all streak metrics with this updated habit
+      const isActive = isStreakActive(simulatedHabit, settings);
+      const currentStreak = calculateCurrentStreak(simulatedHabit, settings);
+      const longestStreak = calculateLongestStreak(simulatedHabit);
+      const perfectWeeks = countPerfectWeeks(simulatedHabit);
+      const perfectMonths = countPerfectMonths(simulatedHabit);
+      const streakStartDate = getCurrentStreakStartDate(
+        simulatedHabit,
+        settings,
+      );
+
+      // Count total completions
+      const completedDates = getCompletedDates(simulatedHabit);
+      const totalCompletions = completedDates.length;
+
+      // Log results for debugging
+      console.debug(`[Streak Store] Updated streak for ${habit.title}:`, {
+        currentStreak,
+        longestStreak: Math.max(longestStreak, streakData.longestStreak),
+        isActive,
+      });
+
+      // Update streak data with calculated values
+      const updatedStreakData = {
+        ...streakData,
+        currentStreak,
+        longestStreak: Math.max(longestStreak, streakData.longestStreak),
+        totalCompletions,
+        lastCompletedDate: completed
+          ? normalizedDateStr
+          : streakData.lastCompletedDate,
+        streakStartDate: streakStartDate ? toDateString(streakStartDate) : null,
+        perfectWeeks,
+        perfectMonths,
+        isStreakActive: isActive,
+      };
+
+      // Update streaks in store
+      const updatedStreaks = {
+        ...streaks,
+        [habit.id]: updatedStreakData,
+      };
+
+      setStreakStore({streaks: updatedStreaks});
+      persistStreaks(updatedStreaks);
+
+      // Update the habit with the new streak data
+      streakActions.updateHabitWithStreakData(habit, updatedStreakData);
+
+      return updatedStreakData;
+    } catch (error) {
+      console.error('Error updating streak after completion:', error);
+      // Return existing streak data to prevent null references
+      const {streaks} = getStoreSnapshot();
+      return (
+        streaks[habit.id] || {
+          habitId: habit.id,
+          currentStreak: 0,
+          longestStreak: 0,
+          totalCompletions: 0,
+          lastCompletedDate: null,
+          streakStartDate: null,
+          perfectWeeks: 0,
+          perfectMonths: 0,
+          isStreakActive: false,
+        }
+      );
     }
-
-    // Update streak data with the latest calculations
-    const isActive = isStreakActive(habit, settings);
-    const currentStreak = calculateCurrentStreak(habit, settings);
-    const longestStreak = calculateLongestStreak(habit);
-    const perfectWeeks = countPerfectWeeks(habit);
-    const perfectMonths = countPerfectMonths(habit);
-    const streakStartDate = getCurrentStreakStartDate(habit, settings);
-
-    // Count total completions
-    const completedDates = getCompletedDates(habit);
-    const totalCompletions = completedDates.length;
-
-    // Update streak data
-    const updatedStreakData = {
-      ...streakData,
-      currentStreak,
-      longestStreak: Math.max(longestStreak, streakData.longestStreak),
-      totalCompletions,
-      lastCompletedDate: completed ? date : streakData.lastCompletedDate,
-      streakStartDate: streakStartDate ? toDateString(streakStartDate) : null,
-      perfectWeeks,
-      perfectMonths,
-      isStreakActive: isActive,
-    };
-
-    // Update store
-    const updatedStreaks = {
-      ...streaks,
-      [habit.id]: updatedStreakData,
-    };
-
-    setStreakStore({streaks: updatedStreaks});
-    persistStreaks(updatedStreaks);
-    streakActions.updateHabitWithStreakData(habit, updatedStreakData);
-
-    return updatedStreakData;
-  },
-
-  // Recalculate streak for a habit
-  recalculateStreakForHabit: (habit: Habit) => {
-    const {streaks, settings} = getStoreSnapshot();
-
-    // Get existing streak data or initialize new
-    let streakData = streaks[habit.id] || {
-      habitId: habit.id,
-      currentStreak: 0,
-      longestStreak: 0,
-      totalCompletions: 0,
-      lastCompletedDate: null,
-      streakStartDate: null,
-      perfectWeeks: 0,
-      perfectMonths: 0,
-      isStreakActive: false,
-    };
-
-    // Calculate updated streak values
-    const isActive = isStreakActive(habit, settings);
-    const currentStreak = calculateCurrentStreak(habit, settings);
-    const longestStreak = calculateLongestStreak(habit);
-    const perfectWeeks = countPerfectWeeks(habit);
-    const perfectMonths = countPerfectMonths(habit);
-    const streakStartDate = getCurrentStreakStartDate(habit, settings);
-
-    // Get last completed date
-    const completedDates = getCompletedDates(habit);
-    const lastCompletedDate =
-      completedDates.length > 0
-        ? toDateString(completedDates[completedDates.length - 1])
-        : null;
-
-    // Update streak data
-    const updatedStreakData = {
-      ...streakData,
-      currentStreak,
-      longestStreak: Math.max(longestStreak, streakData.longestStreak),
-      totalCompletions: completedDates.length,
-      lastCompletedDate,
-      streakStartDate: streakStartDate ? toDateString(streakStartDate) : null,
-      perfectWeeks,
-      perfectMonths,
-      isStreakActive: isActive,
-    };
-
-    // Update store
-    const updatedStreaks = {
-      ...streaks,
-      [habit.id]: updatedStreakData,
-    };
-
-    setStreakStore({streaks: updatedStreaks});
-    persistStreaks(updatedStreaks);
-    // syncing habitData With Streaks
-    streakActions.updateHabitWithStreakData(habit, updatedStreakData);
-
-    return updatedStreakData;
   },
 
   // Recalculate streaks for all habits
@@ -344,24 +329,114 @@ export const streakActions = {
       streakHistory: getStreakHistory(habit),
     };
   },
+
+  /**
+   * Updates habit with streak data to ensure consistency
+   */
   updateHabitWithStreakData: (habit: Habit, streakData: StreakData) => {
-    // Get current habits from store
-    const habits = getHabitStoreSnapshot().habits;
+    try {
+      // Get current habits from store
+      const {habits} = getHabitStoreSnapshot();
 
-    // Find and update the habit with streak data
-    const updatedHabits = habits.map(h => {
-      if (h.id === habit.id) {
-        return {
-          ...h,
-          streak: streakData.currentStreak,
-          longestStreak: streakData.longestStreak,
-        };
+      if (!habits || !Array.isArray(habits)) {
+        console.error('Invalid habits data in store');
+        return;
       }
-      return h;
-    });
 
-    // Update habit store
-    setHabitStore({habits: updatedHabits});
-    persistHabits(updatedHabits);
+      // Find and update the habit with streak data
+      const updatedHabits = habits.map(h => {
+        if (h.id === habit.id) {
+          return {
+            ...h,
+            streak: streakData.currentStreak,
+            longestStreak: streakData.longestStreak,
+          };
+        }
+        return h;
+      });
+
+      // Update habit store
+      setHabitStore({habits: updatedHabits});
+      persistHabits(updatedHabits);
+
+      console.debug(
+        `[Streak Store] Updated habit ${habit.title} with streak: ${streakData.currentStreak}`,
+      );
+    } catch (error) {
+      console.error('Error updating habit with streak data:', error);
+    }
+  },
+
+  /**
+   * Recalculates streak for a specific habit
+   * @param habit The habit to recalculate streak for
+   * @returns The updated streak data
+   */
+  recalculateStreakForHabit: (habit: Habit) => {
+    try {
+      const {streaks, settings} = getStoreSnapshot();
+
+      // Get existing streak data or initialize new
+      let streakData = streaks[habit.id] || {
+        habitId: habit.id,
+        currentStreak: 0,
+        longestStreak: 0,
+        totalCompletions: 0,
+        lastCompletedDate: null,
+        streakStartDate: null,
+        perfectWeeks: 0,
+        perfectMonths: 0,
+        isStreakActive: false,
+      };
+
+      // Calculate updated streak values
+      const isActive = isStreakActive(habit, settings);
+      const currentStreak = calculateCurrentStreak(habit, settings);
+      const longestStreak = calculateLongestStreak(habit);
+      const perfectWeeks = countPerfectWeeks(habit);
+      const perfectMonths = countPerfectMonths(habit);
+      const streakStartDate = getCurrentStreakStartDate(habit, settings);
+
+      // Get last completed date
+      const completedDates = getCompletedDates(habit);
+      const lastCompletedDate =
+        completedDates.length > 0
+          ? toDateString(completedDates[completedDates.length - 1])
+          : null;
+
+      // Update streak data
+      const updatedStreakData = {
+        ...streakData,
+        currentStreak,
+        longestStreak: Math.max(longestStreak, streakData.longestStreak),
+        totalCompletions: completedDates.length,
+        lastCompletedDate,
+        streakStartDate: streakStartDate ? toDateString(streakStartDate) : null,
+        perfectWeeks,
+        perfectMonths,
+        isStreakActive: isActive,
+      };
+
+      // Update store
+      const updatedStreaks = {
+        ...streaks,
+        [habit.id]: updatedStreakData,
+      };
+
+      setStreakStore({streaks: updatedStreaks});
+      persistStreaks(updatedStreaks);
+
+      // Update the habit with new streak data
+      streakActions.updateHabitWithStreakData(habit, updatedStreakData);
+
+      console.debug(
+        `[Streak] Recalculated for ${habit.title}: streak=${currentStreak}, longest=${updatedStreakData.longestStreak}`,
+      );
+
+      return updatedStreakData;
+    } catch (error) {
+      console.error('Error recalculating streak for habit:', error);
+      return null;
+    }
   },
 };

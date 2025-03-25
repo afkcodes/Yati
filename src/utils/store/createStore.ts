@@ -144,9 +144,12 @@ const create = <T>(eventName: string, initState: T, sliceName?: string) => {
 
   /**
    * Custom hook for managing state.
-   * @returns {[T, (data: Partial<T>) => void]} A tuple containing the current state and a function to update it.
+   * @returns {[T, (data: Partial<T> | ((prevState: T) => Partial<T>)) => void]} A tuple containing the current state and a function to update it.
    */
-  const useStore = (): [T, (data: Partial<T>) => void] => {
+  const useStore = (): [
+    T,
+    (data: Partial<T> | ((prevState: T) => Partial<T>)) => void,
+  ] => {
     const [state, setState] = useState<T>(initState);
 
     useEffect(() => {
@@ -161,16 +164,28 @@ const create = <T>(eventName: string, initState: T, sliceName?: string) => {
 
     return [
       getStateValue(state),
-      (data: Partial<T>) => {
-        notifier.notify(eventName, data, slice, false, 'create');
+      (data: Partial<T> | ((prevState: T) => Partial<T>)) => {
+        if (typeof data === 'function') {
+          const currentState = notifier.getState(eventName, slice) as T;
+          const updates = (data as (prevState: T) => Partial<T>)(currentState);
+          notifier.notify(eventName, updates, slice, false, 'create');
+        } else {
+          notifier.notify(eventName, data, slice, false, 'create');
+        }
       },
     ];
   };
 
   return {
     useStore,
-    set: (data: Partial<T>) => {
-      notifier.notify(eventName, data, slice, false, 'create_set');
+    set: (data: Partial<T> | ((prevState: T) => Partial<T>)) => {
+      if (typeof data === 'function') {
+        const currentState = notifier.getState(eventName, slice) as T;
+        const updates = (data as (prevState: T) => Partial<T>)(currentState);
+        notifier.notify(eventName, updates, slice, false, 'create_set');
+      } else {
+        notifier.notify(eventName, data, slice, false, 'create_set');
+      }
     },
     setTransient: (data: Partial<T>) => {
       notifier.notify(eventName, data, slice, true, 'create_transient');

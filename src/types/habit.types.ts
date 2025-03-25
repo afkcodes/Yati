@@ -1,134 +1,101 @@
-/**
- * Basic type definitions
- */
-export type TimePeriod = 'morning' | 'evening' | 'night';
+// types/habit.ts
+import {
+  CommonUnit,
+  EvaluationType,
+  FrequencyType,
+  HabitCategoryType as HabitCategory,
+  HabitColor,
+  TimeUnit,
+} from '~/utils/constants/habitConstants';
 
-export type HabitCategory =
-  | 'health'
-  | 'learning'
-  | 'productivity'
-  | 'mindfulness'
-  | 'fitness'
-  | 'sleep'
-  | 'goals'
-  | 'career';
+// Frequency Type (matches FrequencySection.tsx)
+export interface FrequencyData {
+  type: FrequencyType;
+  value: string[];
+  timeOfDay: Date | null;
+  interval?: number;
+}
 
-export type FrequencyType = 'hourly' | 'daily' | 'weekly' | 'monthly';
-
-export type EvaluationType = 'boolean' | 'numeric' | 'timer' | 'checklist';
-
-/**
- * Checklist item structure
- */
+// Checklist Item
 export interface ChecklistItem {
   id: string;
   text: string;
-  completed: boolean;
+  completed?: boolean;
 }
 
-/**
- * Defines how a habit's progress is evaluated
- */
-export interface HabitEvaluation {
-  type: EvaluationType; // How to track progress
-  target: number; // Target value to reach (e.g., 5 glasses of water)
-  unit: string; // Unit of measurement (e.g., "glasses", "minutes")
-  checklistItems?: ChecklistItem[]; // For checklist type
+// Evaluation Type (matches EvaluationSection.tsx)
+export interface EvaluationData {
+  type: EvaluationType;
+  target: number;
+  unit: CommonUnit | TimeUnit | string;
+  checklistItems?: ChecklistItem[];
 }
 
-/**
- * Defines when the habit should be performed
- */
-export interface HabitFrequency {
-  type: FrequencyType; // How often to perform the habit
-  value: string[]; // Days of week or dates of month
-  timeOfDay: Date | null; // Specific time to perform the habit
-  interval?: number; // For hourly frequency (every X hours)
+// Goal Type (matches GoalSection.tsx)
+export interface GoalData {
+  enabled: boolean;
+  timeframe: 'weekly' | 'monthly' | 'yearly';
+  target: number;
+  deadline: Date | null;
+  progress?: number;
 }
 
-/**
- * Defines a goal for a habit
- */
-export interface HabitGoal {
-  enabled: boolean; // Whether a goal is set
-  target: number; // Number of completions to reach
-  deadline: Date | null; // Date by which to complete the goal
-  progress: number; // Current progress towards goal (0-100)
-}
+// Reminder Type (stored as ISO strings in UTC)
+export type Reminder = string;
 
-/**
- * Progress tracking for a specific day
- */
+// Daily Progress
 export interface DailyProgress {
-  date: string; // ISO format date string
-  isCompleted: boolean; // Whether the habit was completed on this day
-  value?: number; // For numeric/timer habits
-  checklistProgress?: {[itemId: string]: boolean}; // For checklist habits
-  notes?: string; // Optional notes for the day
+  date: string;
+  isCompleted: boolean;
+  value?: number;
+  checklist?: Array<{id: string; completed: boolean}>;
+  completedAt?: string; // ISO string in UTC
 }
 
-/**
- * Main Habit interface
- */
+// Core Habit Interface
 export interface Habit {
-  id: string; // Unique identifier
-  title: string; // Name of the habit
-  description?: string; // Detailed description
-  color: string; // Color used for UI elements
-  category: HabitCategory; // Categorization
-  timePeriod: TimePeriod; // Time of day period
-
-  // Tracking configuration
-  frequency: HabitFrequency;
-  evaluation: HabitEvaluation;
-  goal?: HabitGoal;
-
-  // Status tracking
-  createdAt: string; // ISO date string when created
-  lastUpdatedAt: string; // ISO date string of last update
-  streak: number; // Current streak count
-  longestStreak: number; // Best streak ever achieved
-  progress: {[date: string]: DailyProgress}; // Progress keyed by date
-  archivedAt?: string; // ISO date string if archived
-}
-
-/**
- * Habit form data used for creation/editing
- */
-export interface HabitFormData {
+  id: string;
   title: string;
-  description: string;
-  color: string;
-  categoryId: HabitCategory;
-  frequency: {
-    type: FrequencyType;
-    value: string[];
-    timeOfDay: Date | null;
-    interval?: number;
+  description?: string;
+  category: HabitCategory;
+  color: HabitColor;
+  frequency: FrequencyData;
+  evaluation: EvaluationData;
+  goal?: GoalData;
+  reminders: Reminder[]; // Array of ISO strings in UTC
+  timePeriod: 'morning' | 'evening' | 'night';
+  progress: Record<string, DailyProgress>;
+  createdAt: string; // ISO string in UTC
+  lastUpdatedAt?: string; // ISO string in UTC
+  archivedAt?: string; // ISO string in UTC
+  streak?: {
+    current: number;
+    longest: number;
+    startDate?: string; // ISO string in UTC
   };
-  evaluation: {
-    type: EvaluationType;
-    target: number;
-    unit: string;
-    checklistItems?: ChecklistItem[];
-  };
-  goal: {
-    enabled: boolean;
-    target: number;
-    deadline: Date | null;
-  };
-  reminders: Date[];
 }
 
-/**
- * Validation error interface
- */
+// Form Data for Creation
+export interface HabitFormData {
+  id?: string;
+  title: string;
+  description?: string;
+  category: HabitCategory;
+  color: HabitColor;
+  frequency: FrequencyData;
+  evaluation: EvaluationData;
+  goal?: GoalData;
+  reminders: string[]; // Changed to string[] (ISO strings in UTC)
+  timePeriod?: 'morning' | 'evening' | 'night';
+}
+
+// Form Errors
 export interface HabitFormErrors {
   title?: string;
-  categoryId?: string;
+  category?: string;
+  color?: string;
   frequency?: string;
   evaluation?: string;
   goal?: string;
-  general?: string;
   reminders?: string;
 }

@@ -1,3 +1,4 @@
+// screens/form/ReminderSection.tsx
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   AlarmClock,
@@ -14,18 +15,24 @@ import {TextX, TouchableX, ViewX} from '~/components/common';
 import SquircleViewContainer from '~/containers/SquircleViewContainer';
 import {useTheme} from '~/hooks/ThemeContext';
 import {getThemeColor, styleUtils, withAlpha} from '~/styles/theme';
-import {formatTime12Hour} from '~/utils/date/dateUtils';
+import {
+  formatTime12Hour,
+  fromISO,
+  fromJSDate,
+  toJSDate,
+  toUTCISO,
+} from '~utils/date/dateUtils';
 import {s, vs} from '~utils/screenUtil';
 import {SectionLabel} from './BasicInfo';
 
 interface RemindersSectionProps {
-  reminders: Date[];
+  reminders: string[]; // Now an array of ISO strings
   timeOfDay: Date | null;
-  onUpdateReminders: (reminders: Date[]) => void;
+  onUpdateReminders: (reminders: string[]) => void;
   error?: string;
 }
 
-const ReminderSection: React.FC<RemindersSectionProps> = ({
+const RemindersSection: React.FC<RemindersSectionProps> = ({
   reminders,
   timeOfDay,
   onUpdateReminders,
@@ -50,10 +57,62 @@ const ReminderSection: React.FC<RemindersSectionProps> = ({
   // Suggested times based on common reminder patterns
   const suggestedTimes = [
     {label: 'Morning', time: '08:00', icon: 'Sun'},
-    {label: 'Noon', time: '12:00', icon: 'Sun'},
     {label: 'Evening', time: '18:00', icon: 'Sunset'},
     {label: 'Night', time: '21:00', icon: 'Moon'},
   ];
+
+  // Validate an ISO string and convert to Date
+  const parseISOToDate = useCallback((iso: string): Date | null => {
+    const dt = fromISO(iso, 'utc');
+    if (!dt.isValid) {
+      console.warn('Invalid ISO string in parseISOToDate:', iso);
+      return null;
+    }
+    const date = toJSDate(dt);
+    if (!isValidDate(date)) {
+      console.warn('Invalid Date created from ISO string:', iso);
+      return null;
+    }
+    return date;
+  }, []);
+
+  // Validate a Date object
+  const isValidDate = (date: Date): boolean => {
+    return date instanceof Date && !isNaN(date.getTime());
+  };
+
+  // Format time with validation
+  const formatReminderTime = useCallback(
+    (iso: string): string => {
+      const date = parseISOToDate(iso);
+      if (!date) {
+        return 'Invalid Date';
+      }
+      const dt = fromJSDate(date, 'local');
+      if (!dt.isValid) {
+        console.warn(
+          'Invalid DateTime created from Date in formatReminderTime:',
+          date,
+        );
+        return 'Invalid Date';
+      }
+      return formatTime12Hour(dt);
+    },
+    [parseISOToDate],
+  );
+
+  // Filter and sort reminders
+  const sortedReminders = reminders
+    .map(iso => ({iso, date: parseISOToDate(iso)}))
+    .filter((item): item is {iso: string; date: Date} => item.date !== null)
+    .sort((a, b) => {
+      const aDt = fromJSDate(a.date, 'local');
+      const bDt = fromJSDate(b.date, 'local');
+      const aMinutes = aDt.hour * 60 + aDt.minute;
+      const bMinutes = bDt.hour * 60 + bDt.minute;
+      return aMinutes - bMinutes;
+    })
+    .map(item => item.iso);
 
   // Toggle expanded state
   const toggleExpanded = useCallback(() => {
@@ -64,34 +123,64 @@ const ReminderSection: React.FC<RemindersSectionProps> = ({
     (event: any, date?: Date) => {
       setTimePickerVisible(Platform.OS === 'ios');
 
-      if (!date) {
+      if (!date || !isValidDate(date)) {
+        console.log('No valid date selected from DateTimePicker:', date);
         return;
       }
 
+      // Convert the selected date to a DateTime in the local timezone
+      const dt = fromJSDate(date, 'local');
+      if (!dt.isValid) {
+        console.warn('Invalid DateTime created from selected date:', date);
+        return;
+      }
+
+      // Convert to ISO string in UTC
+      const iso = toUTCISO(dt);
+
       // Check if this time already exists
-      const timeExists = reminders.some(
-        existing =>
-          existing.getHours() === date.getHours() &&
-          existing.getMinutes() === date.getMinutes(),
-      );
+      const timeExists = reminders.some(reminder => {
+        const reminderDate = parseISOToDate(reminder);
+        if (!reminderDate) {
+          return false;
+        }
+        const reminderDt = fromJSDate(reminderDate, 'local');
+        return reminderDt.hour === dt.hour && reminderDt.minute === dt.minute;
+      });
 
       if (!timeExists) {
-        const newReminders = [...reminders, date].sort((a, b) => {
-          const aMinutes = a.getHours() * 60 + a.getMinutes();
-          const bMinutes = b.getHours() * 60 + b.getMinutes();
+        const newReminders = [...reminders, iso].sort((a, b) => {
+          const aDate = parseISOToDate(a);
+          const bDate = parseISOToDate(b);
+          if (!aDate || !bDate) {
+            return 0;
+          }
+          const aDt = fromJSDate(aDate, 'local');
+          const bDt = fromJSDate(bDate, 'local');
+          const aMinutes = aDt.hour * 60 + aDt.minute;
+          const bMinutes = bDt.hour * 60 + bDt.minute;
           return aMinutes - bMinutes;
         });
+        console.log('Adding reminder:', iso, 'New reminders:', newReminders);
         onUpdateReminders(newReminders);
         setExpanded(true);
+      } else {
+        console.log('Reminder time already exists:', iso);
       }
     },
-    [reminders, onUpdateReminders],
+    [reminders, parseISOToDate, onUpdateReminders],
   );
 
   const handleRemoveReminder = useCallback(
     (index: number) => {
       const newReminders = [...reminders];
       newReminders.splice(index, 1);
+      console.log(
+        'Removing reminder at index:',
+        index,
+        'New reminders:',
+        newReminders,
+      );
       onUpdateReminders(newReminders);
     },
     [reminders, onUpdateReminders],
@@ -100,41 +189,83 @@ const ReminderSection: React.FC<RemindersSectionProps> = ({
   const handleAddSuggestedTime = useCallback(
     (timeString: string) => {
       const [hours, minutes] = timeString.split(':').map(Number);
-      const date = new Date();
-      date.setHours(hours, minutes, 0, 0);
+      const dt = fromJSDate(new Date()).set({
+        hour: hours,
+        minute: minutes,
+        second: 0,
+        millisecond: 0,
+      });
+
+      if (!dt.isValid) {
+        console.warn(
+          'Invalid DateTime created from suggested time:',
+          timeString,
+        );
+        return;
+      }
+
+      // Convert to ISO string in UTC
+      const iso = toUTCISO(dt);
 
       // Check if already exists
-      const timeExists = reminders.some(
-        existing =>
-          existing.getHours() === hours && existing.getMinutes() === minutes,
-      );
+      const timeExists = reminders.some(reminder => {
+        const reminderDate = parseISOToDate(reminder);
+        if (!reminderDate) {
+          return false;
+        }
+        const reminderDt = fromJSDate(reminderDate, 'local');
+        return reminderDt.hour === hours && reminderDt.minute === minutes;
+      });
 
       if (!timeExists) {
-        const newReminders = [...reminders, date].sort((a, b) => {
-          const aMinutes = a.getHours() * 60 + a.getMinutes();
-          const bMinutes = b.getHours() * 60 + b.getMinutes();
+        const newReminders = [...reminders, iso].sort((a, b) => {
+          const aDate = parseISOToDate(a);
+          const bDate = parseISOToDate(b);
+          if (!aDate || !bDate) {
+            return 0;
+          }
+          const aDt = fromJSDate(aDate, 'local');
+          const bDt = fromJSDate(bDate, 'local');
+          const aMinutes = aDt.hour * 60 + aDt.minute;
+          const bMinutes = bDt.hour * 60 + bDt.minute;
           return aMinutes - bMinutes;
         });
+        console.log(
+          'Adding suggested time:',
+          timeString,
+          'New reminders:',
+          newReminders,
+        );
         onUpdateReminders(newReminders);
         setExpanded(true);
+      } else {
+        console.log('Suggested time already exists:', timeString);
       }
     },
-    [reminders, onUpdateReminders],
+    [reminders, parseISOToDate, onUpdateReminders],
   );
 
   // Add habit time as reminder
   const addHabitTimeReminder = useCallback(() => {
-    if (timeOfDay) {
-      onUpdateReminders([new Date(timeOfDay)]);
+    if (timeOfDay && isValidDate(timeOfDay)) {
+      const dt = fromJSDate(timeOfDay, 'local');
+      if (!dt.isValid) {
+        console.warn('Invalid DateTime created from timeOfDay:', timeOfDay);
+        return;
+      }
+      const iso = toUTCISO(dt);
+      const newReminders = [iso];
+      console.log(
+        'Adding habit time as reminder:',
+        iso,
+        'New reminders:',
+        newReminders,
+      );
+      onUpdateReminders(newReminders);
+    } else {
+      console.warn('Invalid timeOfDay for habit time reminder:', timeOfDay);
     }
   }, [timeOfDay, onUpdateReminders]);
-
-  // Sort reminders by time for consistent display
-  const sortedReminders = [...reminders].sort((a, b) => {
-    const aMinutes = a.getHours() * 60 + a.getMinutes();
-    const bMinutes = b.getHours() * 60 + b.getMinutes();
-    return aMinutes - bMinutes;
-  });
 
   return (
     <ViewX marginBottom={vs(24)}>
@@ -217,20 +348,20 @@ const ReminderSection: React.FC<RemindersSectionProps> = ({
               fontWeight="semibold"
               color="primary"
               marginLeft={s(8)}>
-              {reminders.length === 0
+              {sortedReminders.length === 0
                 ? 'No reminders set'
-                : reminders.length === 1
+                : sortedReminders.length === 1
                   ? '1 reminder set'
-                  : `${reminders.length} reminders set`}
+                  : `${sortedReminders.length} reminders set`}
             </TextX>
           </ViewX>
 
           <ViewX flexDirection="row" alignItems="center">
-            {reminders.length > 0 && (
+            {sortedReminders.length > 0 && (
               <TextX fontSize="sm" color="secondary" marginRight={s(4)}>
-                {reminders.length === 1
-                  ? formatTime12Hour(reminders[0])
-                  : `${formatTime12Hour(reminders[0])}, ...`}
+                {sortedReminders.length === 1
+                  ? formatReminderTime(sortedReminders[0])
+                  : `${formatReminderTime(sortedReminders[0])}, ...`}
               </TextX>
             )}
             <ChevronRight
@@ -291,9 +422,9 @@ const ReminderSection: React.FC<RemindersSectionProps> = ({
               </TextX>
 
               <ViewX>
-                {sortedReminders.map((item, index) => (
+                {sortedReminders.map((iso, index) => (
                   <SquircleViewContainer
-                    key={item.toISOString()}
+                    key={iso}
                     borderRadius="xs"
                     variant="surface"
                     borderColor={withAlpha(colors.borderColor, 0.5)}
@@ -317,14 +448,14 @@ const ReminderSection: React.FC<RemindersSectionProps> = ({
                           color="primary"
                           marginLeft={s(8)}
                           fontWeight="medium">
-                          {formatTime12Hour(item)}
+                          {formatReminderTime(iso)}
                         </TextX>
                       </ViewX>
 
                       <TouchableX
-                        padding={vs(4)}
+                        padding={s(4)}
                         onPress={() => handleRemoveReminder(index)}
-                        accessibilityLabel={`Remove ${formatTime12Hour(item)} reminder`}
+                        accessibilityLabel={`Remove ${formatReminderTime(iso)} reminder`}
                         backgroundColor={withAlpha(colors.errorColor, 0.1)}
                         borderRadius={16}>
                         <X
@@ -358,7 +489,7 @@ const ReminderSection: React.FC<RemindersSectionProps> = ({
           )}
 
           {/* Use habit time option */}
-          {timeOfDay && reminders.length === 0 && (
+          {timeOfDay && sortedReminders.length === 0 && (
             <ViewX marginTop={vs(8)}>
               <TextX
                 fontSize="xs"
@@ -388,7 +519,9 @@ const ReminderSection: React.FC<RemindersSectionProps> = ({
                     Use habit time as reminder
                   </TextX>
                   <TextX fontSize="xs" color="secondary">
-                    {formatTime12Hour(timeOfDay)}
+                    {formatReminderTime(
+                      toUTCISO(fromJSDate(timeOfDay, 'local')),
+                    )}
                   </TextX>
                 </ViewX>
                 <TouchableX
@@ -408,7 +541,7 @@ const ReminderSection: React.FC<RemindersSectionProps> = ({
       )}
 
       {/* Alternate add time button - shown when collapsed and no reminders */}
-      {!expanded && reminders.length === 0 && !error && (
+      {!expanded && sortedReminders.length === 0 && !error && (
         <TouchableX
           onPress={() => setTimePickerVisible(true)}
           flexDirection="row"
@@ -440,11 +573,11 @@ const ReminderSection: React.FC<RemindersSectionProps> = ({
           is24Hour={false}
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={handleAddReminder}
-          minuteInterval={5}
+          // Removed minuteInterval to allow any minute selection
         />
       )}
     </ViewX>
   );
 };
 
-export default React.memo(ReminderSection);
+export default React.memo(RemindersSection);

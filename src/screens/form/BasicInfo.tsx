@@ -7,7 +7,8 @@ import SquircleViewContainer from '~containers/SquircleViewContainer';
 import {useTheme} from '~hooks/ThemeContext';
 import {getThemeColor} from '~styles/theme';
 import {typography} from '~styles/tokens';
-import {COLOR_PALETTE} from '~utils/constants/habitConstants';
+import {HabitFormData} from '~types/habit.types';
+import {COLOR_PALETTE, HabitColor} from '~utils/constants/habitConstants';
 import {s, vs} from '~utils/screenUtil';
 
 interface BasicInfoSectionProps {
@@ -15,11 +16,7 @@ interface BasicInfoSectionProps {
   color: string;
   description: string;
   error?: string;
-  onUpdate: (data: {
-    title?: string;
-    color?: string;
-    description?: string;
-  }) => void;
+  onUpdate: (data: Partial<HabitFormData>) => void;
 }
 
 const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
@@ -67,7 +64,7 @@ const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
       }),
     ]).start();
 
-    onUpdate({color: selectedColor});
+    onUpdate({color: selectedColor as HabitColor});
   };
 
   // Calculate derived styles

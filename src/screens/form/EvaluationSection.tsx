@@ -1,6 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-/* eslint-disable react/no-unstable-nested-components */
-import {LegendList} from '@legendapp/list';
+
 import {
   Check,
   CheckCircle2,
@@ -17,13 +16,18 @@ import {
   Animated,
   Easing,
   Modal,
+  ScrollView,
   StyleSheet,
   TextInput,
   TouchableWithoutFeedback,
 } from 'react-native';
 import {TextX, TouchableX, ViewX} from '~/components/common';
-import {ChecklistItem, EvaluationType} from '~/types/habit.types';
-import {COMMON_UNITS, TIME_UNITS} from '~/utils/constants/habitConstants';
+import {ChecklistItem} from '~/types/habit.types';
+import {
+  COMMON_UNITS,
+  EvaluationType,
+  TIME_UNITS,
+} from '~/utils/constants/habitConstants';
 import SquircleViewContainer from '~containers/SquircleViewContainer';
 import {useTheme} from '~hooks/ThemeContext';
 import {getThemeColor, withAlpha} from '~styles/theme';
@@ -979,7 +983,6 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
         }}>
         <TouchableWithoutFeedback
           onPress={() => {
-            setChecklistModalVisible(false);
             setEditingChecklistItem(null);
             setNewItemText('');
           }}>
@@ -991,194 +994,178 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
                 opacity: overlayOpacity,
               },
             ]}>
-            <TouchableWithoutFeedback>
-              <Animated.View
-                style={[
-                  styles.modalContent,
-                  {
-                    backgroundColor: surfaceColor,
-                    borderColor: borderColor,
-                    transform: [{translateY: modalY}],
-                  },
-                ]}>
-                <ViewX style={styles.modalHeader}>
-                  <TextX fontSize="lg" fontWeight="semibold" color="primary">
-                    {editingChecklistItem ? 'Edit Task' : 'Manage Tasks'}
+            <Animated.View
+              style={[
+                styles.modalContent,
+                {
+                  backgroundColor: surfaceColor,
+                  borderColor: borderColor,
+                  transform: [{translateY: modalY}],
+                },
+              ]}>
+              <ViewX style={styles.modalHeader}>
+                <TextX fontSize="lg" fontWeight="semibold" color="primary">
+                  {editingChecklistItem ? 'Edit Task' : 'Manage Tasks'}
+                </TextX>
+                <TouchableX
+                  paddingVertical={vs(6)}
+                  paddingHorizontal={s(12)}
+                  borderRadius={s(20)}
+                  backgroundColor={withAlpha(accentColor, 0.1)}
+                  onPress={() => {
+                    setChecklistModalVisible(false);
+                    setEditingChecklistItem(null);
+                    setNewItemText('');
+                  }}>
+                  <TextX fontSize="sm" fontWeight="medium" color="accent">
+                    Done
                   </TextX>
-                  <TouchableX
-                    paddingVertical={vs(6)}
-                    paddingHorizontal={s(12)}
-                    borderRadius={s(20)}
-                    backgroundColor={withAlpha(accentColor, 0.1)}
-                    onPress={() => {
-                      setChecklistModalVisible(false);
-                      setEditingChecklistItem(null);
-                      setNewItemText('');
-                    }}>
-                    <TextX fontSize="sm" fontWeight="medium" color="accent">
-                      Done
-                    </TextX>
-                  </TouchableX>
-                </ViewX>
+                </TouchableX>
+              </ViewX>
 
-                <ViewX
-                  style={styles.modalDivider}
-                  backgroundColor={withAlpha(borderColor, 0.5)}
-                />
+              <ViewX
+                style={styles.modalDivider}
+                backgroundColor={withAlpha(borderColor, 0.5)}
+              />
 
-                <ViewX style={styles.checklistContainer}>
-                  {/* Add/Edit Task Section */}
-                  <ViewX style={styles.addTaskSection}>
-                    <TextX
-                      fontSize="sm"
-                      fontWeight="medium"
-                      color="secondary"
-                      marginBottom={vs(8)}>
-                      {editingChecklistItem ? 'Edit Task' : 'Add New Task'}
-                    </TextX>
+              <ViewX style={[styles.checklistContainer, {flex: 1}]}>
+                {/* Add/Edit Task Section */}
+                <ViewX style={styles.addTaskSection}>
+                  <TextX
+                    fontSize="sm"
+                    fontWeight="medium"
+                    color="secondary"
+                    marginBottom={vs(8)}>
+                    {editingChecklistItem ? 'Edit Task' : 'Add New Task'}
+                  </TextX>
 
-                    <ViewX flexDirection="row" alignItems="center">
-                      <TextInput
-                        style={[
-                          styles.taskInput,
-                          {
-                            color: textPrimary,
-                            borderColor: borderColor,
-                            backgroundColor: withAlpha(fieldColor, 0.7),
-                          },
-                        ]}
-                        value={newItemText}
-                        onChangeText={setNewItemText}
-                        placeholder={
-                          editingChecklistItem ? 'Edit task' : 'Add a new task'
-                        }
-                        placeholderTextColor={textTertiary}
-                        returnKeyType="done"
-                        onSubmitEditing={handleAddChecklistItemSubmit}
-                      />
-                      <TouchableX
-                        onPress={handleAddChecklistItemSubmit}
-                        style={styles.taskButton}
-                        backgroundColor={withAlpha(accentColor, 0.15)}
-                        borderRadius={s(8)}
-                        disabled={!newItemText.trim()}
-                        opacity={!newItemText.trim() ? 0.5 : 1}>
-                        {editingChecklistItem ? (
-                          <Check
-                            size={20}
-                            color={accentColor}
-                            strokeWidth={1.5}
-                          />
-                        ) : (
-                          <Plus
-                            size={20}
-                            color={accentColor}
-                            strokeWidth={1.5}
-                          />
-                        )}
-                      </TouchableX>
-                    </ViewX>
-
-                    {editingChecklistItem && (
-                      <TouchableX
-                        onPress={() => {
-                          setEditingChecklistItem(null);
-                          setNewItemText('');
-                        }}
-                        style={styles.cancelEdit}>
-                        <TextX fontSize="xs" color="accent" textAlign="center">
-                          Cancel Editing
-                        </TextX>
-                      </TouchableX>
-                    )}
+                  <ViewX flexDirection="row" alignItems="center">
+                    <TextInput
+                      style={[
+                        styles.taskInput,
+                        {
+                          color: textPrimary,
+                          borderColor: borderColor,
+                          backgroundColor: withAlpha(fieldColor, 0.7),
+                        },
+                      ]}
+                      value={newItemText}
+                      onChangeText={setNewItemText}
+                      placeholder={
+                        editingChecklistItem ? 'Edit task' : 'Add a new task'
+                      }
+                      placeholderTextColor={textTertiary}
+                      returnKeyType="done"
+                      onSubmitEditing={handleAddChecklistItemSubmit}
+                      blurOnSubmit={false} // This is key - keep keyboard visible after submission
+                    />
+                    <TouchableX
+                      onPress={handleAddChecklistItemSubmit} // Direct call to the function
+                      style={styles.taskButton}
+                      backgroundColor={withAlpha(accentColor, 0.15)}
+                      borderRadius={s(8)}
+                      disabled={!newItemText.trim()}
+                      opacity={!newItemText.trim() ? 0.5 : 1}>
+                      {editingChecklistItem ? (
+                        <Check
+                          size={20}
+                          color={accentColor}
+                          strokeWidth={1.5}
+                        />
+                      ) : (
+                        <Plus size={20} color={accentColor} strokeWidth={1.5} />
+                      )}
+                    </TouchableX>
                   </ViewX>
 
-                  {/* Task List Section */}
-                  <ViewX style={styles.taskListSection}>
-                    <TextX
-                      fontSize="sm"
-                      fontWeight="medium"
-                      color="secondary"
-                      marginBottom={vs(12)}>
-                      Task List
-                    </TextX>
+                  {editingChecklistItem && (
+                    <TouchableX
+                      onPress={() => {
+                        setEditingChecklistItem(null);
+                        setNewItemText('');
+                      }}
+                      style={styles.cancelEdit}>
+                      <TextX fontSize="xs" color="accent" textAlign="center">
+                        Cancel Editing
+                      </TextX>
+                    </TouchableX>
+                  )}
+                </ViewX>
 
+                <ViewX style={[styles.taskListSection, {flex: 1}]}>
+                  <TextX
+                    fontSize="sm"
+                    fontWeight="medium"
+                    color="secondary"
+                    marginBottom={vs(12)}>
+                    Task List ({evaluation.checklistItems?.length || 0})
+                  </TextX>
+
+                  <ScrollView
+                    style={{flex: 1}}
+                    contentContainerStyle={{paddingBottom: vs(20)}}
+                    showsVerticalScrollIndicator={false}>
                     {evaluation.checklistItems &&
                     evaluation.checklistItems.length > 0 ? (
-                      <LegendList
-                        data={evaluation.checklistItems}
-                        keyExtractor={item => item.id}
-                        renderItem={({item}) => (
+                      evaluation.checklistItems.map(item => (
+                        <ViewX
+                          key={item.id}
+                          style={[
+                            styles.taskItem,
+                            {
+                              backgroundColor: withAlpha(fieldColor, 0.7),
+                              borderColor:
+                                editingChecklistItem &&
+                                editingChecklistItem.id === item.id
+                                  ? accentColor
+                                  : 'transparent',
+                              borderWidth:
+                                editingChecklistItem &&
+                                editingChecklistItem.id === item.id
+                                  ? 1
+                                  : 0,
+                              marginBottom: vs(8),
+                            },
+                          ]}>
                           <ViewX
-                            style={[
-                              styles.taskItem,
-                              {
-                                backgroundColor: withAlpha(fieldColor, 0.7),
-                                borderColor:
-                                  editingChecklistItem &&
-                                  editingChecklistItem.id === item.id
-                                    ? accentColor
-                                    : 'transparent',
-                              },
-                            ]}>
-                            <ViewX
-                              flexDirection="row"
-                              alignItems="center"
-                              flex={1}>
-                              <CheckCircle2
-                                size={18}
-                                color={textSecondary}
-                                strokeWidth={1.5}
-                              />
-                              <TextX
-                                fontSize="sm"
-                                color="secondary"
-                                marginLeft={s(12)}
-                                flex={1}>
-                                {item.text}
-                              </TextX>
-                            </ViewX>
-                            <ViewX flexDirection="row">
-                              <TouchableX
-                                onPress={() => handleEditChecklistItem(item)}
-                                style={styles.taskAction}>
-                                <Edit2
-                                  size={18}
-                                  color={accentColor}
-                                  strokeWidth={1.5}
-                                />
-                              </TouchableX>
-                              <TouchableX
-                                onPress={() => onRemoveChecklistItem(item.id)}
-                                style={styles.taskAction}>
-                                <X
-                                  size={18}
-                                  color={errorColor}
-                                  strokeWidth={1.5}
-                                />
-                              </TouchableX>
-                            </ViewX>
-                          </ViewX>
-                        )}
-                        ListEmptyComponent={() => (
-                          <ViewX style={styles.emptyTaskList}>
+                            flexDirection="row"
+                            alignItems="center"
+                            flex={1}>
+                            <CheckCircle2
+                              size={18}
+                              color={textSecondary}
+                              strokeWidth={1.5}
+                            />
                             <TextX
                               fontSize="sm"
-                              color="tertiary"
-                              textAlign="center">
-                              No tasks added yet
-                            </TextX>
-                            <TextX
-                              fontSize="xs"
-                              color="tertiary"
-                              textAlign="center"
-                              marginTop={vs(4)}>
-                              Add tasks to create a checklist for your habit
+                              color="secondary"
+                              marginLeft={s(12)}
+                              flex={1}>
+                              {item.text}
                             </TextX>
                           </ViewX>
-                        )}
-                        contentContainerStyle={{paddingBottom: vs(16)}}
-                      />
+                          <ViewX flexDirection="row">
+                            <TouchableX
+                              onPress={() => handleEditChecklistItem(item)}
+                              style={styles.taskAction}>
+                              <Edit2
+                                size={18}
+                                color={accentColor}
+                                strokeWidth={1.5}
+                              />
+                            </TouchableX>
+                            <TouchableX
+                              onPress={() => onRemoveChecklistItem(item.id)}
+                              style={styles.taskAction}>
+                              <X
+                                size={18}
+                                color={errorColor}
+                                strokeWidth={1.5}
+                              />
+                            </TouchableX>
+                          </ViewX>
+                        </ViewX>
+                      ))
                     ) : (
                       <ViewX style={styles.emptyTaskList}>
                         <TextX
@@ -1196,10 +1183,10 @@ const EvaluationSection: React.FC<EvaluationSectionProps> = ({
                         </TextX>
                       </ViewX>
                     )}
-                  </ViewX>
+                  </ScrollView>
                 </ViewX>
-              </Animated.View>
-            </TouchableWithoutFeedback>
+              </ViewX>
+            </Animated.View>
           </Animated.View>
         </TouchableWithoutFeedback>
       </Modal>

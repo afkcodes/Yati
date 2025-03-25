@@ -1,5 +1,4 @@
 /* eslint-disable react-native/no-inline-styles */
-import {isValid, startOfDay} from 'date-fns';
 import {Plus} from 'lucide-react-native';
 import {NavigationContext} from 'navigation-react';
 import React, {
@@ -16,17 +15,21 @@ import GreetingHeader from '~components/specific/home/Greeting';
 import HabitCard from '~components/specific/home/Habit';
 import TimeFilter from '~components/specific/home/TimeFilter';
 import {useTheme} from '~hooks/ThemeContext';
-import {
-  getHabitStoreSnapshot,
-  habitActions,
-  isHabitCompleted,
-  useHabitStore,
-} from '~state/habit.store';
-import {streakActions} from '~state/streak.store';
+import {useHabitStore} from '~state/habit/habit.store';
+import {habitActions} from '~state/habit/habitActions';
+
 import {getThemeColor, styleUtils, withAlpha} from '~styles/theme';
-import {Habit, TimePeriod} from '~types/habit.types';
-import {getLocalToday, toDateString} from '~utils/date/dateUtils';
+import {Habit} from '~types/habit.types';
+import {
+  fromJSDate,
+  getLocalToday,
+  now,
+  toDateString,
+  toJSDate,
+  toUTCISO,
+} from '~utils/date/dateUtils';
 import {h, vs, w} from '~utils/screenUtil';
+import {habitToFormData} from '~utils/storage/storageUtils';
 
 const EmptyState = React.memo(
   ({
@@ -55,71 +58,76 @@ const EmptyState = React.memo(
   (prevProps, nextProps) => prevProps.accentColor === nextProps.accentColor,
 );
 
-const debounce = (func: (...args: any[]) => void, wait: number) => {
-  let timeout: NodeJS.Timeout;
-  return (...args: any[]) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), wait);
-  };
-};
-
 const Home = () => {
   const {stateNavigator} = useContext(NavigationContext);
   const {theme} = useTheme();
-  const [{habits: allHabits, selectedDate: storedDate}] = useHabitStore();
+  const [
+    {habits: allHabits, selectedDate: storedDate, timeFilter: selectedTime},
+  ] = useHabitStore();
+  const [localSelectedDate, setLocalSelectedDate] = useState<Date>(
+    toJSDate(storedDate),
+  );
+
+  console.log('Home re-rendered with storedDate:', storedDate.toISO());
 
   const validStoredDate = useMemo(() => {
-    return storedDate && isValid(storedDate)
-      ? startOfDay(storedDate)
-      : getLocalToday();
+    console.log('Stored date:', storedDate.toISO());
+    const date =
+      storedDate && storedDate.isValid
+        ? storedDate.startOf('day')
+        : getLocalToday();
+    console.log('Valid stored date:', date.toISO());
+    return date;
   }, [storedDate]);
-
-  const [selectedDate, setSelectedDate] = useState(validStoredDate);
-  const [selectedTime, setSelectedTime] = useState<TimePeriod | 'all'>('all');
-  const [habitsForDate, setHabitsForDate] = useState<Habit[]>([]);
 
   const backgroundColor = getThemeColor(theme, 'background', 'primary');
   const navBackgroundColor = getThemeColor(theme, 'background', 'surface');
   const accentColor = getThemeColor(theme, 'background', 'accent');
 
+  // Ensure the store's selectedDate is initialized on mount
   useEffect(() => {
-    if (selectedDate && isValid(selectedDate)) {
-      habitActions.setSelectedDate(startOfDay(selectedDate));
+    const today = getLocalToday();
+    if (
+      !storedDate ||
+      !storedDate.isValid ||
+      storedDate.toMillis() !== today.toMillis()
+    ) {
+      console.log('Initializing selectedDate to today:', today.toISO());
+      habitActions.setSelectedDate(today);
+      setLocalSelectedDate(toJSDate(today));
     }
-  }, [selectedDate]);
+  }, []); // Empty dependency array to run only on mount
 
-  useEffect(() => {
-    const updateHabits = debounce(() => {
-      if (selectedDate && isValid(selectedDate)) {
-        const normalizedDate = startOfDay(selectedDate);
-        const filtered = [
-          ...habitActions.getHabitsForDate(normalizedDate, selectedTime),
-        ];
-        setHabitsForDate(filtered);
-      } else {
-        setHabitsForDate([]);
-      }
-    }, 100);
-
-    updateHabits();
-  }, [allHabits, selectedDate, selectedTime]);
+  const habitsForDate = useMemo(() => {
+    console.log('All habits:', allHabits);
+    if (validStoredDate && validStoredDate.isValid) {
+      const normalizedDate = validStoredDate.startOf('day');
+      const filtered = habitActions.getHabitsForDate(
+        normalizedDate,
+        selectedTime,
+      );
+      console.log('Habits for date after filtering:', filtered);
+      return filtered;
+    }
+    console.log('No valid date, returning empty habits');
+    return [];
+  }, [allHabits, validStoredDate, selectedTime]);
 
   const isCompleted = useCallback(
     (habit: Habit): boolean => {
-      if (!selectedDate || !isValid(selectedDate)) {
+      if (!validStoredDate || !validStoredDate.isValid) {
         return false;
       }
-      const dateStr = toDateString(selectedDate);
+      const dateStr = toDateString(validStoredDate);
       const progress = habit.progress?.[dateStr];
-      return progress ? isHabitCompleted(habit, progress) : false;
+      return progress ? habitActions.isHabitCompleted(habit, progress) : false;
     },
-    [selectedDate],
+    [validStoredDate],
   );
 
   const handleToggleHabit = useCallback(
     (habit: Habit) => {
-      const dateStr = toDateString(selectedDate);
-      if (!selectedDate || !isValid(selectedDate)) {
+      if (!validStoredDate || !validStoredDate.isValid) {
         return;
       }
 
@@ -127,7 +135,7 @@ const Home = () => {
       switch (habit.evaluation.type) {
         case 'boolean':
           // Toggle boolean habit completion
-          habitActions.toggleHabitCompletion(habit.id, selectedDate);
+          habitActions.toggleHabitCompletion(habit.id, validStoredDate);
           break;
         case 'numeric':
         case 'timer':
@@ -137,58 +145,109 @@ const Home = () => {
           return; // Exit early since we're navigating away
         default:
           // Fallback to toggle completion for any other types
-          habitActions.toggleHabitCompletion(habit.id, selectedDate);
-      }
-
-      // After toggling, get the updated habit with its new completion status
-      const updatedHabit = getHabitStoreSnapshot().habits.find(
-        _h => _h.id === habit.id,
-      );
-
-      if (updatedHabit) {
-        // Get the current completion status after the toggle
-        const currentlyCompleted =
-          updatedHabit.progress[dateStr]?.isCompleted || false;
-
-        // Update streak with the current (post-toggle) status
-        streakActions.updateStreakAfterCompletion(
-          updatedHabit,
-          dateStr,
-          currentlyCompleted,
-        );
+          habitActions.toggleHabitCompletion(habit.id, validStoredDate);
       }
     },
-    [selectedDate, stateNavigator],
+    [validStoredDate, stateNavigator],
   );
 
   const handleCreateHabit = useCallback(() => {
     stateNavigator?.navigate('create');
   }, [stateNavigator]);
 
-  const handleDateSelect = useCallback((date: Date) => {
-    if (date && isValid(date)) {
-      setSelectedDate(startOfDay(date));
-    }
+  const handleEditHabit = useCallback(
+    (habit: Habit) => {
+      // Convert Habit to HabitFormData for editing
+      const formData = habitToFormData(habit);
+      // Navigate to HabitCreationScreen in edit mode
+      stateNavigator?.navigate('create', {
+        mode: 'edit',
+        formData: JSON.stringify(formData),
+      });
+    },
+    [stateNavigator],
+  );
+
+  const handleArchiveHabit = useCallback((habit: Habit) => {
+    // Update the habit with an archivedAt timestamp
+    habitActions.updateHabit(habit.id, {archivedAt: toUTCISO(now())});
   }, []);
+
+  const handleDuplicateHabit = useCallback((habit: Habit) => {
+    // Create a new habit with the same details but a new ID
+    const newHabit: Habit = {
+      ...habit,
+      id: 'habit_' + now().toMillis().toString(),
+      createdAt: toUTCISO(now()),
+      progress: {},
+      streak: {current: 0, longest: 0},
+      archivedAt: undefined,
+    };
+    habitActions.addHabit(habitToFormData(newHabit));
+  }, []);
+
+  const handleViewStats = useCallback(
+    (habit: Habit) => {
+      // Navigate to a stats screen (to be implemented)
+      stateNavigator?.navigate('habitStats', {id: habit.id});
+    },
+    [stateNavigator],
+  );
+
+  const handleDateSelect = useCallback(
+    (date: Date) => {
+      const dt = fromJSDate(date, 'local').startOf('day');
+      if (
+        dt.isValid &&
+        (!storedDate || storedDate.toMillis() !== dt.toMillis())
+      ) {
+        console.log('Setting selected date:', dt.toISO());
+        habitActions.setSelectedDate(dt);
+        setLocalSelectedDate(date); // Update local state to force re-render
+      } else {
+        console.log(
+          'Date not updated:',
+          dt.toISO(),
+          'Stored date:',
+          storedDate?.toISO(),
+        );
+      }
+    },
+    [storedDate],
+  );
+
+  const handleTimeFilterSelect = useCallback(
+    (time: 'morning' | 'evening' | 'night' | 'all') => {
+      if (time !== selectedTime) {
+        console.log('Setting time filter:', time);
+        habitActions.setTimeFilter(time);
+      }
+    },
+    [selectedTime],
+  );
 
   const renderHabitItem = useCallback(
     ({item}: {item: Habit}) => (
       <HabitCard
-        key={item.id}
-        title={item.title}
-        frequency={
-          item.frequency.type === 'daily' ? 'Every day' : item.frequency.type
-        }
-        color={item.color}
+        habit={item}
+        onPress={habit => handleToggleHabit(habit)}
+        onEdit={handleEditHabit}
+        onDelete={habit => habitActions.deleteHabit(habit.id)}
+        onArchive={handleArchiveHabit}
+        onDuplicate={handleDuplicateHabit}
+        onViewStats={handleViewStats}
         isCompleted={isCompleted(item)}
-        streak={item.streak}
-        onToggleComplete={() => handleToggleHabit(item)}
       />
     ),
-    [isCompleted, handleToggleHabit],
+    [
+      handleToggleHabit,
+      handleEditHabit,
+      handleArchiveHabit,
+      handleDuplicateHabit,
+      handleViewStats,
+      isCompleted,
+    ],
   );
-
-  console.log(habitsForDate);
 
   return (
     <ViewX variant="base" flex={1} backgroundColor={backgroundColor}>
@@ -214,7 +273,7 @@ const Home = () => {
         zIndex={100}
         paddingVertical={styleUtils.spacing['2xs']}>
         <CalendarStrip
-          selectedDate={selectedDate}
+          selectedDate={localSelectedDate}
           onDateSelect={handleDateSelect}
           daysToShow={30}
         />
@@ -238,22 +297,24 @@ const Home = () => {
       <ViewX variant="base" flex={1} paddingTop={12}>
         <TimeFilter
           selectedTime={selectedTime}
-          onSelectTime={setSelectedTime}
+          onSelectTime={handleTimeFilterSelect}
         />
 
-        <FlatList
-          data={habitsForDate}
-          renderItem={renderHabitItem}
-          keyExtractor={(item: Habit) => item.id.toString()}
-          contentContainerStyle={{paddingBottom: 120, paddingTop: 16}}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <EmptyState
-              onCreateHabit={handleCreateHabit}
-              accentColor={accentColor}
-            />
-          }
-        />
+        <ViewX flex={1} padding={styleUtils.spacing.md}>
+          <FlatList
+            data={habitsForDate}
+            renderItem={renderHabitItem}
+            keyExtractor={(item: Habit) => item.id.toString()}
+            contentContainerStyle={{paddingBottom: 120, paddingTop: 16}}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <EmptyState
+                onCreateHabit={handleCreateHabit}
+                accentColor={accentColor}
+              />
+            }
+          />
+        </ViewX>
       </ViewX>
     </ViewX>
   );

@@ -14,12 +14,18 @@ import BottomTabs from '~navigation/Tabs';
 import WelcomeScreen from '~screens/Onboarding/Welcome';
 import {getThemeColor} from '~styles/theme';
 import {wait} from '~utils/common';
+import {now, toUTCISO} from '~utils/date/dateUtils';
+import {
+  initializeNotifee,
+  snoozeReminder,
+} from '~utils/reminders/reminderUtils';
+import {loadHabits, saveHabits} from '~utils/storage/storageUtils';
 
 const App = () => {
   const bgColor = getThemeColor('dark', 'background', 'base');
   React.useEffect(() => {
     const init = async () => {
-      // await habitActions.preloadData();
+      // await loadHabits();
       await wait(100);
     };
 
@@ -29,6 +35,46 @@ const App = () => {
     });
   }, []);
 
+  React.useEffect(() => {
+    initializeNotifee(
+      (habitId: string) => {
+        const habits = loadHabits();
+        const habitIndex = habits.findIndex(h => h.id === habitId);
+        if (habitIndex === -1) {
+          console.warn(`Habit ${habitId} not found in foreground event`);
+          return;
+        }
+
+        const habit = {...habits[habitIndex]};
+        const today = now().startOf('day');
+        const dateStr = today.toFormat('yyyy-MM-dd');
+        const currentProgress = habit.progress[dateStr] || {
+          date: dateStr,
+          isCompleted: false,
+        };
+
+        habit.progress = {
+          ...habit.progress,
+          [dateStr]: {
+            ...currentProgress,
+            isCompleted: true,
+            completedAt: toUTCISO(now()),
+          },
+        };
+
+        habits[habitIndex] = habit;
+        saveHabits(habits);
+        console.log(`Habit ${habitId} marked as completed in foreground`);
+      },
+      (habitId: string, reminderIndex: number, originalFireDate: string) => {
+        const habits = loadHabits();
+        const habit = habits.find(h => h.id === habitId);
+        if (habit) {
+          snoozeReminder(habitId, reminderIndex, originalFireDate, habit.title);
+        }
+      },
+    );
+  }, []);
   return (
     <GestureHandlerRootView>
       <SafeAreaProvider>

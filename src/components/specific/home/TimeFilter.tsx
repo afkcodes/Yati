@@ -20,11 +20,12 @@ interface TimeFilterProps {
   onSelectTime: (time: TimePeriod) => void;
 }
 
+// Time periods aligned with HabitCreationScreen.tsx
 const TIME_OPTIONS = [
-  {id: 'all', label: 'All', Icon: Clock},
-  {id: 'morning', label: 'Morning', Icon: Sun},
-  {id: 'evening', label: 'Evening', Icon: Sunset},
-  {id: 'night', label: 'Night', Icon: Moon},
+  {id: 'all', label: 'All', Icon: Clock}, // All time periods
+  {id: 'morning', label: 'Morning', Icon: Sun}, // 5:00 AM to 11:59 AM
+  {id: 'evening', label: 'Evening', Icon: Sunset}, // 5:00 PM to 8:59 PM (afternoon habits from 12:00 PM to 4:59 PM are mapped here)
+  {id: 'night', label: 'Night', Icon: Moon}, // 9:00 PM to 4:59 AM
 ] as const;
 
 const TAB_WIDTH_PERCENTAGE = 100 / TIME_OPTIONS.length;

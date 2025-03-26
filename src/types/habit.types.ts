@@ -7,6 +7,7 @@ import {
   HabitColor,
   TimeUnit,
 } from '~/utils/constants/habitConstants';
+import {StreakData} from './streak.types';
 
 // Frequency Type (matches FrequencySection.tsx)
 export interface FrequencyData {
@@ -68,11 +69,7 @@ export interface Habit {
   createdAt: string; // ISO string in UTC
   lastUpdatedAt?: string; // ISO string in UTC
   archivedAt?: string; // ISO string in UTC
-  streak?: {
-    current: number;
-    longest: number;
-    startDate?: string; // ISO string in UTC
-  };
+  streak?: StreakData;
 }
 
 // Form Data for Creation

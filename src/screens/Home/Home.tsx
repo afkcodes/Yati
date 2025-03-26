@@ -96,7 +96,8 @@ const Home = () => {
       habitActions.setSelectedDate(today);
       setLocalSelectedDate(toJSDate(today));
     }
-  }, []); // Empty dependency array to run only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const habitsForDate = useMemo(() => {
     console.log('All habits:', allHabits);
@@ -180,7 +181,15 @@ const Home = () => {
       id: 'habit_' + now().toMillis().toString(),
       createdAt: toUTCISO(now()),
       progress: {},
-      streak: {current: 0, longest: 0},
+      streak: {
+        type: 'daily', // Default streak type
+        current: 0,
+        longest: 0,
+        history: [],
+        freezeDaysAllowed: 3, // Initial freeze days
+        freezeDaysUsed: 0,
+        lastFreezeReset: toUTCISO(now().startOf('month')),
+      },
       archivedAt: undefined,
     };
     habitActions.addHabit(habitToFormData(newHabit));
